@@ -1,0 +1,24 @@
+[submodule "plugins/discourse-theme"]
+	path = plugins/discourse-theme
+	url = https://github.com/sitepoint/discourse-theme
+[submodule "plugins/discourse-tagging"]
+	path = plugins/discourse-tagging
+	url = https://github.com/sitepoint/discourse-tagging
+[submodule "plugins/discourse-google-dfp"]
+	path = plugins/discourse-google-dfp
+	url = https://github.com/sitepoint/discourse-google-dfp
+[submodule "plugins/discourse-akismet"]
+	path = plugins/discourse-akismet
+	url = https://github.com/discourse/discourse-akismet
+[submodule "plugins/discourse-sp-hello-bar"]
+	path = plugins/discourse-sp-hello-bar
+	url = https://github.com/sitepoint/discourse-sp-hello-bar
+[submodule "plugins/discourse-data-explorer"]
+	path = plugins/discourse-data-explorer
+	url = https://github.com/discourse/discourse-data-explorer
+[submodule "plugins/discourse-sp-api"]
+	path = plugins/discourse-sp-api
+	url = https://github.com/sitepoint/discourse-sp-api.git
+[submodule "plugins/discourse-staff-notes"]
+	path = plugins/discourse-staff-notes
+	url = https://github.com/discourse/discourse-staff-notes
