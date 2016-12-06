@@ -30,6 +30,7 @@
 
 **/
 let _connectorCache, _templateCache;
+let _extraConnectorClasses = {};
 
 function findOutlets(collection, callback) {
   const disabledPlugins = Discourse.Site.currentProp('disabled_plugins') || [];
@@ -57,18 +58,37 @@ export function clearCache() {
   _connectorCache = null;
 }
 
+export function resetExtraClasses() {
+  _extraConnectorClasses = {};
+}
+
+// Note: In plugins, define a class by path and it will be wired up automatically
+// eg: discourse/connectors/<OUTLET NAME>/<CONNECTOR NAME>.js.es6
+export function extraConnectorClass(name, obj) {
+  _extraConnectorClasses[name] = obj;
+}
+
+const DefaultConnectorClass = {
+  shouldRender: () => true
+};
+
 function buildConnectorCache() {
   _connectorCache = {};
   _templateCache = [];
 
-  findOutlets(Ember.TEMPLATES, function(outletName, resource, uniqueName) {
+  findOutlets(Ember.TEMPLATES, (outletName, resource, uniqueName) => {
     _connectorCache[outletName] = _connectorCache[outletName] || [];
 
+    const connectorClass = _extraConnectorClasses[`${outletName}/${uniqueName}`];
+
+    console.log(connectorClass);
     _connectorCache[outletName].push({
       templateName: resource.replace('javascripts/', ''),
       template: Ember.TEMPLATES[resource],
-      classNames: `${outletName}-outlet ${uniqueName}`
+      classNames: `${outletName}-outlet ${uniqueName}`,
+      connectorClass: connectorClass || DefaultConnectorClass
     });
+
   });
 
   Object.keys(_connectorCache).forEach(outletName => {
@@ -93,10 +113,27 @@ Handlebars.registerHelper('plugin-outlet', function(name) {
 
 const { registerKeyword } = Ember.__loader.require("ember-htmlbars/keywords");
 const { internal } = Ember.__loader.require('htmlbars-runtime');
+const BasicStream = Ember.__loader.require('ember-metal/ib/steams/stream');
+const { read } = Ember.__loader.require('ember-metal/streams/utils');
+
+let VolatileStream = BasicStream.extend({
+  init(source) {
+    this.label = `(volatile ${source.label})`;
+    this.source = source;
+    this.addDependency(source);
+  },
+
+  value() {
+    return read(this.source);
+  },
+
+  notify() {}
+});
 
 registerKeyword('plugin-outlet', {
   setupState(state, env, scope, params) {
     if (!_connectorCache) { buildConnectorCache(); }
+    console.log(params[1]);
     return { outletName: env.hooks.getValue(params[0]) };
   },
 
@@ -106,11 +143,22 @@ registerKeyword('plugin-outlet', {
     const connector = _connectorCache[state.outletName];
     if (!connector || connector.length === 0) { return true; }
 
+
     const listTemplate = Ember.TEMPLATES['outlet-list'];
     listTemplate.raw.locals = ['templateId', 'outletClasses', 'tagName'];
 
     internal.hostBlock(renderNode, env, scope, listTemplate.raw, null, null, visitor, function(options) {
+
+      console.log(renderNode.linkedResult);
+
       connector.forEach(source => {
+        const connectorClass = source.connectorClass;
+        console.log(env, scope);
+        debugger;
+        if (!connectorClass.shouldRender()) {
+          return;
+        }
+
         const tid = source.templateId;
         options.templates.template.yieldItem(`d-outlet-${tid}`, [
           tid,
