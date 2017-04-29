@@ -30,7 +30,7 @@
           <h2>{{user.title}}</h2>
         {{/if}}
 
-        {{plugin-outlet name="user-card-post-names" args=(hash user=user)}}
+        {{plugin-outlet name="user-card-post-names" args=(hash user=user) tagName='div'}}
       </span>
     </div>
 
@@ -78,7 +78,7 @@
           <span class='website-name'>
             {{fa-icon "globe"}}
             {{#if linkWebsite}}
-              <a href={{user.website}} rel={{unless removeNoFollow 'nofollow'}} target="_blank">{{user.website_name}}</a>
+              <a href={{user.website}} rel={{unless removeNoFollow 'nofollow noopener'}} target="_blank">{{user.website_name}}</a>
             {{else}}
               <span title={{user.website}}>{{user.website_name}}</span>
             {{/if}}

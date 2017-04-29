@@ -308,23 +308,63 @@ class Search
       level = TopicUser.notification_levels[match.to_sym]
       posts.where("posts.topic_id IN (
                     SELECT tu.topic_id FROM topic_users tu
-                    WHERE tu.user_id = #{@guardian.user.id} AND
-                          tu.notification_level >= #{level}
-                   )")
+                    WHERE tu.user_id = :user_id AND
+                          tu.notification_level >= :level
+                   )", user_id: @guardian.user.id, level: level)
 
     end
   end
 
+  advanced_filter(/in:seen/) do |posts|
+    if @guardian.user
+      posts
+        .joins("INNER JOIN post_timings ON
+          post_timings.topic_id = posts.topic_id
+          AND post_timings.post_number = posts.post_number
+          AND post_timings.user_id = #{Post.sanitize(@guardian.user.id)}
+        ")
+    end
+  end
+
+  advanced_filter(/in:unseen/) do |posts|
+    if @guardian.user
+      posts
+        .joins("LEFT JOIN post_timings ON
+          post_timings.topic_id = posts.topic_id
+          AND post_timings.post_number = posts.post_number
+          AND post_timings.user_id = #{Post.sanitize(@guardian.user.id)}
+        ")
+        .where("post_timings.user_id IS NULL")
+    end
+  end
+
   advanced_filter(/category:(.+)/) do |posts,match|
-    category_ids = Category.where('name ilike ? OR id = ? OR parent_category_id = ?', match, match.to_i, match.to_i).pluck(:id)
+    exact = false
+
+    if match[0] == "="
+      exact = true
+      match = match[1..-1]
+    end
+
+    category_ids = Category.where('slug ilike ? OR name ilike ? OR id = ?',
+                                  match, match, match.to_i).pluck(:id)
     if category_ids.present?
+
+      unless exact
+        category_ids +=
+          Category.where('parent_category_id = ?', category_ids.first).pluck(:id)
+      end
+
       posts.where("topics.category_id IN (?)", category_ids)
     else
       posts.where("1 = 0")
     end
   end
 
-  advanced_filter(/^\#([a-zA-Z0-9\-:]+)/) do |posts,match|
+  advanced_filter(/^\#([a-zA-Z0-9\-:=]+)/) do |posts,match|
+
+    exact = true
+
     slug = match.to_s.split(":")
     if slug[1]
       # sub category
@@ -332,11 +372,26 @@ class Search
       category_id = Category.where(slug: slug[1].downcase, parent_category_id: parent_category_id).pluck(:id).first
     else
       # main category
-      category_id = Category.where(slug: slug[0].downcase, parent_category_id: nil).pluck(:id).first
+      if slug[0][0] == "="
+        slug[0] = slug[0][1..-1]
+      else
+        exact = false
+      end
+
+      category_id = Category.where(slug: slug[0].downcase)
+        .order('case when parent_category_id is null then 0 else 1 end')
+        .pluck(:id)
+        .first
     end
 
     if category_id
-      posts.where("topics.category_id = ?", category_id)
+      category_ids = [category_id]
+
+      unless exact
+        category_ids +=
+          Category.where('parent_category_id = ?', category_id).pluck(:id)
+      end
+      posts.where("topics.category_id IN (?)", category_ids)
     else
       posts.where("topics.id IN (
         SELECT DISTINCT(tt.topic_id)
@@ -421,6 +476,9 @@ class Search
 
         if word == 'order:latest'
           @order = :latest
+          nil
+        elsif word == 'order:latest_topic'
+          @order = :latest_topic
           nil
         elsif word =~ /topic:(\d+)/
           topic_id = $1.to_i
@@ -610,7 +668,8 @@ class Search
           end
 
         elsif @search_context.is_a?(Category)
-          posts = posts.where("topics.category_id = #{@search_context.id}")
+          category_ids = [@search_context.id] + Category.where(parent_category_id: @search_context.id).pluck(:id)
+          posts = posts.where("topics.category_id in (?)", category_ids)
         elsif @search_context.is_a?(Topic)
           posts = posts.where("topics.id = #{@search_context.id}")
                        .order("posts.post_number")
@@ -623,6 +682,12 @@ class Search
           posts = posts.order("MAX(posts.created_at) DESC")
         else
           posts = posts.order("posts.created_at DESC")
+        end
+      elsif @order == :latest_topic
+        if opts[:aggregate_search]
+          posts = posts.order("MAX(topics.created_at) DESC")
+        else
+          posts = posts.order("topics.created_at DESC")
         end
       elsif @order == :views
         if opts[:aggregate_search]
@@ -697,10 +762,10 @@ class Search
         if @order == :likes
           # likes are a pain to aggregate so skip
           posts_query(@limit, private_messages: opts[:private_messages])
-            .select('topics.id', "post_number")
+            .select('topics.id', "posts.post_number")
         else
           posts_query(@limit, aggregate_search: true, private_messages: opts[:private_messages])
-            .select('topics.id', "#{min_or_max}(post_number) post_number")
+            .select('topics.id', "#{min_or_max}(posts.post_number) post_number")
             .group('topics.id')
         end
 
@@ -729,6 +794,7 @@ class Search
       post_sql = aggregate_post_sql(opts)
 
       added = 0
+
       aggregate_posts(post_sql[:default]).each do |p|
         @results.add(p)
         added += 1

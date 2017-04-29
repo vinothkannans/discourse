@@ -2,6 +2,7 @@ import { ajax } from 'discourse/lib/ajax';
 import { default as computed, observes } from "ember-addons/ember-computed-decorators";
 import GroupHistory from 'discourse/models/group-history';
 import RestModel from 'discourse/models/rest';
+import { popupAjaxError } from 'discourse/lib/ajax-error';
 
 const Group = RestModel.extend({
   limit: 50,
@@ -16,9 +17,10 @@ const Group = RestModel.extend({
     return Em.isEmpty(value) ? "" : value;
   },
 
-  type: function() {
-    return this.get("automatic") ? "automatic" : "custom";
-  }.property("automatic"),
+  @computed('automatic')
+  type(automatic) {
+    return automatic ? "automatic" : "custom";
+  },
 
   @computed('user_count')
   userCountDisplay(userCount) {
@@ -92,6 +94,7 @@ const Group = RestModel.extend({
     });
   },
 
+
   @computed('flair_bg_color')
   flairBackgroundHexColor() {
     return this.get('flair_bg_color') ? this.get('flair_bg_color').replace(new RegExp("[^0-9a-fA-F]", "g"), "") : null;
@@ -110,7 +113,7 @@ const Group = RestModel.extend({
   @observes("visible", "canEveryoneMention")
   _updateAllowMembershipRequests() {
     if (!this.get('visible') || !this.get('canEveryoneMention')) {
-      this.set('allow_membership_requests', false);
+      this.set ('allow_membership_requests', false);
     }
   },
 
@@ -136,7 +139,8 @@ const Group = RestModel.extend({
       bio_raw: this.get('bio_raw'),
       public: this.get('public'),
       allow_membership_requests: this.get('allow_membership_requests'),
-      full_name: this.get('full_name')
+      full_name: this.get('full_name'),
+      default_notification_level: this.get('default_notification_level')
     };
   },
 
@@ -188,10 +192,10 @@ const Group = RestModel.extend({
     });
   },
 
-  setNotification(notification_level) {
+  setNotification(notification_level, userId) {
     this.set("group_user.notification_level", notification_level);
     return ajax(`/groups/${this.get("name")}/notifications`, {
-      data: { notification_level },
+      data: { notification_level, user_id: userId },
       type: "POST"
     });
   }
@@ -208,6 +212,10 @@ Group.reopenClass({
     return ajax("/groups/" + name + ".json").then(result => Group.create(result.basic_group));
   },
 
+  loadOwners(name) {
+    return ajax('/groups/' + name + '/owners.json').catch(popupAjaxError);
+  },
+
   loadMembers(name, offset, limit, params) {
     return ajax('/groups/' + name + '/members.json', {
       data: _.extend({
@@ -219,7 +227,7 @@ Group.reopenClass({
 
   mentionable(name) {
     return ajax(`/groups/${name}/mentionable`, { data: { name } });
-  },
+  }
 });
 
 export default Group;

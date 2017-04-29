@@ -66,7 +66,8 @@ class TagsController < ::ApplicationController
       @description_meta = I18n.t("rss_by_tag", tag: tag_params.join(' & '))
       @title = @description_meta
 
-      canonical_url "#{Discourse.base_url_no_prefix}#{public_send(url_method(params.slice(:category, :parent_category)))}"
+      path_name = url_method(params.slice(:category, :parent_category))
+      canonical_url "#{Discourse.base_url_no_prefix}#{public_send(path_name, *(params.slice(:parent_category, :category, :tag_id).values))}"
 
       if @list.topics.size == 0 && params[:tag_id] != 'none' && !Tag.where(name: @tag_id).exists?
         permalink_redirect_or_not_found
@@ -126,7 +127,7 @@ class TagsController < ::ApplicationController
     category = params[:categoryId] ? Category.find_by_id(params[:categoryId]) : nil
 
     tags_with_counts = DiscourseTagging.filter_allowed_tags(
-      self.class.tags_by_count(guardian, params.slice(:limit)),
+      Tag.tags_by_count_query(params.slice(:limit)),
       guardian,
       {
         for_input: params[:filterForInput],

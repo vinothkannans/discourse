@@ -142,8 +142,12 @@ class TopicView
 
   def page_title
     title = @topic.title
-    if SiteSetting.topic_page_title_includes_category && @topic.category_id != SiteSetting.uncategorized_category_id && @topic.category_id && @topic.category
-      title += " - #{topic.category.name}"
+    if SiteSetting.topic_page_title_includes_category
+      if @topic.category_id != SiteSetting.uncategorized_category_id && @topic.category_id && @topic.category
+        title += " - #{@topic.category.name}"
+      elsif SiteSetting.tagging_enabled && @topic.tags.exists?
+        title += " - #{@topic.tags.order('tags.topic_count DESC').first.name}"
+      end
     end
     title
   end
@@ -280,7 +284,7 @@ class TopicView
   def participants
     @participants ||= begin
       participants = {}
-      User.where(id: post_counts_by_user.map {|k,v| k}).each {|u| participants[u.id] = u}
+      User.where(id: post_counts_by_user.map {|k,v| k}).includes(:primary_group).each {|u| participants[u.id] = u}
       participants
     end
   end

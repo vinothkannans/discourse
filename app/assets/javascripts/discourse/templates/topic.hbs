@@ -81,7 +81,7 @@
             toggleClosed=(action "toggleClosed")
             toggleArchived=(action "toggleArchived")
             toggleVisibility=(action "toggleVisibility")
-            showAutoClose=(action "topicRouteAction" "showAutoClose")
+            showTopicStatusUpdate=(action "topicRouteAction" "showTopicStatusUpdate")
             showFeatureTopic=(action "topicRouteAction" "showFeatureTopic")
             showChangeTimestamp=(action "topicRouteAction" "showChangeTimestamp")
             convertToPublicTopic=(action "convertToPublicTopic")
@@ -107,7 +107,7 @@
             toggleClosed=(action "toggleClosed")
             toggleArchived=(action "toggleArchived")
             toggleVisibility=(action "toggleVisibility")
-            showAutoClose=(action "topicRouteAction" "showAutoClose")
+            showTopicStatusUpdate=(action "topicRouteAction" "showTopicStatusUpdate")
             showFeatureTopic=(action "topicRouteAction" "showFeatureTopic")
             showChangeTimestamp=(action "topicRouteAction" "showChangeTimestamp")
             convertToPublicTopic=(action "convertToPublicTopic")
@@ -174,7 +174,13 @@
           {{#conditional-loading-spinner condition=model.postStream.loadingFilter}}
             {{#if loadedAllPosts}}
 
-              {{topic-closing topic=model}}
+              {{topic-status-info
+                  statusType=model.topic_status_update.status_type
+                  executeAt=model.topic_status_update.execute_at
+                  basedOnLastPost=model.topic_status_update.based_on_last_post
+                  duration=model.topic_status_update.duration
+                  categoryId=model.topic_status_update.category_id}}
+
               {{#if session.showSignupCta}}
                 {{! replace "Log In to Reply" with the infobox }}
                 {{signup-cta}}
@@ -188,7 +194,7 @@
                     toggleClosed=(action "toggleClosed")
                     toggleArchived=(action "toggleArchived")
                     toggleVisibility=(action "toggleVisibility")
-                    showAutoClose=(action "topicRouteAction" "showAutoClose")
+                    showTopicStatusUpdate=(action "topicRouteAction" "showTopicStatusUpdate")
                     showFeatureTopic=(action "topicRouteAction" "showFeatureTopic")
                     showChangeTimestamp=(action "topicRouteAction" "showChangeTimestamp")
                     convertToPublicTopic=(action "convertToPublicTopic")
@@ -200,7 +206,9 @@
                     replyToPost=(action "replyToPost")
                     }}
                 {{else}}
-                  {{d-button icon="reply" class="btn-primary" action="showLogin" label="topic.reply.title"}}
+                  <div id="topic-footer-button">
+                    {{d-button icon="reply" class="btn-primary pull-right" action="showLogin" label="topic.reply.title"}}
+                  </div>
                 {{/if}}
               {{/if}}
 
@@ -273,8 +281,6 @@
   {{share-popup topic=model replyAsNewTopic="replyAsNewTopic"}}
 
   {{#if currentUser.enable_quoting}}
-    {{quote-button quoteState=quoteState
-                   selectText="selectText"
-                   deselectText="deselectText"}}
+    {{quote-button quoteState=quoteState selectText=(action "selectText")}}
   {{/if}}
 {{/discourse-topic}}

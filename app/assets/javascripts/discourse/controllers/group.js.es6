@@ -53,22 +53,18 @@ export default Ember.Controller.extend({
     this.get('tabs')[0].set('count', this.get('model.user_count'));
   },
 
-  @computed('model.is_group_user', 'model.is_group_owner', 'model.automatic')
-  getTabs(isGroupUser, isGroupOwner, automatic) {
+  @computed('model.is_group_owner', 'model.automatic')
+  getTabs() {
     return this.get('tabs').filter(t => {
-      let display = true;
+      let canSee = true;
 
-      if (this.currentUser) {
-        let admin = this.currentUser.admin;
-
-        if (automatic && t.get('requiresGroupAdmin')) {
-          display = false;
-        } else {
-          display = admin || isGroupOwner;
-        }
+      if (this.currentUser && t.requiresGroupAdmin) {
+        canSee = this.currentUser.canManageGroup(this.get('model'));
+      } else if (t.requiresGroupAdmin) {
+        canSee = false;
       }
 
-      return display;
+      return canSee;
     });
   }
 });

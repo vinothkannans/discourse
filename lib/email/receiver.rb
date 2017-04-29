@@ -1,7 +1,7 @@
 require "digest"
 require_dependency "new_post_manager"
 require_dependency "post_action_creator"
-require_dependency "email/html_cleaner"
+require_dependency "html_to_markdown"
 
 module Email
 
@@ -156,7 +156,7 @@ module Email
           elsif bounce_score >= SiteSetting.bounce_score_threshold
             # NOTE: we check bounce_score before sending emails, nothing to do
             # here other than log it happened.
-            reason = I18n.t("user.email.revoked", email: user.email, date: user.user_stat.reset_bounce_score_after)
+            reason = I18n.t("user.email.revoked", { email: user.email, date: user.user_stat.reset_bounce_score_after })
             StaffActionLogger.new(Discourse.system_user).log_revoke_email(user, reason)
           end
         end
@@ -188,17 +188,21 @@ module Email
         text = fix_charset(@mail)
       end
 
-      if html.present? && (SiteSetting.incoming_email_prefer_html || text.blank?)
-        html = Email::HtmlCleaner.new(html).output_html
-        html = trim_discourse_markers(html)
-        html, elided = EmailReplyTrimmer.trim(html, true)
-        return [html, elided]
+      text, elided_text = if text.present?
+        text = trim_discourse_markers(text)
+        EmailReplyTrimmer.trim(text, true)
       end
 
-      if text.present?
-        text = trim_discourse_markers(text)
-        text, elided = EmailReplyTrimmer.trim(text, true)
-        return [text, elided]
+      markdown, elided_markdown = if html.present?
+        markdown = HtmlToMarkdown.new(html, keep_img_tags: true).to_markdown
+        markdown = trim_discourse_markers(markdown)
+        EmailReplyTrimmer.trim(markdown, true)
+      end
+
+      if text.blank? || (SiteSetting.incoming_email_prefer_html && markdown.present?)
+        return [markdown, elided_markdown]
+      else
+        return [text, elided_text]
       end
     end
 
@@ -239,6 +243,8 @@ module Email
     end
 
     def parse_from_field(mail)
+      return unless mail[:from]
+
       if mail[:from].errors.blank?
         mail[:from].address_list.addresses.each do |address_field|
           address_field.decoded
@@ -300,11 +306,11 @@ module Email
 
     def destinations
       all_destinations
-        .map { |d| check_address(d) }
+        .map { |d| Email::Receiver.check_address(d) }
         .drop_while(&:blank?)
     end
 
-    def check_address(address)
+    def self.check_address(address)
       # only check for a group/category when 'email_in' is enabled
       if SiteSetting.email_in
         group = Group.find_by_email(address)
@@ -315,7 +321,7 @@ module Email
       end
 
       # reply
-      match = reply_by_email_address_regex.match(address)
+      match = Email::Receiver.reply_by_email_address_regex.match(address)
       if match && match.captures
         match.captures.each do |c|
           next if c.blank?
@@ -365,12 +371,13 @@ module Email
                      raw: body,
                      elided: elided,
                      post: email_log.post,
-                     topic: email_log.post.topic)
+                     topic: email_log.post.topic,
+                     skip_validations: user.staged?)
       end
     end
 
     def has_been_forwarded?
-      subject[/^[[:blank]]*(re|fwd?)[[:blank]]?:/i] && embedded_email_raw.present?
+      subject[/^[[:blank:]]*(fwd?|tr)[[:blank:]]?:/i] && embedded_email_raw.present?
     end
 
     def embedded_email_raw
@@ -381,7 +388,7 @@ module Email
     end
 
     def process_forwarded_email(destination, user)
-      embedded = Mail.new(@embedded_email_raw)
+      embedded = Mail.new(embedded_email_raw)
       email, display_name = parse_from_field(embedded)
 
       return false if email.blank? || !email["@"]
@@ -419,29 +426,36 @@ module Email
         return false
       end
 
-      if post && post.topic && @before_embedded.present?
-        post_type = Post.types[:regular]
-        post_type = Post.types[:whisper] if post.topic.private_message? && group.usernames[user.username]
+      if post&.topic
+        # mark post as seen for the forwarder
+        PostTiming.record_timing(user_id: user.id, topic_id: post.topic_id, post_number: post.post_number, msecs: 5000)
 
-        create_reply(user: user,
-                     raw: @before_embedded,
-                     post: post,
-                     topic: post.topic,
-                     post_type: post_type)
+        # create reply when available
+        if @before_embedded.present?
+          post_type = Post.types[:regular]
+          post_type = Post.types[:whisper] if post.topic.private_message? && group.usernames[user.username]
+
+          create_reply(user: user,
+                       raw: @before_embedded,
+                       post: post,
+                       topic: post.topic,
+                       post_type: post_type,
+                       skip_validations: user.staged?)
+        end
       end
 
       true
     end
 
-    def reply_by_email_address_regex
+    def self.reply_by_email_address_regex
       @reply_by_email_address_regex ||= begin
         reply_addresses = [
            SiteSetting.reply_by_email_address,
           *(SiteSetting.alternative_reply_by_email_addresses.presence || "").split("|")
         ]
-        escaped_reply_addresses = reply_addresses.select { |a| a.present? }
+        escaped_reply_addresses = reply_addresses.select(&:present?)
                                                  .map { |a| Regexp.escape(a) }
-                                                 .map { |a| a.gsub(Regexp.escape("%{reply_key}"), "([[:xdigit:]]{32})") }
+                                                 .map { |a| a.gsub(Regexp.escape("%{reply_key}"), "(\\h{32})") }
         Regexp.new(escaped_reply_addresses.join("|"))
       end
     end
@@ -461,16 +475,31 @@ module Email
       message_ids.uniq!
       return if message_ids.empty?
 
-      Post.where(id: IncomingEmail.where(message_id: message_ids).select(:post_id))
-          .order(created_at: :desc)
-          .first
+      message_ids = message_ids.first(5)
+
+      host = Email::Sender.host_for(Discourse.base_url)
+      post_id_regexp  = Regexp.new "topic/\\d+/(\\d+)@#{Regexp.escape(host)}"
+      topic_id_regexp = Regexp.new "topic/(\\d+)@#{Regexp.escape(host)}"
+
+      post_ids =  message_ids.map { |message_id| message_id[post_id_regexp, 1] }.compact.map(&:to_i)
+      post_ids << Post.where(topic_id: message_ids.map { |message_id| message_id[topic_id_regexp, 1] }.compact, post_number: 1).pluck(:id)
+      post_ids << EmailLog.where(message_id: message_ids).pluck(:post_id)
+      post_ids << IncomingEmail.where(message_id: message_ids).pluck(:post_id)
+
+      post_ids.flatten!
+      post_ids.compact!
+      post_ids.uniq!
+
+      return if post_ids.empty?
+
+      Post.where(id: post_ids).order(:created_at).last
     end
 
     def self.extract_references(references)
       if Array === references
         references
       elsif references.present?
-        references.split(/[\s,]/).map { |r| r.sub(/^</, "").sub(/>$/, "") }
+        references.split(/[\s,]/).map { |r| r.tr("<>", "") }
       end
     end
 
@@ -528,7 +557,7 @@ module Email
     def create_post_with_attachments(options={})
       # deal with attachments
       attachments.each do |attachment|
-        tmp = Tempfile.new("discourse-email-attachment")
+        tmp = Tempfile.new(["discourse-email-attachment", File.extname(attachment.filename)])
         begin
           # read attachment
           File.open(tmp.path, "w+b") { |f| f.write attachment.body.decoded }
@@ -565,6 +594,10 @@ module Email
 
       # ensure posts aren't created in the future
       options[:created_at] ||= @mail.date
+      if options[:created_at].nil?
+        raise InvalidPost, "No post creation date found. Is the e-mail missing a Date: header?"
+      end
+
       options[:created_at]   = DateTime.now if options[:created_at] > DateTime.now
 
       is_private_message = options[:archetype] == Archetype.private_message ||
@@ -579,8 +612,7 @@ module Email
       end
 
       user = options.delete(:user)
-      manager = NewPostManager.new(user, options)
-      result = manager.perform
+      result = NewPostManager.new(user, options).perform
 
       raise InvalidPost, result.errors.full_messages.join("\n") if result.errors.any?
 
@@ -624,7 +656,7 @@ module Email
     end
 
     def should_invite?(email)
-      email !~ reply_by_email_address_regex &&
+      email !~ Email::Receiver.reply_by_email_address_regex &&
       email !~ group_incoming_emails_regex &&
       email !~ category_email_in_regex
     end

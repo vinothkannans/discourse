@@ -7,6 +7,7 @@ import RawHtml from 'discourse/widgets/raw-html';
 const SCROLLAREA_HEIGHT = 300;
 const SCROLLER_HEIGHT = 50;
 const SCROLLAREA_REMAINING = SCROLLAREA_HEIGHT - SCROLLER_HEIGHT;
+const LAST_READ_HEIGHT = 20;
 
 function clamp(p, min=0.0, max=1.0) {
   return Math.max(Math.min(p, max), min);
@@ -25,9 +26,9 @@ createWidget('timeline-last-read', {
   tagName: 'div.timeline-last-read',
 
   buildAttributes(attrs) {
-    const bottom = SCROLLAREA_HEIGHT - 10;
+    const bottom = SCROLLAREA_HEIGHT - (LAST_READ_HEIGHT / 2);
     const top = attrs.top > bottom ? bottom : attrs.top;
-    return { style: `height: 20px; top: ${top}px` };
+    return { style: `height: ${LAST_READ_HEIGHT}px; top: ${top}px` };
   },
 
   html(attrs) {
@@ -153,8 +154,7 @@ createWidget('timeline-scrollarea', {
 
     if (this.state.position !== result.current) {
       this.state.position = result.current;
-      const timeline = this._findAncestorWithProperty('updatePosition');
-      timeline.updatePosition.call(timeline, result.current);
+      this.sendWidgetAction('updatePosition', result.current);
     }
 
     return result;
@@ -184,10 +184,9 @@ createWidget('timeline-scrollarea', {
 
 
       // Don't show if at the bottom of the timeline
-      if (lastReadTop > (SCROLLAREA_HEIGHT - SCROLLER_HEIGHT)) {
+      if (lastReadTop > (SCROLLAREA_HEIGHT - (LAST_READ_HEIGHT / 2))) {
         showButton = false;
       }
-
     }
 
     const result = [
@@ -237,7 +236,7 @@ createWidget('timeline-scrollarea', {
   },
 
   goBack() {
-    this.sendWidgetAction('jumpToPost', this.position().lastRead);
+    this.sendWidgetAction('jumpToIndex', this.position().lastRead);
   }
 });
 
@@ -287,8 +286,6 @@ export default createWidget('topic-timeline', {
 
     this.state.position = pos;
     this.state.excerpt = "";
-    this.scheduleRerender();
-
     const stream = this.attrs.topic.get('postStream');
 
     // a little debounce to avoid flashing
@@ -300,7 +297,6 @@ export default createWidget('topic-timeline', {
       // we have an off by one, stream is zero based,
       // pos is 1 based
       stream.excerpt(pos-1).then(info => {
-
         if (info && this.state.position === pos) {
           let excerpt = "";
 
@@ -308,9 +304,7 @@ export default createWidget('topic-timeline', {
             excerpt = "<span class='username'>" + info.username + ":</span> ";
           }
 
-          excerpt += info.excerpt;
-
-          this.state.excerpt = excerpt;
+          this.state.excerpt = excerpt + info.excerpt;
           this.scheduleRerender();
         }
       });
@@ -332,21 +326,19 @@ export default createWidget('topic-timeline', {
       }
 
       let elems = [h('h2', this.attach('link', {
-              contents: ()=>titleHTML,
-              className: 'fancy-title',
-              action: 'jumpTop'}))];
-
+        contents: () => titleHTML,
+        className: 'fancy-title',
+        action: 'jumpTop'
+      }))];
 
       if (this.state.excerpt) {
-        elems.push(
-            new RawHtml({
-              html: "<div class='post-excerpt'>" + this.state.excerpt + "</div>"
-            }));
+        elems.push(new RawHtml({
+          html: "<div class='post-excerpt'>" + this.state.excerpt + "</div>"
+        }));
       }
 
       result.push(h('div.title', elems));
     }
-
 
     if (!attrs.fullScreen && currentUser && currentUser.get('canManageTopic')) {
       result.push(h('div.timeline-controls', this.attach('topic-admin-menu-button', { topic })));

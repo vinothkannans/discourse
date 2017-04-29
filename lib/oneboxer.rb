@@ -1,3 +1,4 @@
+require_dependency "#{Rails.root}/lib/onebox/discourse_onebox_sanitize_config"
 Dir["#{Rails.root}/lib/onebox/engine/*_onebox.rb"].sort.each { |f| require f }
 
 module Oneboxer
@@ -44,10 +45,6 @@ module Oneboxer
     invalidate(url)
     Rails.logger.warn("invalid cached preview for #{url} #{e}")
     ""
-  end
-
-  def self.oneboxer_exists_for_url?(url)
-    Onebox.has_matcher?(url)
   end
 
   def self.invalidate(url)
@@ -124,6 +121,10 @@ module Oneboxer
     $redis.del(preview_key(user_id))
   end
 
+  def self.engine(url)
+    Onebox::Matcher.new(url).oneboxed
+  end
+
   private
 
     def self.preview_key(user_id)
@@ -142,8 +143,8 @@ module Oneboxer
       Rails.cache.fetch(onebox_cache_key(url), expires_in: 1.day) do
         uri = URI(url) rescue nil
         return blank_onebox if uri.blank? || SiteSetting.onebox_domains_blacklist.include?(uri.hostname)
-
-        r = Onebox.preview(url, cache: {}, max_width: 695)
+        options = { cache: {}, max_width: 695, sanitize_config: Sanitize::Config::DISCOURSE_ONEBOX }
+        r = Onebox.preview(url, options)
         { onebox: r.to_s, preview: r.try(:placeholder_html).to_s }
       end
     rescue => e

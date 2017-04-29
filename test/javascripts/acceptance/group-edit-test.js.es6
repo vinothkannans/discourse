@@ -1,10 +1,11 @@
-import { acceptance } from "helpers/qunit-helpers";
+import { acceptance, logIn } from "helpers/qunit-helpers";
 
-acceptance("Editing Group", {
-  loggedIn: true
-});
+acceptance("Editing Group");
 
 test("Editing group", () => {
+  logIn();
+  Discourse.reset();
+
   visit("/groups/discourse/edit");
 
   andThen(() => {
@@ -18,10 +19,8 @@ test("Editing group", () => {
     ok(find('.group-members-input-selector .add[disabled]').length === 1, 'add members button should be disabled');
   });
 
-  click('.group-edit-public');
-
   andThen(() => {
-    ok(find('.group-edit-allow-membership-requests[disabled]').length === 1, 'it should disable group allow_membership_requets input');
+    ok(find('.group-edit-allow-membership-requests[disabled]').length === 1, 'it should disable group allow_membership_request input');
   });
 
   click('.group-edit-public');
@@ -29,5 +28,13 @@ test("Editing group", () => {
 
   andThen(() => {
     ok(find('.group-edit-public[disabled]').length === 1, 'it should disable group public input');
+  });
+});
+
+test("Editing group as an anonymous user", () => {
+  visit("/groups/discourse/edit");
+
+  andThen(() => {
+    ok(count('.group-members tr') > 0, "it should redirect to members page for an anonymous user");
   });
 });

@@ -39,9 +39,8 @@
 //= require plugin_tests
 //= require_self
 //
-//= require jquery.magnific-popup-min.js
+//= require jquery.magnific-popup.min.js
 
-window.TestPreloadStore = require('preload-store').default;
 window.inTestEnv = true;
 
 // Stop the message bus so we don't get ajax calls

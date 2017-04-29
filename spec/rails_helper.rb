@@ -9,22 +9,20 @@ require 'rbtrace'
 #uncomment the following line to use spork with the debugger
 #require 'spork/ext/ruby-debug'
 
-require 'fakeweb'
-FakeWeb.allow_net_connect = false
-
 Spork.prefork do
   # Loading more in this block will cause your tests to run faster. However,
   # if you change any configuration or code from libraries loaded here, you'll
   # need to restart spork for it take effect.
   require 'fabrication'
   require 'mocha/api'
-  require 'fakeweb'
   require 'certified'
+  require 'webmock/rspec'
 
   ENV["RAILS_ENV"] ||= 'test'
   require File.expand_path("../../config/environment", __FILE__)
   require 'rspec/rails'
   require 'shoulda'
+  require 'sidekiq/testing'
 
   # Requires supporting ruby files with custom matchers and macros, etc,
   # in spec/support/ and its subdirectories.
@@ -138,6 +136,10 @@ Spork.prefork do
   def freeze_time(now=Time.now)
     datetime = DateTime.parse(now.to_s)
     time = Time.parse(now.to_s)
+
+    if block_given?
+      raise "Don't use a block with freeze_time"
+    end
 
     DateTime.stubs(:now).returns(datetime)
     Time.stubs(:now).returns(time)

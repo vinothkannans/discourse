@@ -37,25 +37,20 @@ module Email
       @fragment.css('img').each do |img|
         next if img['class'] == 'site-logo'
 
-        if img['class'] == "emoji" || img['src'] =~ /(plugins|images)\/emoji/
-          img['width'] = 20
-          img['height'] = 20
+        if (img['class'] && img['class']['emoji']) || (img['src'] && img['src'][/\/_?emoji\//])
+          img['width'] = img['height'] = 20
         else
           # use dimensions of original iPhone screen for 'too big, let device rescale'
           if img['width'].to_i > 320 or img['height'].to_i > 480
-            img['width'] = 'auto'
-            img['height'] = 'auto'
+            img['width'] = img['height'] = 'auto'
           end
         end
 
-        # ensure all urls are absolute
-        if img['src'] =~ /^\/[^\/]/
-          img['src'] = "#{Discourse.base_url}#{img['src']}"
-        end
-
-        # ensure no schemaless urls
-        if img['src'] && img['src'].starts_with?("//")
-          img['src'] = "#{uri.scheme}:#{img['src']}"
+        if img['src']
+          # ensure all urls are absolute
+          img['src'] = "#{Discourse.base_url}#{img['src']}" if img['src'][/^\/[^\/]/]
+          # ensure no schemaless urls
+          img['src'] = "#{uri.scheme}:#{img['src']}" if img['src'][/^\/\//]
         end
       end
 
@@ -109,11 +104,9 @@ module Email
 
     def onebox_styles
       # Links to other topics
-      style('aside.quote', 'border-left: 5px solid #e9e9e9; background-color: #f8f8f8; padding: 12px 25px 2px 12px; margin-bottom: 10px;')
-      style('aside.quote blockquote', 'border: 0px; padding: 0; margin: 7px 0; background-color: clear;')
-      style('aside.quote blockquote > p', 'padding: 0;')
+      style('aside.quote', 'padding: 12px 25px 2px 12px; margin-bottom: 10px;')
       style('aside.quote div.info-line', 'color: #666; margin: 10px 0')
-      style('aside.quote .avatar', 'margin-right: 5px; width:20px; height:20px')
+      style('aside.quote .avatar', 'margin-right: 5px; width:20px; height:20px; vertical-align:middle;')
 
       style('blockquote', 'border-left: 5px solid #e9e9e9; background-color: #f8f8f8; margin: 0;')
       style('blockquote > p', 'padding: 1em;')
@@ -125,6 +118,19 @@ module Email
       style('aside.onebox .onebox-body img', "max-height: 80%; max-width: 20%; height: auto; float: left; margin-right: 10px;")
       style('aside.onebox .onebox-body h3, aside.onebox .onebox-body h4', "font-size: 1.17em; margin: 10px 0;")
       style('.onebox-metadata', "color: #919191")
+
+      @fragment.css('aside.quote blockquote > p').each do |p|
+        p['style'] = 'padding: 0;'
+      end
+
+      # Convert all `aside.quote` tags to `blockquote`s
+      @fragment.css('aside.quote').each do |n|
+        original_node = n.dup
+        original_node.search('div.quote-controls').remove
+        blockquote = original_node.css('blockquote').inner_html.strip.start_with?("<p") ? original_node.css('blockquote').inner_html : "<p style='padding: 0;'>#{original_node.css('blockquote').inner_html}</p>"
+        n.inner_html = original_node.css('div.title').inner_html + blockquote
+        n.name = "blockquote"
+      end
 
       # Finally, convert all `aside` tags to `div`s
       @fragment.css('aside, article, header').each do |n|
@@ -188,12 +194,12 @@ module Email
 
     def strip_avatars_and_emojis
       @fragment.search('img').each do |img|
-        if img['src'] =~ /_avatar/
+        if img['src'][/_avatar/]
           img.parent['style'] = "vertical-align: top;" if img.parent.name == 'td'
           img.remove
         end
 
-        if img['title'] && (img['src'] =~ /images\/emoji/ || img['src'] =~ /uploads\/default\/_emoji/)
+        if img['title'] && img['src'][/\/_?emoji\//]
           img.add_previous_sibling(img['title'] || "emoji")
           img.remove
         end

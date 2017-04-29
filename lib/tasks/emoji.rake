@@ -1,8 +1,8 @@
-EMOJI_LIST_URL = "http://unicode.org/emoji/charts/full-emoji-list.html"
-EMOJI_KEYWORDS_URL = "https://raw.githubusercontent.com/muan/emojilib/master/emojis.json"
+EMOJI_LIST_URL ||= "http://unicode.org/emoji/charts/full-emoji-list.html"
+EMOJI_KEYWORDS_URL ||= "https://raw.githubusercontent.com/muan/emojilib/master/emojis.json"
 
 # until MS release the emoji flags, we'll use custom made flags
-WINDOWS_FLAGS = Set.new ["1f1e8_1f1f3", "1f1e9_1f1ea", "1f1ea_1f1f8", "1f1eb_1f1f7", "1f1ec_1f1e7", "1f1ee_1f1f9", "1f1ef_1f1f5", "1f1f0_1f1f7", "1f1f7_1f1fa", "1f1fa_1f1f8"]
+WINDOWS_FLAGS ||= Set.new ["1f1e8_1f1f3", "1f1e9_1f1ea", "1f1ea_1f1f8", "1f1eb_1f1f7", "1f1ec_1f1e7", "1f1ee_1f1f9", "1f1ef_1f1f5", "1f1f0_1f1f7", "1f1f7_1f1fa", "1f1fa_1f1f8"]
 
 desc "update emoji images"
 task "emoji:update" => :environment do
@@ -40,7 +40,10 @@ task "emoji:update" => :environment do
 
     code = cells[1].at_css("a")["name"]
 
-    next unless emojis[code]
+    unless emojis[code]
+      code = code.gsub(/_fe0f/, "")
+      next unless emojis[code]
+    end
 
     apple = cell_to_image(cells[4])
     google = cell_to_image(cells[5])
@@ -50,7 +53,7 @@ task "emoji:update" => :environment do
     if WINDOWS_FLAGS.include?(code)
       windows = custom_windows_flag(code)
     else
-      windows = cell_to_image(cells[9])
+      windows = cell_to_image(cells[11])
     end
 
     if apple.blank? || google.blank? || twitter.blank? || one.blank? || windows.blank?
@@ -94,13 +97,16 @@ def custom_windows_flag(code)
 end
 
 def write_emojis(emojis, aliases, style, folder)
-  path = "public/images/emoji/#{folder}/"
+  path = "public/images/emoji/#{folder}"
 
-  FileUtils.rm_f Dir.glob("#{path}/*")
+  # Uncomment to recreate all emojis
+  # FileUtils.rm_f Dir.glob("#{path}/*")
 
   puts folder
 
   emojis.values.each do |emoji|
+    next if emoji[style].nil?
+
     write_emoji("#{path}/#{emoji[:name]}.png", emoji[style])
     if aliases[emoji[:name]]
       aliases[emoji[:name]].each do |new_name|
@@ -113,7 +119,9 @@ def write_emojis(emojis, aliases, style, folder)
 end
 
 def write_emoji(path, emoji)
-  open(path, "wb") { |f| f << emoji }
-  `pngout #{path}`
-  putc "."
+    open(path, "wb") { |f| f << emoji }
+    `pngout #{path}`
+    putc "."
+ensure
+  raise "Failed to write emoji: #{path}" if File.exists?(path) && !File.size?(path)
 end

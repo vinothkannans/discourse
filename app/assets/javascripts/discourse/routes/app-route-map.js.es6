@@ -62,8 +62,9 @@ export default function() {
   });
 
   // User routes
-  this.route('users', { resetNamespace: true });
-  this.route('user', { path: '/users/:username', resetNamespace: true }, function() {
+  this.route('users', { resetNamespace: true, path: '/u' });
+  this.route('password-reset', { path: '/u/password-reset/:token' });
+  this.route('user', { path: '/u/:username', resetNamespace: true }, function() {
     this.route('summary');
     this.route('userActivity', { path: '/activity', resetNamespace: true }, function() {
       this.route('topics');
@@ -140,5 +141,9 @@ export default function() {
 
   this.route('tagGroups', {path: '/tag_groups', resetNamespace: true}, function() {
     this.route('show', {path: '/:id'});
+  });
+
+  this.route('invites', { path: '/invites', resetNamespace: true }, function() {
+    this.route('show', { path: '/:token' });
   });
 }

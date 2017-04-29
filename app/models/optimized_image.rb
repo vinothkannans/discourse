@@ -101,7 +101,7 @@ class OptimizedImage < ActiveRecord::Base
     # this matches instructions which call #to_s
     path = path.to_s
     return false if path != File.expand_path(path)
-    return false if path !~ /\A[_\-a-zA-Z0-9\.\/]+\z/m
+    return false if path !~ /\A[\w\-\.\/]+\z/m
     true
   end
 
@@ -215,8 +215,11 @@ class OptimizedImage < ActiveRecord::Base
   end
 
   def self.convert_with(instructions, to)
-    `#{instructions.join(" ")} &> /dev/null`
-    return false if $?.exitstatus != 0
+    begin
+      Discourse::Utils.execute_command(*instructions)
+    rescue
+      return false
+    end
 
     ImageOptim.new.optimize_image!(to)
     true

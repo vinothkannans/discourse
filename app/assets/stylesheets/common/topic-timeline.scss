@@ -49,14 +49,20 @@
     left: 0;
     right: 0;
     border-top: 1px solid dark-light-choose(scale-color($primary, $lightness: 90%), scale-color($secondary, $lightness: 90%));
+    box-shadow: 0px -2px 4px -1px rgba(0,0,0,.25);
     padding-top: 20px;
     z-index: 100000;
+    .back-button {
+      display: none;
+    }
     .topic-timeline {
       width: 100%;
       table-layout: fixed;
       margin-left: 0;
       margin-right: 0;
       display: table;
+      touch-action: none;
+
       .timeline-date-wrapper {
         float: right;
         text-align: right;
@@ -187,6 +193,7 @@
     margin-left: 3em;
     width: 150px;
     transition: opacity 0.2s ease-in;
+    touch-action: none;
 
     .timeline-controls {
       margin-bottom: 1em;
@@ -237,6 +244,7 @@
       background-color: dark-light-choose(scale-color($tertiary, $lightness: 80%), scale-color($tertiary, $lightness: 20%));
       height: 100%;
       float: left;
+      z-index: 501;
     }
 
     .timeline-scroller-content {
@@ -272,6 +280,7 @@
         color: $tertiary;
         margin-right: 1em;
       }
+      z-index: 502;
     }
 
     .back-button {

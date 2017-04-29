@@ -35,7 +35,7 @@ export default class LockOn {
     const selected = $(this.selector);
     if (selected && selected.offset && selected.offset()) {
       const result = selected.offset().top;
-      return result - Math.round(scrollTopFor(result));
+      return result - (Math.round(scrollTopFor(result)) * 0.9);
     }
   }
 
@@ -55,6 +55,8 @@ export default class LockOn {
 
     const interval = setInterval(() => {
       let top = this.elementTop();
+      if (top < 0) { top = 0; }
+
       const scrollTop = $(window).scrollTop();
 
       if (typeof(top) === "undefined" || isNaN(top)) {

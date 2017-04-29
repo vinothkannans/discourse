@@ -1,11 +1,9 @@
 import CanCheckEmails from 'discourse/mixins/can-check-emails';
 import computed from 'ember-addons/ember-computed-decorators';
-import UserAction from 'discourse/models/user-action';
 import User from 'discourse/models/user';
 
 export default Ember.Controller.extend(CanCheckEmails, {
   indexStream: false,
-  userActionType: null,
   application: Ember.inject.controller(),
   userNotifications: Ember.inject.controller('user-notifications'),
   currentPath: Ember.computed.alias('application.currentPath'),
@@ -62,18 +60,6 @@ export default Ember.Controller.extend(CanCheckEmails, {
     return Discourse.SiteSettings.enable_badges && badgeCount > 0;
   },
 
-  @computed("userActionType")
-  privateMessageView(userActionType) {
-    return (userActionType === UserAction.TYPES.messages_sent) ||
-           (userActionType === UserAction.TYPES.messages_received);
-  },
-
-  @computed("indexStream", "userActionType")
-  showActionTypeSummary(indexStream,userActionType, showPMs) {
-    return (indexStream || userActionType) && !showPMs;
-  },
-
-
   @computed()
   canInviteToForum() {
     return User.currentProp('can_invite_to_forum');
@@ -87,7 +73,7 @@ export default Ember.Controller.extend(CanCheckEmails, {
     if (!Ember.isEmpty(siteUserFields)) {
       const userFields = this.get('model.user_fields');
       return siteUserFields.filterBy('show_on_profile', true).sortBy('position').map(field => {
-        field.dasherized_name = field.get('name').dasherize();
+        Ember.set(field, 'dasherized_name', field.get('name').dasherize());
         const value = userFields ? userFields[field.get('id').toString()] : null;
         return Ember.isEmpty(value) ? null : Ember.Object.create({ value, field });
       }).compact();

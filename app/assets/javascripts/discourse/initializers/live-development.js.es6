@@ -1,4 +1,5 @@
 import DiscourseURL from 'discourse/lib/url';
+import { currentThemeKey, refreshCSS } from 'discourse/lib/theme-selector';
 
 //  Use the message bus for live reloading of components for faster development.
 export default {
@@ -47,18 +48,17 @@ export default {
           // Refresh if necessary
           document.location.reload(true);
         } else {
+          let themeKey = currentThemeKey();
+
           $('link').each(function() {
-            // TODO: stop bundling css in DEV please
-            if (true || (this.href.match(me.name) && me.hash)) {
-              if (!$(this).data('orig')) {
-                $(this).data('orig', this.href);
+            if (me.hasOwnProperty('theme_key') && me.new_href) {
+              let target = $(this).data('target');
+              if (me.theme_key === themeKey && target === me.target) {
+                refreshCSS(this, null, me.new_href);
               }
-              const orig = $(this).data('orig');
-              if (!me.hash) {
-                window.__uniq = window.__uniq || 1;
-                me.hash = window.__uniq++;
-              }
-              this.href = orig + (orig.indexOf('?') >= 0 ? "&hash=" : "?hash=") + me.hash;
+            }
+            else if (this.href.match(me.name) && (me.hash || me.new_href)) {
+              refreshCSS(this, me.hash, me.new_href);
             }
           });
         }

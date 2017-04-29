@@ -15,27 +15,37 @@ fa_IR:
       short: "%m-%d-%Y"
       short_no_year: "%B %-d"
       date_only: "%B %-d, %Y"
+      long: "%B %-d, %Y, %l:%M%P"
+  date:
+    month_names: [null, ژانویه, فوریه, مارچ, آپریل, می, جون, جولای, آگوست, سپتامبر, اکتبر, نوامبر, دسامبر]
+    <<: *datetime_formats
+  time:
+    am: "ق.ظ"
+    pm: "ب.ظ"
+    <<: *datetime_formats
   title: "گفتمان"
   topics: "موضوعات"
   posts: "نوشته ها"
   loading: "بارگذاری..."
-  powered_by_html: 'قدرت گرفته از<a href="http://www.discourse.org">دیسکورس</a>فارسی سازی<a href="http://discours.ir/t/1-0/33"> دیسکورس فارسی</a>, برای نمایش بهتر جاوا اسکریپت را فعال کنید.'
   log_in: "ورود"
   purge_reason: "حساب کاربری غیرفعال. حذف شده به صورت خودکار به علت عدم استفاده."
   disable_remote_images_download_reason: "عکس های ریموت دانلود شده غیرفعال شدند زیرا آنجا فضای کافی در دیسک وجود نداشت"
   anonymous: "ناشناس"
+  remove_posts_deleted_by_author: "پاک شدن توسط نویسنده"
   emails:
     incoming:
-      default_subject: "ایمیل دریافتی از %{email}"
+      default_subject: "این موضوع نیاز به عنوان دارد"
       show_trimmed_content: "نمایش محتوای پنهان شده."
       maximum_staged_user_per_email_reached: "تکمیل ظرفیت تعداد حساب های کاربری با هر ایمیل."
       errors:
         empty_email_error: "رخ دادن در هنگامی که ایمیل خام دریافتی خالی باشد."
+        no_message_id_error: "این اتفاق زمانی رخ می دهد که شناسه پیغام در سربرگ ایمیل وجود ندارد."
         inactive_user_error: "رخ دادن در هنگامی که ارسال کننده فعال نباشد."
         blocked_user_error: "رخ دادن در هنگامی که که ارسال کننده مسدود شده باشد."
         strangers_not_allowed_error: "رخ دادن در هنگامی که که کاربر سعی در ایجاد مبحث در دسته بندی می کند که در آن عضو نیست."
         reply_user_not_matching_error: "رخ دادن در هنگامی که پاسخ از ایمیل متفاوتی از آنچه که ما اطلاع رسانی را به آن ارسال کرده ایم، دریافت شده باشد."
         topic_not_found_error: "رخ دادن در هنگامی که پاسخ دریافت شده باشد، اما مبحث مربوطه حذف شده باشد."
+        topic_closed_error: "این اتفاق زمانی رخ می دهد که تاپیک مربوطه از سمت مدیران بسته شده باشد."
   errors: &errors
     format: '%{attribute} %{message}'
     messages:
@@ -55,6 +65,7 @@ fa_IR:
       has_already_been_used: "قبلا استفاده شده"
       inclusion: در لیست وجود ندارد
       invalid: صحیح نیست
+      is_invalid: "واضح نیست. آیا این جمله کامل است؟"
       less_than: باید کمتر از %{count} باشد
       less_than_or_equal_to: باید کمتر و یا مساوی %{count} باشد
       not_a_number: یک عدد نمی باشد
@@ -84,19 +95,27 @@ fa_IR:
       max_username_length_range: "شما نمیتوانید حداکثر را کمتر از حداقل بگذارید."
       default_categories_already_selected: "شما نمیتوانید یک دسته بندی که در یک فهرست دیگر استفاده شده را انتخاب کنید."
       s3_upload_bucket_is_required: "شما نمیتوانید بارگذاری به S3 را فعال کنید مگر اینکه 's3_upload_bucket' ارائه بدهید."
+  bulk_invite:
+    file_should_be_csv: "فرمت فایل آپلود شده می بایست csv باشد."
+    error: "خطایی هنگام آپلود فایل مربوطه رخ داده است. لطفا بعدا/مجددا امتحان کنید."
   backup:
     operation_already_running: "یک عملیات در حال اجراست. کار جدیدی نمی توان شروع کرد."
     backup_file_should_be_tar_gz: "پرونده‌ی پشتیبان باید یک فایل فشرده با پسوند tar.gz. باشد."
     not_enough_space_on_disk: "فضای کافی برای بارگذاری این پشتیبان وجود ندارد."
+    invalid_filename: "نام فایل پشتیبان شامل حروف ممنوعه می باشد. کاراکترهای قابل استفاده a-z و 0-9 می باشد."
   not_logged_in: "برای اینکار شما باید وارد شوید."
   not_found: "URL یا منبع درخواست شده یافت نشد."
   invalid_access: "شما اجازه مشاهده منبع درخواست شده را ندارید."
   read_only_mode_enabled: "سایت در حالت فقط خواندنی است. تداخلات غیرفعال هستند."
+  reading_time: "زمان مطالعه"
+  likes: "لایک ها"
   too_many_replies:
     other: "متأسفیم، ولی کاربران جدید موقتا محدود به {count}% پاسخ در برخی از تاپیک ها هستند."
   embed:
     start_discussion: "مبحث جدید"
     continue: "ادامه این بحث"
+    error: "خطایی در جاسازی رخ داده است"
+    referer: "ارجاع دهنده:"
     more_replies:
       other: "%{count} پاسخ دیگر"
     loading: "بارگزاری مبحث ..."
@@ -125,6 +144,7 @@ fa_IR:
   topic_not_found: "یک مشکلی وجود دارد.  شاید این جستار بسته شده یا پاک شده همزمان که داشتی نگاهش می کردی ؟"
   just_posted_that: "به آن‌چه که به‌تازگی فرستادید بسیار نزدیک است"
   invalid_characters: "نویسه‌های نامعتبر در بر دارد."
+  is_invalid: "نامعتبر است. تلاش کنید که کمی بیش‌ترتوضیح بگذارید."
   next_page: "صفحه بعد ←"
   prev_page: "→ صفحه قبل"
   page_num: "صفحه %{num}"
@@ -182,36 +202,12 @@ fa_IR:
       - Constructive criticism is welcome, but criticize *ideas*, not people.
 
       For more, [see our community guidelines](/guidelines). This panel will only appear for your first %{education_posts_text}.
-    sequential_replies: |
-      ### Consider replying to several posts at once
-
-      Rather than many sequential replies to a topic, please consider a single reply that includes quotes from previous posts or @name references.
-
-      You can edit your previous reply to add a quote by highlighting text and selecting the <b>quote reply</b> button that appears.
-
-      It's easier for everyone to read topics that have fewer in-depth replies versus lots of small, individual replies.
-    dominating_topic: |
-      ### Let others join the conversation
-
-      This topic is clearly important to you &ndash; you've posted more than %{percent}% of the replies here.
-
-      Are you sure you're providing adequate time for other people to share their points of view, too?
-    too_many_replies: |
-      ### You have reached the reply limit for this topic
-
-      We're sorry, but new users are temporarily limited to %{newuser_max_replies_per_topic} replies in the same topic.
-
-      Instead of adding another reply, please consider editing your previous replies, or visiting other topics.
-    reviving_old_topic: |
-      ### Revive this topic?
-
-      The last reply to this topic is now over %{days} days old. Your reply will bump the topic to the top of its list and notify anyone previously involved in the conversation.
-
-      Are you sure you want to continue this old conversation?
   activerecord:
     attributes:
       category:
         name: "نام دسته"
+      topic:
+        title: 'عنوان'
       post:
         raw: "متن"
       user_profile:
@@ -239,7 +235,6 @@ fa_IR:
               invalid: "این یک رنگ معتبر نیست"
       <<: *errors
   user_profile:
-    no_info_me: "<div class='missing-profile'> درباره من نمایه شما خالی در حال حاضر خالی است٬ <a href='/users/%{username_lower}/preferences/about-me'> علاقه دارید آن را تکمیل کنید ؟ </a></div>"
     no_info_other: "<div class='missing-profile'>%{name}هنوز چیزی وارد نکرده درباره خودش در نمایه شان. "
   vip_category_name: "زبان"
   vip_category_description: "دسته مخصوص برای اعضا با سطح اعتماد 3 و بالاتر."
@@ -307,7 +302,6 @@ fa_IR:
       pms_per_day: "شما به حداکثر تعداد پیام هایی که امروز میتوانید بفرستید رسیده اید. لطفا به مدت %{time_left} صبر کنید قبل از اینکه دوباره امتحان کنید."
       create_like: "شما به حداکثر تعداد پسند هایی که امروز میتوانید بکنید رسیده اید. لطفا به مدت %{time_left} صبر کنید قبل از اینکه دوباره امتحان کنید."
       create_bookmark: "شما به حداکثر تعداد بوک مارک هایی که امروز میتوانید بکنید رسیده اید. لطفا به مدت %{time_left} صبر کنید قبل از اینکه دوباره امتحان کنید."
-      edit_post: "شما به حداکثر تعداد ویرایش هایی که امروز میتوانید بکنید رسیده اید. لطفا به مدت %{time_left} صبر کنید قبل از اینکه دوباره امتحان کنید."
     hours:
       other: "%{count} ساعت"
     minutes:
@@ -365,14 +359,11 @@ fa_IR:
         other: "حداقل %{count} سال قبل"
   password_reset:
     no_token: "متآسفیم, پیوند تغییر رمز عبور بسیار قدیمی است. دکمه ورود را انتخاب کنید و از 'من رمز عبور خود را فراموش کرده ام' برای دریافت یک پیوند جدید استفاده کنید."
-    choose_new: "لطفا یک رمز عبور جدید وارد کنید"
-    choose: "لطفا یک رمز عبور وارد کنید"
     update: 'به‌روز کردن گذرواژه'
     save: 'تنظیم رمز عبور'
     title: 'بازیابی گذرواژه'
     success: "شما با موفقیت رمز عبورتان را تغییر دادید و الان وارد سیستم هستید. "
     success_unapproved: "شما با موفقیت رمز عبورتان را تغییر دادید."
-    continue: "برو به %{site_name}"
   change_email:
     confirmed: "ایمیل شما به روز شد."
     please_continue: "برو به %{site_name}"
@@ -591,8 +582,6 @@ fa_IR:
     facebook_config_warning: 'سرور تنظیم شده تا اجازه دهد به ثبت نام و وارد شدن یا فیس بوک (enable_facebook_logins), ولی ID برنامه٬  ارزش های مخفی برنامه تنظیم نشده است. برو به  <a href="/admin/site_settings"> تنظیمات سایت </a> و بروز رسانی تنظیمات  <a href="https://meta.discourse.org/t/configuring-facebook-login-for-discourse/13394" target="_blank"> راهنما را ببین برای دانستن بیشتر</a>.'
     twitter_config_warning: 'سرور تنظیم شده تا اجازه دهد برای ثبت نام و وارد شدن با تیوتر (enable_twitter_logins), ولی کلید و ارزش های مخفی تنظیم نشده شده است. برو به  <a href="/admin/site_settings"> تنظیمات سایت </a> بروز رسانی و تنظیمات. <a href="https://meta.discourse.org/t/configuring-twitter-login-for-discourse/13395" target="_blank"> راهنما را ببین برای دانستن بیشتر</a>.'
     github_config_warning: 'سرور تنظیم شده تا اجازه دهد برای ثبت نام و وارد شدن با GitHub (enable_github_logins), ولی مشتری و ارزش های مخقی تنظیم نشده است.  برو به <a href="/admin/site_settings"> تنظیمات سایت </a> بروز رسانی و تنظیمات.  <a href="https://meta.discourse.org/t/configuring-github-login-for-discourse/13745" target="_blank"> راهنما را ببین برای دانستن بیشتر</a>.'
-    s3_config_warning: 'سرور تنظیم شده برای بارگزاری فایل به  s3 ولی حداقل یکی از تنظیمات پیش رو تنظیم نشده است:  s3_access_key_id, s3_secret_access_key or s3_upload_bucket.  برو به <a href="/admin/site_settings"> تنظیمات سایت </a>  و بروز رسانی و تنظیمات. <a href="http://meta.discourse.org/t/how-to-set-up-image-uploads-to-s3/7229" target="_blank"> این را ببین برای بارگزاری های  عکس به  S3؟"  برای کسب اطلاعات بیشتر </a>.'
-    s3_backup_config_warning: 'سرور تنظیم شده برای بارگزاری نسخه پشتیبان  به  s3 ولی حداقل یکی از تنظیمات پیش رو تنظیم نشده است:  : s3_access_key_id, s3_secret_access_key or s3_backup_bucket. برو به <a href="/admin/site_settings"> تنظیمات سایت </a> و بروز رسانی و تنظیمات  <a href="http://meta.discourse.org/t/how-to-set-up-image-uploads-to-s3/7229" target="_blank">  این را ببین برای تنظیم ارسال عکس ها به S3؟ "  برای کسب اطلاعات بیشتر </a>.'
     image_magick_warning: 'سرور تنظیم شده برای ساخت تامبنیل های عکس های بزرگ. ولی  ImageMagick نصب نشده است. ImageMagick را نصب کن با استفاده از بسته مدیریت یا <a href="http://www.imagemagick.org/script/binary-releases.php" target="_blank"> آخرین نسخه را دانلود کن. '
   site_settings:
     censored_words: "کلماتی که به صورت خودکار جایگزین می شوند با  &#9632;&#9632;&#9632;&#9632;"
@@ -625,8 +614,6 @@ fa_IR:
     delete_removed_posts_after: "نوشته های حذف شده توسط نویسنده بطور خودکار پاک می شوند بعد از  (n) ساعت. اگر به 0 تنظیم شود همان موقع پاک خواهند شد. "
     max_image_width: "حداکثر عرض تامبنیل عکس ها در نوشته."
     max_image_height: "حداکثر طول تامبنیل عکس ها در نوشته."
-    category_featured_topics: "تعداد جستارهای نمایش داداه شده به دسته بندی در صفحه دسته بندی ها. بعد از عوض کردن این مقدار٬ تا 15 دقیقه زمان می برد تا صفحه دسته بندی ها به روز شود. "
-    show_subcategory_list: "نمایش زیر دسته بندی ها به جای لیست موضوع هنگام ورود به یک دسته بندی."
     fixed_category_positions: "اگر چک شده باشد٬ شما این امکان را دارید تا دسته بندی ها را به ترتیب در یک نظم ثابت قرار دهید. اگر چک نشده باشد٬ دسته بندی ها بر اساس فعالیتشان قرار می گیرند. "
     fixed_category_positions_on_create: "اگر انتخاب شود بدین معنی است که ترتیب دسته‌ها در پنجره ایجاد یک عنوان جدید مدیریت خواهد شد (نیازمند  fixed_category_positions است)."
     add_rel_nofollow_to_user_content: "nofollow REL را اضافه کن به تمام محتویات ارسال شده کاربر٬ بجر برای پیوندهای داخلی (به همراه دامنه های والد). اگر این را عوض کردی٬‌ باید تمام پست ها را rebake کنی با : \"rake posts:rebake\""
@@ -659,7 +646,6 @@ fa_IR:
     must_approve_users: "Staff must approve all new user accounts before they are allowed to access the site. WARNING: enabling this for a live site will revoke access for existing non-staff users!"
     ga_universal_tracking_code: "Google Universal Analytics (analytics.js) کد پیگری کد٬ UA-12345678-9; این را ببین http://google.com/analytics"
     ga_universal_domain_name: "Google Universal Analytics (analytics.js) اسم دامنه٬‌ eg: mysite.com; این را ببین  http://google.com/analytics"
-    enable_noscript_support: "webcrawler  موتور جستجوی  استاندارد را فعال کناز طریق تگ noscript"
     allow_moderators_to_create_categories: "اجازه دادن به مدیران برای ساخت دسته‌بندی‌های جدید"
     cors_origins: "ریشه های مجاز برای cross-origin requests درخواست متقابل منشاء (CORS). هر منشاء باید دارای http:// or https://. The DISCOURSE_ENABLE_CORS  env باید متغیر باشد برای تنظیم به کارگیری CORS. "
     top_menu: "مشخص کن کدام موارد در صفحه اصلی مکان یابی نشان داده شوند٬ و به چه ترتیبی. برای مثال : آخرین ها|جدید|خوانده نشده|دسته بندی|خوانده شده|نوشته شده|نشانک"
@@ -679,7 +665,6 @@ fa_IR:
     top_page_default_timeframe: "دعوتنامه های معمولی در صفحه کاربر نشان داده می شوند. "
     show_email_on_profile: "به کاربران ایمیلشان را در نمایه نشان بده (فقط برای خودشان و مدیران)"
     email_token_valid_hours: "رمز عبور فراموش شده/ حساب کاربری فعال اعتبار دارد برای (n) ساعت."
-    email_token_grace_period_hours: "رمز عبور فراموش شده/ نشانه حساب کاربری فعال هنوز قابل اعتبار است برای مهلت (n) ساعت بعد از اینکه بخشوده شد."
     enable_badges: "فعال سازی سیستم مدال دهی"
     allow_index_in_robots_txt: "مشخص کردن در robots.txt که به این سایت اجازه می دهد به نمایه شدن برای موتورهای جستجوی وب."
     email_domains_blacklist: "لیست pipe-delimit دامنه های ایمیل که کاربران اجازه ندارند با آن حساب کاربری ثبت نام کنند. برای مثال:  mailinator.com|trashmail.net"
@@ -693,7 +678,6 @@ fa_IR:
     invite_passthrough_hours: "برای چه مدت کاربر می تواند از کلید فراخوان بخشوده شده برای ورود به سیستم استفاده کند٬‌ در ساعت"
     invite_only: "ثبت نام عمومی از کار افتاده است٬ تمام کاربران جدید باید از توسط کاربران عضو دعوت شده شوند."
     login_required: "نیاز به تصدیق است برای خواندن محتوا در سایت٬ دسترسی  ناشناس رد شود."
-    reserved_usernames: "نام های کاربری غیرمجاز جهت عضویت."
     min_password_length: "حداقل طول رمز عبور"
     block_common_passwords: "رمز عبوری که جزو 10,000 رمز عبور رایج است را قبول نکنید. "
     enable_sso: "اجازه single sign on از طریق سایت‌های دیگر داده شود (هشدار: آدرس ایمیل کاربر *باید* توسط سایت دیگر معتبر تشخیص داده شود!)"
@@ -916,10 +900,6 @@ fa_IR:
   change_owner:
     post_revision_text: "حق مالکیت از کاربر {old_user}% به کاربر {new_user}% منتقل شد"
     deleted_user: "یک کاربر حذف شده"
-  emoji:
-    errors:
-      name_already_exists: "متأسفیم، در حال حاضر نام '{name}%' توسط ایموجی دیگری استفاده می‌شود."
-      error_while_storing_emoji: "متأسفیم، در هنگام ذخیره‌سازی ایموجی خطایی رخ داده است."
   topic_statuses:
     archived_enabled: "این جستار بایگانی شده است.  غیر قابل دسترسی است و قادر به تغییر آن نیستید."
     archived_disabled: "این جستار الان از بایگانی خارج شد.این دیگر غیر قابل دسترسی نیست و قادر به عوض شدن است."
@@ -950,7 +930,6 @@ fa_IR:
     incorrect_username_email_or_password: "نام کاربری، ایمیل یا رمز عبور نادرست"
     wait_approval: "ممنون برای ثبت نام. ما به شما اطلاع می دهیم وقتی حساب کاربری شما تایید شد."
     active: "حساب کاربریتان فعال شده و آماده‌ی استفاده است."
-    activate_email: "<p>تقریبا ثبت نام انجام شد! ما ایمیل فعال سازی را برای ما ارسال کردیم <b>%{email}</b>. لطفا به ایمیل خود برای فعال سازی حساب کاربر خود مراجعه نمایید.</p><p> اگر ایمل فعال سازی نبود، لطفا پوشه اسپم ایمیل خود را برسی نمایید،اگر ایمیل ارسال نشده است با ورود به سایت دوباره ایمیل فعال سازی ارسال نمایید. </p>"
     not_activated: "هنوز نمی توانید وارد سیستم شوید. ما ایمیل برای فعال سازی برای شما ارسال کردیم. لطفا دستور عمل را در ایمیل برای فعال سازی حساب کاربریتان دنبال کنید."
     not_allowed_from_ip_address: "شما نمی‌توانید با این آی‌پی آدرس وارد حساب کاربری {username}% شوید."
     admin_not_allowed_from_ip_address: "شما نمی تواند با این اپی آدرس به عنوان مدیر وارد سیستم شوید."
@@ -985,35 +964,10 @@ fa_IR:
       other: "%{count} نشانه ها منتظر استفاده"
   invite_mailer:
     subject_template: "%{invitee_name} شما را دعوت کرده به %{topic_title}' در  %{site_domain_name}"
-    text_body_template: |
-      %{invitee_name} شما را دعوت کرده به یک گفتگو
-
-      > **%{topic_title}**
-      >
-      > %{topic_excerpt}
-
-      در
-
-      > %{site_title} -- %{site_description}
-
-      اگر علاقه مند هستید بر روی پیوند پایین کلیک کنید:‌
-
-      %{invite_link}
-
-      این دعوتنامه از طرف یک کاربر قابل اعتماد است٬ پس شما نیازی به ورود ندارید.
   invite_forum_mailer:
     subject_template: "%{invitee_name} دعوت شدید به عضویت در %{site_domain_name}"
   invite_password_instructions:
     subject_template: "تنظیم رمز عبور برای حساب کاربری {site_name}%"
-  test_mailer:
-    subject_template: "[%{site_name}] ایمیل تست دهش"
-  new_version_mailer:
-    subject_template: "[%{site_name}] نسخه جدید Discourse برای به روز رسانی موجود است"
-  new_version_mailer_with_notes:
-    subject_template: "[%{site_name}] بروزرسانی در دسترس"
-  queued_posts_reminder:
-    subject_template:
-      other: "[%{site_name}] %{count} نوشته منتظر بررسی است"
   flag_reasons:
     off_topic: "نوشته شما به عنوان **بی ربط به جستار** پرچم گزاری شده. انجمن احساس خوبی برای جا دادن آن در جستار ندارد٬ آن طور که در عنوان و نوشته اول تعریف شده. "
     inappropriate: "نوشاه شما به عنوان ** نامناسب** پرچم گزاری شده. انجمن احساس کرده این تهاجمی، توهین آمیز، و یا نقض  [دستورالعمل  انجمن ما است](دستورعمل  انجمن/)"
@@ -1025,7 +979,6 @@ fa_IR:
     disagreed: "ممنون از اینکه به ما اطلاع دادید. ما بهش نگاه می کنیم"
     deferred: "ممنون از اینکه به ما اطلاع دادید. ما بهش نگاه می کنیم"
     deferred_and_deleted: "ممنون از اینکه به ما اطلاع دادید. ما نوشته را پاک می کنیم."
-  temporarily_closed_due_to_flags: "این عنوان به صورت موقت به خاطر تعداد فراوان گزارش‌های رسیده از کاربران بسته شده است."
   system_messages:
     welcome_user:
       subject_template: "به %{site_name} خوش آمدید!"
@@ -1045,33 +998,6 @@ fa_IR:
         (اگر نیاز به تماس با یکی از مدیران[staff members] را دارید(%{base_url}/about) به عنوان یک کاربر جدید٬ فقط به این پیام پاسخ دهید.)
     welcome_invite:
       subject_template: "به %{site_name} خوش آمدید!"
-      text_body_template: |
-        ممنون برای قبول دعتونامه به %{site_name} -- خوش آمدید!
-
-
-        برای شما یک حساب کاربری جدید ساختیم **%{username}** و شما الان در سیستم هستید. می توانید اسم خود را عوض کنید با مراجعه به [your user profile][prefs].
-
-        برای ورود بعدتر :
-
-
-        1.  همیشه برای ورود ** از ایمیل آدرسی استفاده کن که در دعوتنامه اصلی استفاده کردید**. در غیر اینصورت نمی تونیم بگوییم این شمایید!
-
-
-        2.  رمز عبور خیلی خوبی بساز برای  [کاربری نمایه ات][prefs]٬ و برای ورود از آن استفاده کن.
-
-        %{new_user_tips}
-
-
-        ما به [رفتار جامعه ای متمدن] همیشه اعتقاد داریم (%{base_url}/guidelines).
-
-
-        از بودنتان در انجمن لذت ببرید!
-
-
-        (اگر نیاز به تماس با یکی از مدیران[staff members] را دارید(%{base_url}/about) به عنوان یک کاربر جدید٬ فقط به این پیام پاسخ دهید. )
-
-
-        [prefs]: %{user_preferences_url}
     backup_succeeded:
       subject_template: "پشتیبان گیری با موفقیت انجام شد"
     backup_failed:
@@ -1096,33 +1022,9 @@ fa_IR:
         ```
     csv_export_succeeded:
       subject_template: "خارج کردن اطلاعات کامل شد"
-      text_body_template: |+
-        خارج کردن فایل ها با موفقیت انجام شد! :dvd:
-
-
-        <a class="attachment" href="%{download_link}">%{file_name}</a> (%{file_size})
-
-        پیوند زیر برای دانلود فقط برای 48 ساعت اعتبار دارد.
-
     csv_export_failed:
       subject_template: "خارج کردن فایل ها ناموفق شد"
       text_body_template: "ما متاسفیم٬ ولی خارج کردن اطلاعات ناموفق شد. لطفا سیستم را چک کنید یا با یکی از مدیران تماس بگیرید. "
-    email_reject_no_account:
-      subject_template: "[%{site_name}]  مشکل ایمیل  -- حساب کاربری ناشناس "
-    email_reject_empty:
-      subject_template: "[%{site_name}] مشکل ایمیل -- بدون محتوا"
-    email_reject_invalid_access:
-      subject_template: "[%{site_name}] مشکل ایمیل  -- دسترسی نامعتبر "
-    email_reject_reply_key:
-      subject_template: "[%{site_name}] مشکل ایمیل  -- کلید پاسخ ناشناس"
-    email_reject_topic_not_found:
-      subject_template: "[%{site_name}] مشکل ایمیل  -- جستار یافت نشد"
-    email_reject_topic_closed:
-      subject_template: "[%{site_name}] مشکل ایمیل  -- جستار بسته است"
-    email_reject_auto_generated:
-      subject_template: "[%{site_name}] مشکل ایمیل  -- پاسخ خودکار"
-    email_error_notification:
-      subject_template: "[%{site_name}] مشکل ایمیل  -- ایراد تصدیق POP "
     spam_post_blocked:
       subject_template: "کاربر جدید%{username} نوشته مسدود شده است بدلیل پیوند های تکراری"
     pending_users_reminder:
@@ -1143,93 +1045,11 @@ fa_IR:
       title: "لغو اشتراک"
       description: "آیا تمایلی به دریافت این ایمیل‌ها ندارید؟ مشکلی نیست! اینجا را کلیک کنید تا اشتراک آن هم‌اکنون حذف شود."
     posted_by: "نوشته شده توسط {username}% در تاریخ {post_date}%"
-    user_invited_to_private_message_pm:
-      subject_template: "[%{site_name}] %{username} شما را به یک پیام دعوت کرده است: '%{topic_title}'"
-    user_replied:
-      subject_template: "[%{site_name}] %{topic_title}"
-    user_quoted:
-      subject_template: "[%{site_name}] %{topic_title}"
-    user_mentioned:
-      subject_template: "[%{site_name}] %{topic_title}"
-    user_posted:
-      subject_template: "[%{site_name}] %{topic_title}"
-    user_posted_pm:
-      subject_template: "[%{site_name}] [PM] %{topic_title}"
     digest:
       why: "یک گزارش کوتاه از %{site_link}  از آخرین باری که بازدید کردید در %{last_seen_at}"
       click_here: "اینجا کلیک کنید"
-    forgot_password:
-      subject_template: "[%{site_name}] باز یابی رمز عبور"
-      text_body_template: |
-        شخصی برای ریست رمز عبور سوال کرد[%{site_name}](%{base_url}).
-
-
-        اگر شما نبود٬ می توانید با خیال راحت این ایمیل را نادیده بگیرید.
-
-
-        بر روی پیوند پیش رو برای انتخاب رمز عبور جدید کلیک کنید.
-
-        %{base_url}/users/password-reset/%{email_token}
-    set_password:
-      subject_template: "تنظیم رمز عبور [%{site_name}] "
-      text_body_template: |
-        شخصی برای اضافه کردن رمز عبور به حساب کاربری شما پرسیده در [%{site_name}](%{base_url}).  در روش دیگر٬‌ شما می توانید با وارد شوید از طریق سرویس دیگر مثل (گوگل٬‌ فیس بوک٬‌غیره) که ایمیل برابر استفاده می کنند.
-
-
-        اگر شما نبود٬ می توانید با خیال راحت این ایمیل را نادیده بگیرید.
-
-        بر روی پیوند پیش رو برای انتخاب رمز عبور جدید کلیک کنید.
-
-        %{base_url}/users/password-reset/%{email_token}
-    admin_login:
-      subject_template: "[%{site_name}] ورود به سیستم"
-      text_body_template: |
-        شخصی برای ورود به سیستم با حساب کاربری شما سوال کرد  [%{site_name}](%{base_url}).
-
-        اگر شما این درخواست را نداده اید می توانید این ایمیل را نادیده بگیرید.
-
-        برای ورود به سیستم لینک پیش رو را کلیک کنید. :
-        %{base_url}/users/admin-login/%{email_token}
-    account_created:
-      subject_template: "[%{site_name}] حساب کاربری جدید شما"
-      text_body_template: |
-        حساب کاربری جدید برای شما ساخته شد در  %{site_name}
-
-        بر روری پیوند پیش رو کلیک کنید برای انتخاب رمز برای حساب کاربری جدیدتان:
-
-        %{base_url}/users/password-reset/%{email_token}
     signup_after_approval:
       subject_template: "شما تایید شدید %{site_name}! "
-      text_body_template: |
-        خوش آمدید به  %{site_name}!
-
-        یکی از مدیران حساب کاربری شما را تایید کرد در %{site_name}.
-
-        بر روی پیوند پیش رو کلیک کنید تا حساب کاربری شما تایید شود:
-        %{base_url}/users/activate-account/%{email_token}
-
-        اگر پیوند بالا قابل کلیک کردن نیست٬ پیوند را کپی کنید و در مرور گر وب انتقال دهید.
-
-        %{new_user_tips}
-
-
-        ما به  [رفتار انجمن متمدن] معتقدیم (%{base_url}/guidelines) برای  همیشه.
-
-        از بودنتان در اینجا لذت ببرید!
-
-        ( اگر شما نیاز  به ارتباط با مدیران را دارید[staff members](%{base_url}/about) به عنوان یک کاربر جدید٬ لطفا به این پیام پاسخ دهید.)
-    signup:
-      subject_template: "[%{site_name}] حساب کاربری جدید را تایید کنید"
-      text_body_template: |
-        خوش آمدید به %{site_name}!
-
-
-        برای فعال نمودن حساب کاربریتان بر روی پیوند پیش رو کلیک کنید:
-
-        %{base_url}/users/activate-account/%{email_token}
-
-
-        اگر پیوند بالا قابل کلیک کردن نیست٬ پیوند را کپی کنید و در مرور گر وب انتقال دهید.
   page_not_found:
     popular_topics: "محبوب"
     recent_topics: "اخیر"
@@ -1283,11 +1103,13 @@ fa_IR:
     نوشته اول این جستار را ویرایش کن برای عوض کردن محتویا ت%{page_name} صفحه.
   guidelines_topic:
     title: "پرسش و پاسخ / دستورالعمل"
-    body: "اینجا مکانی متمدن برای بحث جمعی است.\nلطفا برای این فروم بحث همان احترامی را قائل باشید که برای یک پارک عمومی هستید. ما، هم، یک منبع جمعی مشترک هستیم – جایی که مهارت ها، دانش و علایق در اثر بحث های در جریان به اشتراک گذاشته می شود.\nاز راهنمای زیر برای تمیز نگه داشتن این مکان به صورت یک مجلس متمدن بحث بهره ببرید. این راهنما قوانین سفت و سختی ندارد، بلکه صرفا به قضاوت افراد از جامعه ی ما کمک میکند.\nبحث را بهبود ببخشید\nبا بهبود بحث ها، حتی اگر بهبود کوچکی باشد، به ما کمک کنید تا اینجا را همیشه یک مکان مناسب برای بحث نگه داریم. اگر مطمئن نیستید که پست های شما به بحث چیزی اضافه میکند، به چیزی که میخواهید فکر کنید و بعدتر دوباره تلاش کنید.\nموضوعات بحث شده در اینجا برای ما مهم است، و میخواهیم شما هم طوری رفتار کنید که گویی آن ها برای شما هم مهم هستند. نسبت به موضوعات مطرح شده و مردمی که راجع به آن بحث میکنند احترام قائل باشید، حتی اگر با بعضی چیزهایی که گفته می شود موافق نیستید.\nیک راه بهبود بحث ها، با کشف بحث هایی است که پیش تر اتفاق افتاده. لطفا پیش از اینکه پاسخ خودتان را بیان کنید، زمانی برای مرور عناوینی که اینجاست سپری کنید؛ در این صورت احتمال اینکه افراد دیگری با علایق مشترک با شما بیابید بیشتر میشود.\nحتی وقتی موافق نیستید، نیز دلپذیر باشید\nممکن است بخواهید با بعضی بحث های مطرح شده مخالفت کنید. این خوب است. فقط حواستان باشد که ایده ها را نقد کنید و نه افراد را. لطفا از موارد زیر دوری کنید:\n-\tنام بردن\n-\tحمله به شخصیت و یا انگیزه ی افراد\n-\tواکنش به نحوه ی بیان پست به جای محتوای آن\n-\tواکنش های سریع و متناقض\nبه جای این ها، استدلال های مخالفی که بحث را بهبود می بخشند فراهم کنید.\nمشارکت شما به حساب می آید\nبحث هایی که ما اینجا داریم برای همه خواهد ماند. با تعامل در بحث هایی که این فروم را به مکان جالب تری برای حضور میکند و دوری از بحث هایی که این چنین نمی کند، به ما کمک کنید در آینده ی این جمع تاثیرگذار باشیم.\nدیسکورس ابزاری در دسترس می گذارد که به جمع این امکان را میدهد که بهترین (و بدترین) مشارکتها را تشخیص دهند: علاقه مندی ها، نشانک ها، لایک ها، پرچم ها، پاسخ ها، ویرایش ها، و ... . از این ابزارها برای بهبود تجربه ی خودتان و همین طور دیگران بهره ببرید.\nبیاید تلاش کنیم پارک را نسبت به آن چه از ابتدا یافته ایم، بهبود ببخشیم.\nاگر مشکلی دیدید، آن را پرچم گذاری کنید.\nتعدیل کننده ها امتیازهای مشخصی دارند؛ آن ها مسئول این فروم هستند. و البته شما هم هستید. با کمک شما، تعدیل کننده ها میتوانند تسهیل گر باشند و نه فقط فراش یا پلیس.\nوقتی رفتار نامناسبی میبینید، پاسخ ندهید. این کار رفتار بد را تشویق میکند، انرژی شما را مصرف میکند، و زمان دیگران را خرج میکند. تنها کافی است آن را پرچم گذاری کنید. با تعلق گرفتن پرچم های کافی، اقدام مناسب انجام می شود، یا خود به خود و یا با دخالت تعدیل کننده ها.\nبرای حفظ جامعه یمان، تعدیل کننده ها این حق را دارند که محتوای هر کاربری و یا هر کاربری را به هر دلیلی در هر زمانی حذف کنند. تعدیل کننده ها، پست های جدید را پیش نمایش نمیکنند؛ و تعدیل کننده ها و مجریان سایت مسئول هیچ کدام از پست های جمع نیستند.\nهمیشه متمدن باشید\nهیچ چیزی یک بحث سالم را مانند بی ادبی خراب نمیکند:\n-\tمتمدن باشید. مطالبی که یک فرد معقول توهین آمیز، سواستفاده، و یا بیان نفرت در نظر میگیرد پست نکنید.\n-\tاینجا را تمیز نگه دارید. مطالب مستهجن و یا مطالب جنسی صریح پست نکنید.\n-\tبه همدیگر احترام بگذارید. باعث آزار یا اندوه دیگران نشوید، خود را به جای دیگران جا نزنید، و یا اطلاعات خصوصی دیگران را در معرض قرار ندهید.\n-\tبه فروم ما احترام بگذارید. اسپم پست نکنید و یا فروم را به تباهی نکشید.\nاین شرایط تعریف دقیق ندارند – از چیزهایی که حتی نمود این موارد هست نیز دوری کنید. اگر مطمئن نیستید، از خودتان بپرسید چه حسی به شما دست میداد اگر پستتان در صفحه ی اول نشریه نیویورک تایمز چاپ شود.\nاینجا یک فروم عمومی است، و موتورهای جستجو بحث های موجود را نشان میدهند. زبان، لینک ها، و تصاویر را برای دوستان و خانواده امن نگه دارید.\nاینجا را تمیز نگه دارید\nتلاش کنید تا چیزها را در جای مناسب خود قرار دهید، تا ما بتوانیم زمان بیشتری را به بحث و زمان کمتری را به تمیزکاری بپردازیم:\n-\tیک موضوع را در دسته بندی نادرست مطرح نکنید.\n-\tیک موضوع را در عناوین مختلف پست نکنید.\n-\tپاسخ های بدون محتوا پست نکنید.\n-\tیک موضوع را با ویرایش آن در حین بحث منحرف نکنید.\n-\tپست های خودتون رو امضا نکنید – هر پستی اطلاعات شما را با خود به همراه دارد.\nبه جای پست کردن «+1» یا «موافقم»، از دکمه ی لایک استفاده کنید. به جای اینکه یک موضوع موجود را به عنوان موضوع جدید مطرح کنید، از گزینه ی «پاسخ به صورت موضوع لینک شده» استفاده کنید.\nتنها مطالب خودتان را پست کنید\nمطالب دیگران را بدون اجازه مطرح نکنید. توصیف، لینک، و یا ابزاری برای دزدی دارایی های معنوی دیگران (نرم افزارها، ویدیوها، فایل صوتی، تصویر) و یا شکستن قوانین دیگر؛ را مطرح نکنید.\nقدرت گرفته از شما\nاین سایت توسط مدیران ما و شما، جمع حرکت میکند. اگر هر سوال دیگری درباره ی نحوه ی عملکرد چیزهای اینجا دارید، یک بحث جدید در دسته بندی فیدبک های سایت شروع کنید و بگذارید تا بحث صورت بگیرد. اگر یک موضوع بحرانی و یا مسئله ی فوری هست که نمیتواند در یک موضوع فیدبک و یا با پرچم مطرح شود، از طریق صفحه ی اعضا با ما تماس بگیرید.\nشرایط سرویس\nبله، قوانین خسته کننده هستند، ولی ما باید از خودمان در برابر گروه های غیردوستانه محافظت کنیم – و همین طور از شما و اطلاعات شما. در شرایط استفاده از سرویسمان که رفتار شما ( و ما) را توصیف میکند و حقوق مربوط به محتوا، حریم خصوصی، و قوانین را توضیح داده ایم. برای استفاده از این سرویس، لازم است شما با رعایت شرایط استفاده از سرویس ما موافقت کرده باشید.\n"
   tos_topic:
     title: "شرایط استفاده از خدمات"
   privacy_topic:
     title: "سیاست حفظ حریم خصوصی"
+  badges:
+    welcome:
+      name: خوش آمدید
   admin_login:
     success: "ایمیل ارسال شد "
     error: "خطا!"
@@ -1298,10 +1120,30 @@ fa_IR:
   performance_report:
     initial_post_raw: این مطلب شامل گزارش عملکرد روزانه سایت شماست.
     initial_topic_title: گزارش عملکرد وب‌سایت
-  date:
-    <<: *datetime_formats
-  time:
-    <<: *datetime_formats
+  tags:
+    title: "برچسب"
+  wizard:
+    step:
+      forum_title:
+        title: "نام"
+      contact:
+        fields:
+          contact_email:
+            label: "ایمیل"
+            placeholder: "name@example.com"
+          contact_url:
+            placeholder: "http://www.example.com/contact-us"
+      homepage:
+        title: "صفحه اصلی"
+        fields:
+          homepage_style:
+            choices:
+              latest:
+                label: "آخرین‌ ارسال‌ها"
+              categories:
+                label: "دسته‌بندی‌ها"
+      emoji:
+        title: "شکلک"
   activemodel:
     errors:
       <<: *errors

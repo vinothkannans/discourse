@@ -57,7 +57,12 @@ class Upload < ActiveRecord::Base
   end
 
   # list of image types that will be cropped
-  CROPPED_IMAGE_TYPES ||= %w{avatar profile_background card_background}
+  CROPPED_IMAGE_TYPES ||= %w{
+    avatar
+    profile_background
+    card_background
+    custom_emoji
+  }
 
   WHITELISTED_SVG_ELEMENTS ||= %w{
     circle
@@ -92,12 +97,17 @@ class Upload < ActiveRecord::Base
   # options
   #   - content_type
   #   - origin (url)
-  #   - image_type ("avatar", "profile_background", "card_background")
+  #   - image_type ("avatar", "profile_background", "card_background", "custom_emoji")
   #   - is_attachment_for_group_message (boolean)
   def self.create_for(user_id, file, filename, filesize, options = {})
+    upload = Upload.new
+
     DistributedMutex.synchronize("upload_#{user_id}_#{filename}") do
       # do some work on images
       if FileHelper.is_image?(filename) && is_actual_image?(file)
+        # retrieve image info
+        w, h = FastImage.size(file) || [0, 0]
+
         if filename[/\.svg$/i]
           # whitelist svg elements
           doc = Nokogiri::XML(file)
@@ -105,13 +115,14 @@ class Upload < ActiveRecord::Base
           File.write(file.path, doc.to_s)
           file.rewind
         else
-          # fix orientation first
-          fix_image_orientation(file.path) if should_optimize?(file.path)
-        end
+          if w * h >= SiteSetting.max_image_megapixels * 1_000_000
+            upload.errors.add(:base, I18n.t("upload.images.larger_than_x_megapixels", max_image_megapixels: SiteSetting.max_image_megapixels))
+            return upload
+          end
 
-        # retrieve image info
-        image_info = FastImage.new(file)
-        w, h = *(image_info.try(:size) || [0, 0])
+          # fix orientation first
+          fix_image_orientation(file.path) if should_optimize?(file.path, [w, h])
+        end
 
         # default size
         width, height = ImageSizer.resize(w, h)
@@ -137,12 +148,19 @@ class Upload < ActiveRecord::Base
             max_width = 590 * max_pixel_ratio
             width, height = ImageSizer.resize(w, h, max_width: max_width, max_height: max_width)
             OptimizedImage.downsize(file.path, file.path, "#{width}x#{height}", filename: filename, allow_animation: allow_animation)
+          when "custom_emoji"
+            OptimizedImage.downsize(file.path, file.path, "100x100", filename: filename, allow_animation: allow_animation)
           end
         end
 
         # optimize image (except GIFs, SVGs and large PNGs)
-        if should_optimize?(file.path)
-          ImageOptim.new.optimize_image!(file.path) rescue nil
+        if should_optimize?(file.path, [w, h])
+          begin
+            ImageOptim.new.optimize_image!(file.path)
+          rescue ImageOptim::Worker::TimeoutExceeded
+            # Don't optimize if it takes too long
+            Rails.logger.warn("ImageOptim timed out while optimizing #{filename}")
+          end
           # update the file size
           filesize = File.size(file.path)
         end
@@ -210,12 +228,13 @@ class Upload < ActiveRecord::Base
 
   LARGE_PNG_SIZE ||= 3.megabytes
 
-  def self.should_optimize?(path)
+  def self.should_optimize?(path, dimensions = nil)
     # don't optimize GIFs or SVGs
     return false if path =~ /\.(gif|svg)$/i
     return true  if path !~ /\.png$/i
-    image_info = FastImage.new(path) rescue nil
-    w, h = *(image_info.try(:size) || [0, 0])
+
+    dimensions ||= (FastImage.size(path) || [0, 0])
+    w, h = dimensions
     # don't optimize large PNGs
     w > 0 && h > 0 && w * h < LARGE_PNG_SIZE
   end
@@ -239,7 +258,7 @@ class Upload < ActiveRecord::Base
   end
 
   def self.fix_image_orientation(path)
-    `convert #{path} -auto-orient #{path}`
+    Discourse::Utils.execute_command('convert', path, '-auto-orient', path)
   end
 
   def self.migrate_to_new_scheme(limit=nil)

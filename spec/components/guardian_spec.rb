@@ -4,9 +4,9 @@ require_dependency 'post_destroyer'
 
 describe Guardian do
 
-  let(:user) { build(:user) }
-  let(:moderator) { build(:moderator) }
-  let(:admin) { build(:admin) }
+  let(:user) { Fabricate(:user) }
+  let(:moderator) { Fabricate(:moderator) }
+  let(:admin) { Fabricate(:admin) }
   let(:trust_level_2) { build(:user, trust_level: 2) }
   let(:trust_level_3) { build(:user, trust_level: 3) }
   let(:trust_level_4)  { build(:user, trust_level: 4) }
@@ -168,14 +168,13 @@ describe Guardian do
     context "enable_private_messages is false" do
       before { SiteSetting.enable_private_messages = false }
 
-      it "returns false if user is not the contact user" do
-        expect(Guardian.new(user).can_send_private_message?(another_user)).to be_falsey
+      it "returns false if user is not staff member" do
+        expect(Guardian.new(trust_level_4).can_send_private_message?(another_user)).to be_falsey
       end
 
-      it "returns true for the contact user and system user" do
-        SiteSetting.site_contact_username = user.username
-        expect(Guardian.new(user).can_send_private_message?(another_user)).to be_truthy
-        expect(Guardian.new(Discourse.system_user).can_send_private_message?(another_user)).to be_truthy
+      it "returns true for staff member" do
+        expect(Guardian.new(moderator).can_send_private_message?(another_user)).to be_truthy
+        expect(Guardian.new(admin).can_send_private_message?(another_user)).to be_truthy
       end
     end
 
@@ -218,6 +217,7 @@ describe Guardian do
   describe 'can_reply_as_new_topic' do
     let(:user) { Fabricate(:user) }
     let(:topic) { Fabricate(:topic) }
+    let(:private_message) { Fabricate(:private_message_topic) }
 
     it "returns false for a non logged in user" do
       expect(Guardian.new(nil).can_reply_as_new_topic?(topic)).to be_falsey
@@ -234,6 +234,10 @@ describe Guardian do
 
     it "returns true for a trusted user" do
       expect(Guardian.new(user).can_reply_as_new_topic?(topic)).to be_truthy
+    end
+
+    it "returns true for a private message" do
+      expect(Guardian.new(user).can_reply_as_new_topic?(private_message)).to be_truthy
     end
   end
 
@@ -273,6 +277,20 @@ describe Guardian do
 
       Rails.configuration.stubs(:developer_emails).returns([admin.email])
       expect(Guardian.new(admin).can_impersonate?(another_admin)).to be_truthy
+    end
+  end
+
+  describe "can_view_action_logs?" do
+    it 'is false for non-staff acting user' do
+      expect(Guardian.new(user).can_view_action_logs?(moderator)).to be_falsey
+    end
+
+    it 'is false without a target user' do
+      expect(Guardian.new(moderator).can_view_action_logs?(nil)).to be_falsey
+    end
+
+    it 'is true when target user is present' do
+      expect(Guardian.new(moderator).can_view_action_logs?(user)).to be_truthy
     end
   end
 
@@ -336,16 +354,6 @@ describe Guardian do
       expect(Guardian.new(moderator).can_invite_to?(topic)).to be_truthy
     end
 
-    it 'returns true when the site requires approving users and is mod' do
-      SiteSetting.expects(:must_approve_users?).returns(true)
-      expect(Guardian.new(moderator).can_invite_to?(topic)).to be_truthy
-    end
-
-    it 'returns false when the site requires approving users and is regular' do
-      SiteSetting.expects(:must_approve_users?).returns(true)
-      expect(Guardian.new(coding_horror).can_invite_to?(topic)).to be_falsey
-    end
-
     it 'returns false for normal user on private topic' do
       expect(Guardian.new(user).can_invite_to?(private_topic)).to be_falsey
     end
@@ -356,6 +364,38 @@ describe Guardian do
 
     it 'returns true for a group owner' do
       expect(Guardian.new(group_owner).can_invite_to?(group_private_topic)).to be_truthy
+    end
+  end
+
+  describe 'can_invite_via_email?' do
+    it 'returns true for all (tl2 and above) users when sso is disabled, local logins are enabled, user approval is not required' do
+      expect(Guardian.new(trust_level_2).can_invite_via_email?(topic)).to be_truthy
+      expect(Guardian.new(moderator).can_invite_via_email?(topic)).to be_truthy
+      expect(Guardian.new(admin).can_invite_via_email?(topic)).to be_truthy
+    end
+
+    it 'returns false for all users when sso is enabled' do
+      SiteSetting.enable_sso = true
+
+      expect(Guardian.new(trust_level_2).can_invite_via_email?(topic)).to be_falsey
+      expect(Guardian.new(moderator).can_invite_via_email?(topic)).to be_falsey
+      expect(Guardian.new(admin).can_invite_via_email?(topic)).to be_falsey
+    end
+
+    it 'returns false for all users when local logins are disabled' do
+      SiteSetting.enable_local_logins = false
+
+      expect(Guardian.new(trust_level_2).can_invite_via_email?(topic)).to be_falsey
+      expect(Guardian.new(moderator).can_invite_via_email?(topic)).to be_falsey
+      expect(Guardian.new(admin).can_invite_via_email?(topic)).to be_falsey
+    end
+
+    it 'returns correct valuse when user approval is required' do
+      SiteSetting.must_approve_users = true
+
+      expect(Guardian.new(trust_level_2).can_invite_via_email?(topic)).to be_falsey
+      expect(Guardian.new(moderator).can_invite_via_email?(topic)).to be_truthy
+      expect(Guardian.new(admin).can_invite_via_email?(topic)).to be_truthy
     end
   end
 
@@ -840,8 +880,30 @@ describe Guardian do
       expect(Guardian.new(user).can_recover_topic?(topic)).to be_falsey
     end
 
-    it "returns true for a moderator" do
-      expect(Guardian.new(moderator).can_recover_topic?(topic)).to be_truthy
+    context 'as a moderator' do
+      before do
+        topic.save!
+        post.save!
+      end
+
+      describe 'when post has been deleted' do
+        it "should return the right value" do
+          expect(Guardian.new(moderator).can_recover_topic?(topic)).to be_falsey
+
+          PostDestroyer.new(moderator, topic.first_post).destroy
+
+          expect(Guardian.new(moderator).can_recover_topic?(topic.reload)).to be_truthy
+        end
+      end
+
+      describe "when post's user has been deleted" do
+        it 'should return the right value' do
+          PostDestroyer.new(moderator, topic.first_post).destroy
+          topic.first_post.user.destroy!
+
+          expect(Guardian.new(moderator).can_recover_topic?(topic.reload)).to be_falsey
+        end
+      end
     end
   end
 
@@ -859,8 +921,32 @@ describe Guardian do
       expect(Guardian.new(user).can_recover_post?(post)).to be_falsey
     end
 
-    it "returns true for a moderator" do
-      expect(Guardian.new(moderator).can_recover_post?(post)).to be_truthy
+    context 'as a moderator' do
+      let(:other_post) { Fabricate(:post, topic: topic, user: topic.user) }
+
+      before do
+        topic.save!
+        post.save!
+      end
+
+      describe 'when post has been deleted' do
+        it "should return the right value" do
+          expect(Guardian.new(moderator).can_recover_post?(post)).to be_falsey
+
+          PostDestroyer.new(moderator, post).destroy
+
+          expect(Guardian.new(moderator).can_recover_post?(post.reload)).to be_truthy
+        end
+
+        describe "when post's user has been deleted" do
+          it 'should return the right value' do
+            PostDestroyer.new(moderator, post).destroy
+            post.user.destroy!
+
+            expect(Guardian.new(moderator).can_recover_post?(post.reload)).to be_falsey
+          end
+        end
+      end
     end
 
   end
@@ -1558,6 +1644,15 @@ describe Guardian do
       user.id = 2
       expect(Guardian.new(admin).can_grant_admin?(user)).to be_truthy
     end
+
+    it 'should not allow an admin to grant admin access to a non real user' do
+      begin
+        Discourse.system_user.update!(admin: false)
+        expect(Guardian.new(admin).can_grant_admin?(Discourse.system_user)).to be(false)
+      ensure
+        Discourse.system_user.update!(admin: true)
+      end
+    end
   end
 
   context 'can_revoke_admin?' do
@@ -1578,6 +1673,10 @@ describe Guardian do
       another_admin.id = 2
 
       expect(Guardian.new(admin).can_revoke_admin?(another_admin)).to be_truthy
+    end
+
+    it "should not allow an admin to revoke a no real user's admin access" do
+      expect(Guardian.new(admin).can_revoke_admin?(Discourse.system_user)).to be(false)
     end
   end
 
@@ -1601,6 +1700,15 @@ describe Guardian do
 
     it "allows an admin to grant a regular user access" do
       expect(Guardian.new(admin).can_grant_moderation?(user)).to be_truthy
+    end
+
+    it "should not allow an admin to grant moderation to a non real user" do
+      begin
+        Discourse.system_user.update!(moderator: false)
+        expect(Guardian.new(admin).can_grant_moderation?(Discourse.system_user)).to be(false)
+      ensure
+        Discourse.system_user.update!(moderator: true)
+      end
     end
   end
 
@@ -1628,6 +1736,10 @@ describe Guardian do
 
     it "does not allow revoke from non moderators" do
       expect(Guardian.new(admin).can_revoke_moderation?(admin)).to be_falsey
+    end
+
+    it "should not allow an admin to revoke moderation from a non real user" do
+      expect(Guardian.new(admin).can_revoke_moderation?(Discourse.system_user)).to be(false)
     end
   end
 

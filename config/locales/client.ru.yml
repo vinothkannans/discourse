@@ -172,10 +172,12 @@ ru:
         enabled: 'Включил в списки %{when}'
         disabled: 'Исключил из списков %{when}'
     topic_admin_menu: "действия администратора над темой"
-    wizard_required: "Пришло время для настройки вашего форума!<a href='%{url}' data-auto-route='true'>Запустить Мастер Установки</a>!"
+    wizard_required: "Добро пожаловать в ваш новый Discourse! Начните с <a href='%{url}' data-auto-route='true'>мастера настройки</a> ✨"
     emails_are_disabled: "Все исходящие письма были глобально отключены администратором. Уведомления любого вида не будут отправляться на почту."
     bootstrap_mode_enabled: "Чтобы облегчить развитие вашего нового сайта в самом начале, был включен режим запуска. В этом режиме, всем новым пользователям будет автоматически присвоен 1й уровень доверия при регистрации и включена ежедневная почтовая рассылка сводки новостей. Режим запуска будет выключен автоматически, как только количество зарегистрированных пользователей достигнет %{min_users}."
     bootstrap_mode_disabled: "Режим запуска будет отключен в течение 24 часов."
+    themes:
+      default_description: "По умолчанию"
     s3:
       regions:
         us_east_1: "US East (N. Virginia)"
@@ -183,6 +185,7 @@ ru:
         us_west_2: "US West (Oregon)"
         us_gov_west_1: "AWS GovCloud (US)"
         eu_west_1: "EU (Ireland)"
+        eu_west_2: "EU (London)"
         eu_central_1: "EU (Frankfurt)"
         ap_southeast_1: "Asia Pacific (Singapore)"
         ap_southeast_2: "Asia Pacific (Sydney)"
@@ -204,7 +207,7 @@ ru:
     admin_title: "Админка"
     flags_title: "Жалобы"
     show_more: "показать дальше"
-    show_help: "Cправка"
+    show_help: "Расширенный поиск"
     links: "Ссылки"
     links_lowercase:
       one: "ссылка"
@@ -253,7 +256,7 @@ ru:
       like_count: "Симпатии"
       topic_count: "Темы"
       post_count: "Сообщения"
-      user_count: "Новые пользователи"
+      user_count: "Пользователей"
       active_user_count: "Активные пользователи"
       contact: "Контакты"
       contact_info: "В случае возникновения критической ошибки или срочного дела, касающегося этого сайта, свяжитесь с нами по адресу %{contact_info}."
@@ -285,7 +288,7 @@ ru:
       few: "{{count}} новые темы."
       many: "{{count}} новых тем."
       other: "{{count}} новых тем."
-    click_to_show: "Показать."
+    click_to_show: "Нажмите чтобы показать."
     preview: "предпросмотр"
     cancel: "отмена"
     save: "Сохранить"
@@ -372,23 +375,64 @@ ru:
         few: "%{count} пользователя"
         many: "%{count} пользователей"
         other: "%{count} пользователей"
+    group_histories:
+      actions:
+        change_group_setting: "Настроить группу"
+        add_user_to_group: "Добавить пользователя"
+        remove_user_from_group: "Удалить пользователя"
+        make_user_group_owner: "Сделать владельцем"
+        remove_user_as_group_owner: "Лишить прав владельца"
     groups:
+      logs:
+        title: "Логи"
+        when: "Когда"
+        action: "Действие"
+        acting_user: "Действующий пользователь"
+        target_user: "Целевой пользователь"
+        subject: "Тема"
+        details: "Подробности"
+        from: "От"
+        to: "Кому"
+      edit:
+        title: 'Редактировать Группу'
+        full_name: 'Полное Имя'
+        add_members: "Добавить Участников"
+        delete_member_confirm: "Удалить '%{username}' из группы '%{group}'?"
+      request_membership_pm:
+        title: "Запрос на Вступление"
+        body: "Я бы хотел вступить в @%{groupName}."
+      name_placeholder: "Название группы, без пробелов, по тем же правилам, что и для псевдонимов."
+      public: "Позволить пользователям свободно вступать/покидать группу (Группа должна быть видимой)"
       empty:
-        posts: "Участники этой группы не отправили ни одного сообщения"
-        members: "В этой группе нет участников"
-        mentions: "Упоминаний этой группы нет"
-        messages: "Для этой группы нет сообщений"
-        topics: "Участниками этой группы не создано ни одной темы"
+        posts: "Участниками этой группы не создано ни одной записи."
+        members: "Нет участников в этой группе."
+        mentions: "Нет ссылок на эту группу."
+        messages: "Нет сообщений для этой группы."
+        topics: "Нет тем от участников этой группы."
+        logs: "Нет логов для этой группы."
       add: "Добавить"
+      join: "Вступить в Группу"
+      leave: "Покинуть Группу"
+      request: "Попроситься в Группу"
+      automatic_group: Автоматическая Группа
+      closed_group: Закрытая Группа
+      is_group_user: "Вы участник этой группы"
+      membership: "Участие"
+      name: "Название"
+      user_count: "Количество Участников"
+      bio: "О Группе"
       selector_placeholder: "Добавить участников"
       owner: "владелец"
       visible: "Группа видима всем пользователям"
-      index: "Группы"
+      index:
+        title: "Группы"
+        empty: "Нет видимых групп."
       title:
         one: "группа"
         few: "группы"
         many: "групп"
         other: "групп"
+      activity: "Деятельность"
       members: "Участники"
       topics: "Темы"
       posts: "Сообщения"
@@ -420,6 +464,15 @@ ru:
         muted:
           title: "Выключено"
           description: "Не уведомлять о новых темах в этой группе."
+      flair_url: "Изображение Аватара"
+      flair_url_placeholder: "(Необязательно) Ссылка на изображение или класс шрифта Font Awesome"
+      flair_bg_color: "Фоновый Цвет Аватара"
+      flair_bg_color_placeholder: "(Необязательно) Hex-код цвета"
+      flair_color: "Цвет Аватара"
+      flair_color_placeholder: "(Необязательно) Hex-код цвета"
+      flair_preview_icon: "Иконка Предпросмотра"
+      flair_preview_image: "Изображение Предпросмотра"
+      flair_note: "Внимание: Флаер будет показываться только основной группе пользователей."
     user_action_groups:
       '1': "Выразил симпатий"
       '2': "Получил симпатий"
@@ -485,6 +538,11 @@ ru:
       profile: "Профиль"
       mute: "Отключить"
       edit: "Настройки"
+      download_archive:
+        button_text: "Скачать мои сообщения"
+        confirm: "Вы уверены, что хотите скачать свои сообщения?"
+        success: "Скачивание началось, вы будете уведомлены, когда процесс завершится."
+        rate_limit_error: "Сообщения могут быть скачаны лишь раз в день, попробуйте завтра."
       new_private_message: "Новое сообщение"
       private_message: "Личное сообщение"
       private_messages: "Личные сообщения"
@@ -508,6 +566,7 @@ ru:
         each_browser_note: "Примечание: эта настройка устанавливается в каждом браузере индивидуально."
       dismiss_notifications: "Отложить все"
       dismiss_notifications_tooltip: "Пометить все непрочитанные уведомления прочитанными"
+      first_notification: "Ваше первое уведомление! Выберите его, чтобы начать."
       disable_jump_reply: "Не переходить к вашему новому сообщению после ответа"
       dynamic_favicon: "Показывать количество новых / обновленных тем на иконке сообщений"
       external_links_in_new_tab: "Открывать все внешние ссылки в новой вкладке"
@@ -515,7 +574,7 @@ ru:
       change: "изменить"
       moderator: "{{user}} - модератор"
       admin: "{{user}} - админ"
-      moderator_tooltip: "{{user}} - модератор"
+      moderator_tooltip: "Этот пользователь модератор"
       admin_tooltip: "{{user}} - админ"
       blocked_tooltip: "Этот пользователь заблокирован"
       suspended_notice: "Пользователь заморожен до {{date}}."
@@ -537,7 +596,7 @@ ru:
       watched_tags: "Наблюдение"
       watched_tags_instructions: "Вы будете автоматически отслеживать все новые темы в этих тэгах. Вам будут приходить уведомления о новых сообщениях и темах, а также количество непрочитанных и новых сообщений будет показано рядом с названиями тем. "
       tracked_tags: "Отслеживаемая"
-      tracked_tags_instructions: "Вы будете автоматически отслеживать новые темы в этих разделах. Рядом со списком тем будет отображено количество непрочитанных и новых сообщений."
+      tracked_tags_instructions: "Вы будете автоматически отслеживать новые темы с этими тегами. Рядом со списком тем будет отображено количество непрочитанных и новых сообщений."
       muted_tags: "Выключено"
       muted_tags_instructions: "Вы не будете получать уведомления о новых темах в этих разделах. Также, они не будут показываться во вкладке Непрочитанное."
       watched_categories: "Наблюдение"
@@ -566,6 +625,7 @@ ru:
       revoke_access: "Лишить прав доступа"
       undo_revoke_access: "Отменить Лишение прав доступа"
       api_approved: "Подтверждено"
+      theme: "Стиль"
       staff_counters:
         flags_given: "полезные жалобы"
         flagged_posts: "сообщения с жалобами"
@@ -589,6 +649,8 @@ ru:
         error: "(ошибка)"
         action: "Отправить письмо для сброса пароля"
         set_password: "Установить пароль"
+        choose_new: "Выберите новый пароль"
+        choose: "Выберите пароль"
       change_about:
         title: "Изменить информацию обо мне"
         error: "При изменении значения произошла ошибка."
@@ -623,10 +685,11 @@ ru:
         instructions: "Картинки фона будут отцентрированы и по-умолчанию имеют ширину 590 пикселей."
       email:
         title: "E-mail"
-        instructions: "Всегда скрыт от публики"
+        instructions: "Не показывать"
         ok: "Мы вышлем вам письмо для подтверждения"
         invalid: "Введите действующий адрес электронной почты"
         authenticated: "Ваш адрес электронной почты подтвержден {{provider}}"
+        frequency_immediately: "Получать уведомления о новых непрочитанных сообщениях незамедлительно."
         frequency:
           one: "Мы отправим вам письмо только в том случае, если вы более {{count}} минуты находитесь оффлайн."
           few: "Мы отправим вам письмо только в том случае, если вы не были онлайн последние {{count}} минуты."
@@ -634,7 +697,7 @@ ru:
           other: "Мы отправим вам письмо только в том случае, если вы не были онлайн последние {{count}} минyт."
       name:
         title: "Имя"
-        instructions: "Ваше полное имя (опционально)"
+        instructions: "ваше полное имя (опционально)"
         instructions_required: "Ваше полное имя"
         too_short: "Ваше имя слишком короткое"
         ok: "Допустимое имя"
@@ -643,13 +706,11 @@ ru:
         instructions: "Уникальный, без пробелов и покороче"
         short_instructions: "Пользователи могут упоминать вас по псевдониму @{{username}}"
         available: "Псевдоним доступен"
-        global_match: "Адрес электронной почты совпадает с зарегистрированным псевдонимом"
-        global_mismatch: "Уже занято. Попробуйте {{suggestion}}?"
         not_available: "Недоступно. Попробуйте {{suggestion}}?"
+        not_available_no_suggestion: "Не доступно"
         too_short: "Псевдоним слишком короткий"
         too_long: "Псевдоним слишком длинный"
         checking: "Проверяю доступность псевдонима..."
-        enter_email: 'Псевдоним найден; введите адрес электронной почты'
         prefilled: "Адрес электронной почты совпадает с зарегистрированным псевдонимом"
       locale:
         title: "Язык интерфейса"
@@ -746,9 +807,12 @@ ru:
         account_age_days: "Дней с момента регистрации"
         create: "Отправить приглашение"
         generate_link: "Скопировать ссылку для приглашений"
+        link_generated: "Пригласительная ссылка успешно создана!"
+        valid_for: "Пригласительная ссылка действительна только для этого адреса электропочты: %{email}"
         bulk_invite:
           text: "Пригласить всех из файла"
           success: "Файл успешно загружен, вы получите сообщение, когда процесс будет завершен."
+          error: "Извините, но файл должен быть в формате CSV."
       password:
         title: "Пароль"
         too_short: "Пароль слишком короткий."
@@ -756,7 +820,7 @@ ru:
         same_as_username: "Ваш пароль такой же, как и ваше имя пользователя."
         same_as_email: "Ваш пароль такой же, как и ваш email."
         ok: "Допустимый пароль."
-        instructions: "Не менее %{count} символов."
+        instructions: "не менее %{count} символов"
       summary:
         title: "Сводка"
         stats: "Статистика"
@@ -860,6 +924,8 @@ ru:
     too_few_topics_notice: "Давайте <a href='http://blog.discourse.org/2014/08/building-a-discourse-community/'>приступим к обсуждению!</a> Сейчас <strong>%{currentTopics} / %{requiredTopics}</strong> тем. Новым пользователям будет интереснее тут, если появится больше тем для обсуждений."
     too_few_posts_notice: "Давайте <a href='http://blog.discourse.org/2014/08/building-a-discourse-community/'>приступим к обсуждению!</a>  Сейчас <strong>%{currentPosts} / %{requiredPosts}</strong> сообщений. Новым пользователям будет интереснее тут, если появится больше сообщений для обсуждения."
     logs_error_rate_notice:
+      reached: "<b>%{relativeAge}</b> – <a href='%{url}' target='_blank'>%{rate}</a> достигнут установленный для сайта предел %{siteSettingRate}."
+      exceeded: "<b>%{relativeAge}</b> – <a href='%{url}' target='_blank'>%{rate}</a> превышен установленный для сайта предел %{siteSettingRate}."
       rate:
         one: "1 ошибка/%{duration}"
         few: "%{count} ошибок/%{duration}"
@@ -915,6 +981,7 @@ ru:
     trust_level: 'Уровень доверия'
     search_hint: 'Псевдоним, e-mail или IP адрес'
     create_account:
+      disclaimer: "Регистрируясь, Вы соглашаетесь с <a href='{{privacy_link}}'>политикой конфиденциальности</a> и <a href='{{tos_link}}'>условиями предоставления услуг</a>."
       title: "Зарегистрироваться"
       failed: "Произошла ошибка. Возможно, этот Email уже используется. Попробуйте восстановить пароль"
     forgot_password:
@@ -934,45 +1001,60 @@ ru:
       password: "Пароль"
       email_placeholder: "E-mail или псевдоним"
       caps_lock_warning: "Caps Lock включен"
-      error: "Непредвиденная ошибка"
-      rate_limit: "Пожалуйста, сделайте перерыв перед очередной попыткой войти."
+      error: "Неизвестная ошибка"
+      rate_limit: "Сделайте перерыв перед очередной попыткой войти."
       blank_username_or_password: "Введите ваш e-mail (или псевдоним) и пароль."
       reset_password: 'Сброс пароля'
       logging_in: "Проверка..."
       or: "или"
       authenticating: "Проверка..."
-      awaiting_confirmation: "Ваша учетная запись требует активации. Для того, чтобы получить активационное письмо повторно, нажмите на Сброс пароля."
-      awaiting_approval: "Ваша учетная запись еще не одобрена. Вы получите письмо, как только это случится."
+      awaiting_activation: "Ваша учетная запись ожидает активации через ссылку из письма. Чтобы повторно выслать активационное письмо, используйте кнопку сброса пароля."
+      awaiting_approval: "Ваша учетная запись еще не одобрена персоналом. Мы вышлем вам письмо, как только это произойдет."
       requires_invite: "К сожалению, доступ к этому форуму только по приглашениям."
-      not_activated: "Прежде, чем вы сможете войти на форум, вам необходимо активировать свою учетную запись. Мы отправили на почту <b>{{sentTo}}</b> подробные инструкции, как это cделать."
+      not_activated: "Прежде, чем вы сможете войти на форум, понадобиться активировать свою учетную запись. Мы отправили на почту <b>{{sentTo}}</b> подробные инструкции, как это cделать."
       not_allowed_from_ip_address: "С этого IP адреса вход запрещен."
-      admin_not_allowed_from_ip_address: "Вы не можете войти в качестве админа с этого IP адреса."
-      resend_activation_email: "Щелкните здесь, чтобы мы повторно выслали вам письмо для активации учетной записи."
+      admin_not_allowed_from_ip_address: "Вы не можете войти в качестве администратора с этого IP адреса."
+      resend_activation_email: "Щелкните здесь, чтобы повторно выслать письмо для активации учетной записи."
+      resend_title: "Заново выслать активационное письмо"
+      change_email: "Изменить электронную почту"
+      provide_new_email: "Укажите новый адрес электронной почты, чтобы задействовать его и заново выслать активационное письмо."
+      submit_new_email: "Обновить электронную почту"
       sent_activation_email_again: "По адресу <b>{{currentEmail}}</b> повторно отправлено письмо с инструкциями по активации вашей учетной записи. Доставка сообщения может занять несколько минут. Имейте в виду, что иногда по ошибке письмо может попасть в папку Спам."
-      to_continue: "Войдите пожалуйста"
-      preferences: "Вам необходимо войти на сайт для редактирования настроек пользователя"
-      forgot: "Я не помню данные моего аккаунта"
+      to_continue: "Пожалуйста, войдите"
+      preferences: "Необходимо войти на сайт для редактирования настроек профиля."
+      forgot: "Я не помню данные моей учетной записи"
+      not_approved: "Ваша учетная запись еще не прошла проверку. После успешной проверки мы отправим вам письмо с уведомлением, и вы сможете входить в свою учетную запись."
       google:
-        title: "С помощью Google"
+        title: "Через Google"
         message: "Вход с помощью учетной записи Google (убедитесь, что блокировщик всплывающих окон отключен)"
       google_oauth2:
-        title: "С помощью Google"
+        title: "Через Google"
         message: "Вход с помощью учетной записи Google (убедитесь, что блокировщик всплывающих окон отключен)"
       twitter:
-        title: "С помощью Twitter"
+        title: "Через Twitter"
         message: "Вход с помощью учетной записи Twitter (убедитесь, что блокировщик всплывающих окон отключен)"
       instagram:
-        title: "через Instagram"
+        title: "Через Instagram"
         message: "Вход с помощью учетной записи Instagram (убедитесь, что блокировщик всплывающих окон отключен)"
       facebook:
-        title: "С помощью Facebook"
+        title: "Через Facebook"
         message: "Вход с помощью учетной записи Facebook (всплывающие окна должны быть разрешены)"
       yahoo:
-        title: "С помощью Yahoo"
+        title: "Через Yahoo"
         message: "Вход с помощью учетной записи Yahoo (убедитесь, что блокировщик всплывающих окон отключен)"
       github:
-        title: "С помощью GitHub"
+        title: "Через GitHub"
         message: "Вход с помощью учетной записи GitHub (убедитесь, что блокировщик всплывающих окон отключен)"
+    invites:
+      accept_title: "Приглашение"
+      welcome_to: "Добро пожаловать на %{site_name}!"
+      invited_by: "Вы были приглашены:"
+      your_email: "Ваш электронный адрес аккаунта <b>%{email}</b>."
+      accept_invite: "Принять приглашение"
+      success: "Ваш аккаунт создан и вы можете теперь войти."
+      password_label: "Установить пароль (опционально)"
+    password_reset:
+      continue: "Далее на %{site_name}"
     emoji_set:
       apple_international: "Apple/International"
       google: "Google"
@@ -1007,6 +1089,9 @@ ru:
         few: "Упоминая группу {{group}}, вы тем самым отправите уведомление <a href='{{group_link}}'>{{count}} пользователям</a> – вы уверены?"
         many: "Упоминая группу {{group}}, вы тем самым отправите уведомление <a href='{{group_link}}'>{{count}} пользователям</a> – вы уверены?"
         other: "Упоминая группу {{group}}, вы тем самым отправите уведомление <a href='{{group_link}}'>{{count}} пользователям</a> – вы уверены?"
+      cannot_see_mention:
+        category: "Вы упомянули {{username}}, но они не будут уведомлены, потому что у них нет доступа к этому разделу. Вам нужно добавить их в группу, имеющую доступ к этому разделу."
+        private: "Вы упомянули {{username}}, но они не будут уведомлены, потому что они не могут видеть это личное сообщение. Вам нужно пригласить их в это ЛС."
       duplicate_link: "Эту же самую ссылку на <b>{{domain}}</b> уже писал <b>@{{username}}</b> в <a href='{{post_url}}'>своем ответе {{ago}}</a> – вы уверены, что хотите повторить ссылку снова?"
       error:
         title_missing: "Требуется название темы"
@@ -1026,8 +1111,10 @@ ru:
       title: "Или нажмите Ctrl+Enter"
       users_placeholder: "Добавить пользователя"
       title_placeholder: "Название: суть темы коротким предложением"
+      title_or_link_placeholder: "Введите название или вставьте здесь ссылку"
       edit_reason_placeholder: "Причина редактирования..."
       show_edit_reason: "(добавить причину редактирования)"
+      topic_featured_link_placeholder: "Введите ссылку, отображаемую с названием."
       reply_placeholder: "Поддерживаемые форматы: Markdown, BBCode и HTML. Чтобы вставить картинку, перетащите ее сюда или вставьте с помощью Ctrl+V, Command-V, или нажмите правой кнопкой мыши и выберите меню \"вставить\"."
       view_new_post: "Посмотреть созданное вами сообщение."
       saving: "Сохранение..."
@@ -1071,15 +1158,6 @@ ru:
         title: "Забыли указать получателей?"
         body: "В списке получателей сейчас только вы сами!"
       admin_options_title: "Дополнительные настройки темы для персонала"
-      auto_close:
-        label: "Закрыть тему через:"
-        error: "Пожалуйста, введите корректное значение."
-        based_on_last_post: "Не закрывать, пока не пройдет хотя бы такой промежуток времени с момента последнего сообщения в этой теме."
-        all:
-          examples: 'Введите количество часов (напр., 24), время (напр., 17:30) или дату и время (2013-11-22 14:00).'
-        limited:
-          units: "(кол-во часов)"
-          examples: 'Введите количество часов (24).'
     notifications:
       title: "уведомления об упоминании @псевдонима, ответах на ваши посты и темы, сообщения и т.д."
       none: "Уведомления не могут быть загружены."
@@ -1087,10 +1165,13 @@ ru:
       more: "посмотреть более ранние уведомления"
       total_flagged: "всего сообщений с жалобами"
       mentioned: "<i title='mentioned' class='fa fa-at'></i><p><span>{{username}}</span> {{description}}</p>"
+      group_mentioned: "<i title='group mentioned' class='fa fa-at'></i><p><span>{{username}}</span> {{description}}</p>"
       quoted: "<i title='quoted' class='fa fa-quote-right'></i><p><span>{{username}}</span> {{description}}</p>"
       replied: "<i title='replied' class='fa fa-reply'></i><p><span>{{username}}</span> {{description}}</p>"
+      posted: "<i title='posted' class='fa fa-reply'></i><p><span>{{username}}</span> {{description}}</p>"
       edited: "<i title='edited' class='fa fa-pencil'></i><p><span>{{username}}</span> {{description}}</p>"
       liked: "<i title='liked' class='fa fa-heart'></i><p><span>{{username}}</span> {{description}}</p>"
+      liked_2: "<i title='liked' class='fa fa-heart'></i><p><span>{{username}}, {{username2}}</span> {{description}}</p>"
       liked_many:
         one: "<i title='liked' class='fa fa-heart'></i><p><span>{{username}}, {{username2}} и ещё {{count}}</span> {{description}}</p>"
         few: "<i title='liked' class='fa fa-heart'></i><p><span>{{username}}, {{username2}} и ещё {{count}}</span> {{description}}</p>"
@@ -1101,7 +1182,14 @@ ru:
       invited_to_topic: "<i title='приглашен в тему' class='fa fa-hand-o-right'></i><p><span>{{username}}</span> {{description}}</p>"
       invitee_accepted: "<i title='accepted your invitation' class='fa fa-user'></i><p><span>{{username}}</span> принял(а) ваше приглашение</p>"
       moved_post: "<i title='moved post' class='fa fa-sign-out'></i><p><span>{{username}}</span> переместил(а) {{description}}</p>"
+      linked: "<i title='linked post' class='fa fa-link'></i><p><span>{{username}}</span> {{description}}</p>"
       granted_badge: "<i title='badge granted' class='fa fa-certificate'></i><p>Вы награждены: {{description}}</p>"
+      watching_first_post: "<i title='new topic' class='fa fa-dot-circle-o'></i><p><span>Новая Тема</span> {{description}}</p>"
+      group_message_summary:
+        one: "<i title='messages in group inbox' class='fa fa-group'></i><p> {{count}} входящее сообщение в Вашей группе {{group_name}}</p>"
+        few: "<i title='messages in group inbox' class='fa fa-group'></i><p> {{count}} входящих сообщения в Вашей группе {{group_name}}</p>"
+        many: "<i title='messages in group inbox' class='fa fa-group'></i><p> {{count}} входящих сообщений в Вашей группе {{group_name}}</p>"
+        other: "<i title='messages in group inbox' class='fa fa-group'></i><p> {{count}} входящих сообщений в Вашей группе {{group_name}}</p>"
       alt:
         mentioned: "Упомянуто"
         quoted: "Процитировано пользователем"
@@ -1116,6 +1204,7 @@ ru:
         moved_post: "Ваша тема перенесена участником "
         linked: "Ссылка на ваше сообщение"
         granted_badge: "Награда получена от"
+        group_message_summary: "Входящие сообщения группы"
       popup:
         mentioned: '{{username}} упомянул вас в "{{topic}}" - {{site_title}}'
         group_mentioned: '{{username}} упомянул вас в "{{topic}}" - {{site_title}}'
@@ -1126,7 +1215,7 @@ ru:
         linked: '{{username}} ссылается на ваш пост в теме: "{{topic}}" - {{site_title}}'
     upload_selector:
       title: "Add an image"
-      title_with_attachments: "Add an image or a file"
+      title_with_attachments: "Добавить изображение или файл"
       from_my_computer: "С моего устройства"
       from_the_web: "С интернета"
       remote_tip: "ссылка на изображение"
@@ -1185,6 +1274,8 @@ ru:
           first: Только первые сообщения в темах
           pinned: Закреплены
           unpinned: Не закреплены
+          seen: Отметить прочитанным
+          unseen: Отметить непрочитанным
           wiki: Являются вики
         statuses:
           label: Характеристика темы
@@ -1209,31 +1300,33 @@ ru:
       new_messages_marker: "последний визит"
       bulk:
         select_all: "Выбрать все"
-        clear_all: "Очистить все"
-        unlist_topics: "Исключить из списков"
+        clear_all: "Отменить выбор"
+        unlist_topics: "Исключить из всех списков тем"
         reset_read: "Сбросить прочтённые"
         delete: "Удалить темы"
-        dismiss: "OK"
+        dismiss: "Отложить"
         dismiss_read: "Отклонить все непрочитанные"
         dismiss_button: "Отложить..."
         dismiss_tooltip: "Отложить новые сообщения или перестать следить за этими темами"
         also_dismiss_topics: "Перестать следить за этими темами, чтобы они никогда больше не высвечивались как непрочитанные"
         dismiss_new: "Отложить новые"
         toggle: "Вкл./выкл. выбор нескольких тем"
-        actions: "Массовое действие"
+        actions: "Массовые действия"
         change_category: "Изменить раздел"
         close_topics: "Закрыть темы"
         archive_topics: "Архивировать темы"
-        notification_level: "Изменить уровень оповещения"
-        choose_new_category: "Выберите новый раздел для тем:"
+        notification_level: "Изменить настройки уведомлений"
+        choose_new_category: "Выберите новый раздел для этих тем:"
         selected:
           one: "Вы выбрали <b>{{count}}</b> тему."
           few: "Вы выбрали <b>{{count}}</b> темы."
           many: "Вы выбрали <b>{{count}}</b> тем."
           other: "Вы выбрали <b>{{count}}</b> тем."
-        change_tags: "Изменить тэги"
-        choose_new_tags: "Выбрать новые тэги для выбранных тем:"
-        changed_tags: "Теги этой темы были изменены."
+        change_tags: "Заменить теги"
+        append_tags: "Добавить теги"
+        choose_new_tags: "Выберите новые тэги для этих тем:"
+        choose_append_tags: "Выберите теги для добавления к этим темам:"
+        changed_tags: "Теги этих тем изменены."
       none:
         unread: "У вас нет непрочитанных тем."
         new: "У вас нет новых тем."
@@ -1261,12 +1354,13 @@ ru:
         search: "Больше ничего не найдено."
     topic:
       unsubscribe:
+        stop_notifications: "Вы будете получать меньше уведомлений для <strong>{{title}}</strong>"
         change_notification_state: "Ваше текущее состояние уведомлений"
       filter_to:
         one: "1 сообщение в теме"
-        few: "{{post_count}} сообщений в теме"
-        many: "{{post_count}} сообщений в теме"
-        other: "{{post_count}} сообщений в теме"
+        few: "{{count}} сообщения в теме"
+        many: "{{count}} сообщений в теме"
+        other: "{{count}} сообщений в теме"
       create: 'Создать Тему'
       create_long: 'Создать новую тему'
       private_message: 'Новое личное соощение'
@@ -1333,11 +1427,12 @@ ru:
       jump_reply_up: перейти к более ранним ответам
       jump_reply_down: перейти к более поздним ответам
       deleted: "Тема удалена"
-      auto_close_notice: "Тема будет автоматически закрыта через %{timeLeft}."
-      auto_close_notice_based_on_last_post: "Эта тема будет закрыта через %{duration} после последнего ответа."
       auto_close_title: 'Настройки закрытия темы'
-      auto_close_save: "Сохранить"
-      auto_close_remove: "Не закрывать тему автоматически"
+      auto_close_immediate:
+        one: "Последнее сообщение в этой теме отправлено 1 час назад, поэтому данная тема будет закрыта незамедлительно."
+        few: "Последнее сообщение в этой теме отправлено %{count} часа назад, поэтому данная тема будет закрыта незамедлительно."
+        many: "Последнее сообщение в этой теме отправлено %{count} часов назад, поэтому данная тема будет закрыта незамедлительно."
+        other: "Последнее сообщение в этой теме отправлено %{count} часов назад, поэтому данная тема будет закрыта незамедлительно."
       timeline:
         back: "Вернуться"
         back_description: "Перейти к последнему непрочитанному сообщению"
@@ -1348,7 +1443,8 @@ ru:
         go_bottom: "перейти вниз"
         go: "=>"
         jump_bottom: "перейти к последнему сообщению"
-        jump_prompt: "перейти к сообщению"
+        jump_prompt: "перейти к..."
+        jump_prompt_of: "из %{count} сообщений"
         jump_prompt_long: "К какому сообщению вы хотите перейти?"
         jump_bottom_with_number: "перейти к сообщению %{post_number}"
         total: всего сообщений
@@ -1356,6 +1452,7 @@ ru:
       notifications:
         title: изменить частоту уведомлений об этой теме
         reasons:
+          mailing_list_mode: "Вы включили режим почтовой рассылки, поэтому Вы будете получать уведомления об ответах в этой теме через e-mail."
           '3_10': 'Вы будете получать уведомления, т.к. наблюдаете за тэгом этой темы.'
           '3_6': 'Вы будете получать уведомления, т.к. наблюдаете за этим разделом.'
           '3_5': 'Вы будете получать уведомления, т.к. наблюдение темы началось автоматически.'
@@ -1365,7 +1462,6 @@ ru:
           '2_8': 'Вы будете получать уведомления, т.к. следите за этим разделом.'
           '2_4': 'Вы будете получать уведомления, т.к. ответили в теме.'
           '2_2': 'Вы будете получать уведомления, т.к. следите за этой темой.'
-          '2': 'Вы будете получать уведомления, т.к. <a href="/users/{{username}}/preferences">читали эту тему</a>.'
           '1_2': 'Вы будете получать уведомления, если кто-то упомянет ваш @псевдоним или ответит вам.'
           '1': 'Вы будете получать уведомления, если кто-то упомянет ваш @псевдоним или ответит вам.'
           '0_7': 'Не получать уведомлений из этого раздела.'
@@ -1401,7 +1497,6 @@ ru:
         open: "Открыть тему"
         close: "Закрыть тему"
         multi_select: "Выбрать сообщения..."
-        auto_close: "Автоматическое закрытие..."
         pin: "Закрепить тему..."
         unpin: "Открепить тему..."
         unarchive: "Разархивировать тему"
@@ -1419,7 +1514,7 @@ ru:
         remove_banner: "Удалить объявление"
       reply:
         title: 'Ответить'
-        help: 'ответить в теме'
+        help: 'начать составление ответа к этой теме'
       clear_pin:
         title: "Открепить"
         help: "Открепить тему, чтобы она более не показывалась в самом начале списка тем"
@@ -1471,6 +1566,7 @@ ru:
         email_or_username_placeholder: "e-mail или псевдоним"
         action: "Пригласить"
         success: "Мы пригласили этого пользователя принять участие в беседе."
+        success_group: "Мы пригласили эту группу принять участие в беседе."
         error: "К сожалению, в процессе приглашения пользователя произошла ошибка."
         group_name: "название группы"
       controls: "Управление темой"
@@ -1558,8 +1654,10 @@ ru:
       edit: "Изменить {{link}} {{replyAvatar}} {{username}}"
       edit_reason: "Причина:"
       post_number: "сообщение {{number}}"
+      wiki_last_edited_on: "вики редактировалось"
       last_edited_on: "последний раз сообщение редактировалось"
       reply_as_new_topic: "Ответить в новой связанной теме"
+      reply_as_new_private_message: "Ответить новым сообщением тем же адресатам"
       continue_discussion: "Продолжить обсуждение из {{postLink}}:"
       follow_quote: "перейти к цитируемому сообщению"
       show_full: "Показать полный текст"
@@ -1601,6 +1699,7 @@ ru:
         create: "К сожалению, не удалось создать сообщение из-за ошибки. Попробуйте еще раз."
         edit: "К сожалению, не удалось изменить сообщение. Попробуйте еще раз."
         upload: "К сожалению, не удалось загрузить файл. Попробуйте еще раз."
+        file_too_large: "К сожалению, этот файл слишком большой (максимально допустимый размер {{max_size_kb}} КБ). Почему бы не загрузить Ваш большой файл в службу облачного обмена, а затем поделиться ссылкой?"
         too_many_uploads: "К сожалению, за один раз можно загрузить только одно изображение."
         too_many_dragged_and_dropped_files: "К сожалению, за один раз можно загрузить только 10 файлов."
         upload_not_authorized: "К сожалению, вы не можете загрузить файл данного типа (список разрешенных типов файлов: {{authorized_extensions}})."
@@ -1612,11 +1711,13 @@ ru:
         no_value: "Нет, оставить"
         yes_value: "Да, отказаться"
       via_email: "это сообщение пришло с почты"
+      via_auto_generated_email: "это сообщение пришло с автосгенерированого e-mail"
       whisper: "Это внутреннее сообщение, т.е. оно видно только модераторам"
       wiki:
         about: "это вики-сообщение"
       archetypes:
         save: 'Параметры сохранения'
+      few_likes_left: "Спасибо, что делитесь любовью. На сегодня у Вас осталось несколько лайков."
       controls:
         reply: "начать составление ответа на сообщение"
         like: "мне нравится"
@@ -1778,17 +1879,30 @@ ru:
           hide: "Скрыть редакцию"
           show: "Показать редакцию"
           revert: "Откат до этой версии"
+          edit_wiki: "Редактировать Wiki"
+          edit_post: "Редактировать запись"
           comparing_previous_to_current_out_of_total: "<strong>{{previous}}</strong> <i class='fa fa-arrows-h'></i> <strong>{{current}}</strong> / {{total}}"
         displays:
           inline:
             title: "Отобразить сообщение с включенными добавлениями и удалениями."
-            button: '<i class="fa fa-square-o"></i> HTML'
+            button: 'HTML'
           side_by_side:
             title: "Отобразить сообщение с построчными изменениями"
-            button: '<i class="fa fa-columns"></i> HTML'
+            button: 'HTML'
           side_by_side_markdown:
             title: "Показать отличия редакций бок о бок"
-            button: '<i class="fa fa-columns"></i> Исходный текст'
+            button: 'Необработанный'
+      raw_email:
+        displays:
+          raw:
+            title: "Показать исходное письмо"
+            button: 'Исходник'
+          text_part:
+            title: "Показать текстовую версию письма"
+            button: 'Текст'
+          html_part:
+            title: "Показать HTML версию письма"
+            button: 'HTML'
     category:
       can: 'может&hellip; '
       none: '(вне раздела)'
@@ -1805,6 +1919,7 @@ ru:
       tags_allowed_tag_groups: "Группы тегов, которые могут быть использованы только в этом разделе:"
       tags_placeholder: "(Необязательно) список доступных тегов"
       tag_groups_placeholder: "(Необязательно) список доступных групп тегов"
+      topic_featured_link_allowed: "Разрешить популярные ссылки в этой категории"
       delete: 'Удалить раздел'
       create: 'Создать Раздел'
       create_long: 'Создать новый раздел'
@@ -1839,7 +1954,8 @@ ru:
       email_in_disabled: "Создание новых тем через электронную почту отключено в настройках сайта. Чтобы разрешить создание новых тем через электронную почту,"
       email_in_disabled_click: 'активируйте настройку "email in".'
       suppress_from_homepage: "Не отображать этот раздел на главной странице."
-      sort_order: "Порядок сортировки:"
+      num_featured_topics: "Количество тем на странице разделов"
+      all_topics_wiki: "Создавать новые темы в вики-формате по умолчанию."
       allow_badges_label: "Разрешить вручение наград в этом разделе"
       edit_permissions: "Изменить права доступа"
       add_permission: "Добавить права"
@@ -1884,6 +2000,7 @@ ru:
       notify_action: 'Сообщение'
       official_warning: 'Официальное предупреждение'
       delete_spammer: "Удалить спамера"
+      delete_confirm_MF: "Вы собираетесь удалить {POSTS, plural, one {<b>1</b> сообщение} other {<b>#</b> сообщений}} и {TOPICS, plural, one {<b>1</b> тему} other {<b>#</b> темы}} этого пользователя, а так же удалить его учетную запись, добавить его IP адрес  <b>{ip_address}</b> и его почтовый адрес <b>{email}</b> в черный список. Вы действительно уверены, что ваши помыслы чисты и действия не продиктованы гневом?"
       yes_delete_spammer: "Да, удалить спамера"
       ip_address_missing: "(не доступно)"
       hidden_email_address: "(скрыто)"
@@ -1929,6 +2046,11 @@ ru:
         other: "%{count} кликов"
     post_links:
       about: "gjrfpf"
+      title:
+        one: "ещё 1"
+        few: "ещё %{count}"
+        many: "ещё %{count}"
+        other: "ещё %{count}"
     topic_statuses:
       warning:
         help: "Это официальное предупреждение."
@@ -1966,7 +2088,11 @@ ru:
       few: "просмотра"
       other: "просмотров"
     replies: "Ответов"
-    views_long: "тема просмотрена {{number}} раз"
+    views_long:
+      one: "тема просмотрена 1 раз"
+      few: "тема просмотрена {{number}} раза"
+      many: "тема просмотрена {{number}} раз"
+      other: "тема просмотрена {{number}} раз"
     activity: "Активность"
     likes: "Нрав."
     likes_lowercase:
@@ -1983,7 +2109,7 @@ ru:
     history: "История"
     changed_by: "автором {{author}}"
     raw_email:
-      title: "Исходное письмо"
+      title: "Входящее сообщение"
       not_available: "Не доступно!"
     categories_list: "Список разделов"
     filters:
@@ -2133,9 +2259,16 @@ ru:
         mark_watching: '<b>m</b>, <b>w</b> Наблюдать за темой'
         print: '<b>ctrl</b>+<b>p</b> Печатать тему'
     badges:
+      earned_n_times:
+        one: "Заработал эту награду 1 раз"
+        few: "Заработали эту награду %{count} раз"
+        many: "Заработали эту награду %{count} раз"
+        other: "Заработали эту награду %{count} раз"
       granted_on: "Выдана %{date}"
       others_count: "Другие с этой наградой (%{count})"
       title: Награды
+      allow_title: "доступный заголовок"
+      multiple_grant: "награждён множество раз"
       badge_count:
         one: "1 награда"
         few: "%{count} наград"
@@ -2146,6 +2279,12 @@ ru:
         few: "+ еще %{count}"
         many: "+ еще %{count}"
         other: "+ еще %{count}"
+      granted:
+        one: "выдано 1"
+        few: "выдано %{count}"
+        many: "выдано %{count}"
+        other: "выдано %{count}"
+      select_badge_for_title: Использовать награду в качестве Вашего титула
       none: "<отсутствует>"
       badge_grouping:
         getting_started:
@@ -2156,6 +2295,8 @@ ru:
           name: Уровень доверия
         other:
           name: Прочее
+        posting:
+          name: Публикации
     google_search: |
       <h3>Искать с помощью Google</h3>
       <p>
@@ -2242,6 +2383,8 @@ ru:
       custom_message_placeholder: "Напишите сюда ваше личное сообщение"
       custom_message_template_forum: "Привет. Подумал, что тебе будет интересно зарегистрироваться на этом форуме!"
       custom_message_template_topic: "Привет! Подумал, что тебя может заинтересовать эта тема!"
+    safe_mode:
+      enabled: "Включен безопасный режим, чтобы выйти из безопасного режима, закройте текущее окно браузера"
   admin_js:
     type_to_filter: "Введите текст для фильтрации..."
     admin:
@@ -2276,8 +2419,8 @@ ru:
         backups: "Резервные копии"
         traffic_short: "Трафик"
         traffic: "Трафик (веб-запросы)"
-        page_views: "Запросы API"
-        page_views_short: "Запросы API"
+        page_views: "Просмотров Страниц"
+        page_views_short: "Просмотров"
         show_traffic_report: "Раширенный отчет по трафику"
         reports:
           today: "Сегодня"
@@ -2382,7 +2525,6 @@ ru:
         delete: "Удалить"
         delete_confirm: "Удалить эту группу?"
         delete_failed: "Невозможно удалить группу. Если группа была создана автоматически, то она не может быть удалена."
-        delete_member_confirm: "Удалить пользователя '%{username}' из группы '%{group}'?"
         delete_owner_confirm: "Отозвать права владельца у пользователя '%{username}'?"
         add: "Добавить"
         add_members: "Добавить участников"
@@ -2400,6 +2542,8 @@ ru:
         add_owners: Добавить владельцев
         incoming_email: "Специальный входящий адрес e-mail"
         incoming_email_placeholder: "введите e-mail"
+        none_selected: "Чтобы начать, выберите группу!"
+        no_custom_groups: "Создать новую кастомную группу"
       api:
         generate_master: "Сгенерировать ключ API"
         none: "Отсутствует ключ API."
@@ -2416,6 +2560,7 @@ ru:
         note_html: "Никому <strong>не сообщайте</strong> этот ключ. Тот, у кого он есть, сможет создавать сообщения, выдавая себя за любого пользователя форума."
       web_hooks:
         title: "Webhooks"
+        none: "Сейчас нет веб-перехватчиков."
         instruction: "Webhooks позволяют Discourse уведомлять внешние службы, когда определенное событие происходит на вашем сайте. При срабатывании webhook, на соответствующий URL будет отправлен POST-запрос."
         detailed_instruction: "При наступлении выбранного события, на соответствующий URL будет отправлен POST-запрос."
         new: "Добавить Webhook"
@@ -2423,10 +2568,27 @@ ru:
         save: "Сохранить"
         destroy: "Удалить"
         description: "Описание"
+        controls: "Управление"
         go_back: "Вернуться к списку"
+        payload_url: "Ссылка для отправки"
         payload_url_placeholder: "https://example.com/postreceive"
-        secret_placeholder: "Необязательная строка, используется для генерации подписи"
+        warn_local_payload_url: "По-видимому вы пытаетесь настроить веб-перехватчик на локальный URL. Собитие, отправляемое на локальный адрес может иметь побочное действие или неожиданное поведение. Продолжить?"
+        secret_invalid: "Ключ не должен содержать пустых символов."
+        secret_too_short: "Ключ должен быть не менее 12 символов."
+        secret_placeholder: "Допольнительная строка, используется для создания подписи"
         event_type_missing: "Вам необходимо настроить по крайней мере один тип событий."
+        content_type: "Тип Содержимого"
+        secret: "Ключ"
+        event_chooser: "Какие события должны вызывать веб-перехватчик?"
+        wildcard_event: "Присылать мне всё."
+        individual_event: "Выбрать отдельные события."
+        verify_certificate: "Проверять TLS сертификат ссылки для отправки данных"
+        active: "Активный"
+        active_notice: "Мы будем отправлять подробности события, когда оно будет происходить."
+        categories_filter_instructions: "Подходящие веб-перехватчики будут срабатывать только если событие связано с указанными разделами. Оставьте пустым, чтобы веб-перехватчик срабатывал для всех разделов."
+        categories_filter: "Только Для Этих Разделов"
+        groups_filter_instructions: "Подходящие веб-перехватчики будут срабатывать только если событие связано с указанными группами. Оставьте пустым, чтобы веб-перехватчик срабатывал для всех групп."
+        groups_filter: "Только Для Групп"
         delete_confirm: "Удалить Webhook?"
         topic_event:
           name: "Событие темы"
@@ -2436,7 +2598,7 @@ ru:
           details: "Происходит, когда сообщение создается, редактируется, удаляется или восстанавливается."
         user_event:
           name: "Событие пользователя"
-          details: "Происходит, когда создается или подтверждается пользователь."
+          details: "Когда пользователь создаётся, утверждается или обновляется."
         delivery_status:
           title: "Статус передачи"
           inactive: "Неактивна"
@@ -2445,16 +2607,30 @@ ru:
         events:
           none: "Нет связанных событий."
           redeliver: "Возврат"
+          incoming:
+            one: "Есть новое событие."
+            few: "{{count}} новых события."
+            many: "{{count}} новых событий."
+            other: "{{count}} новых событий."
+          completed_in:
+            one: "Завершится через 1 секунду."
+            few: "Завершится через {{count}} секунд."
+            many: "Завершится через {{count}} секунд."
+            other: "Завершится через {{count}} секунд."
           request: "Запрос"
           response: "Ответ"
+          redeliver_confirm: "Вы уверены, что хотите повторно отправить теже самые данные?"
           headers: "Заголовки"
+          payload: "Данные для отправки"
           body: "Тело"
           go_list: "Перейти к списку"
           go_details: "Редактировать webhook"
           go_events: "Перейти к событию"
           ping: "Ping"
+          status: "Код Состояния"
           event_id: "Идентификатор (ID)"
           timestamp: "Создано"
+          completion: "Время Завершения"
           actions: "Действия"
       plugins:
         title: "Плагины"
@@ -2507,7 +2683,8 @@ ru:
             without_uploads: "Да (исключить файлы)"
           download:
             label: "Скачать"
-            title: "Скачать резервную копию"
+            title: "Послать письмо со ссылкой для скачивания"
+            alert: "Вам была отправлена ссылка для скачивания бэкапа."
           destroy:
             title: "Удалить резервную копию"
             confirm: "Вы уверены, что хотите уничтожить резервную копию?"
@@ -2538,32 +2715,14 @@ ru:
       customize:
         title: "Оформление"
         long_title: "Стили и заголовки"
-        css: "CSS"
-        header: "Заголовок"
-        top: "Топ"
-        footer: "нижний колонтитул"
-        embedded_css: "Встроенные CSS"
-        head_tag:
-          text: "</head>"
-          title: "HTML код, который будет добавлен перед тегом </head>."
-        body_tag:
-          text: "</body>"
-          title: "HTML код, который будет добавлен перед тегом </body>."
-        override_default: "Не использовать стандартную таблицу стилей"
-        enabled: "Разрешить?"
         preview: "как будет"
-        undo_preview: "удалить предпросмотр"
-        rescue_preview: "стиль по умолчанию"
-        explain_preview: "Посмотреть сайт с этой таблицей стилей"
-        explain_undo_preview: "Вернуться к текущей таблице стилей"
-        explain_rescue_preview: "Посмотреть сайт со стандартной таблицей стилей"
+        explain_preview: "Предпросмотр сайта с активированным стилем"
         save: "Сохранить"
         new: "Новое"
         new_style: "Новый стиль"
         import: "Импорт"
-        import_title: "Выберите файл или вставьте текст"
         delete: "Удалить"
-        delete_confirm: "Удалить настройки?"
+        delete_confirm: "Удалить этот стиль?"
         about: "Измените CSS стили и HTML заголовки на сайте. Чтобы начать, внесите правки."
         color: "Цвет"
         opacity: "Прозрачность"
@@ -2571,16 +2730,75 @@ ru:
         email_templates:
           title: "Шаблоны писем"
           subject: "Тема"
+          multiple_subjects: "Этот шаблон электронной почты имеет множество тем."
           body: "Текст сообщения"
           none_selected: "Выберите шаблон письма, чтобы начать редактирование."
           revert: "Отменить изменения"
-        css_html:
-          title: "CSS/HTML"
-          long_title: "Настройка CSS и HTML"
+          revert_confirm: "Вы уверены, что хотите отменить Ваши изменения?"
+        theme:
+          import_theme: "Импортировать стиль"
+          customize_desc: "Настроить:"
+          title: "Стили"
+          long_title: "Стилизация сайта: цвета, CSS и HTML"
+          edit: "Редактировать"
+          edit_confirm: "Это импортированный стиль. Изменения CSS/HTML потеряются после очередного обновления стиля."
+          common: "Общее"
+          desktop: "Настольный"
+          mobile: "Мобильный"
+          preview: "Предпросмотр"
+          is_default: "Активировать по умолчанию"
+          user_selectable: "Пользователи могут выбирать стиль"
+          color_scheme: "Цветовая схема"
+          color_scheme_select: "Выберите цвета для стиля"
+          custom_sections: "Настройка секций:"
+          included_themes: "Включенные стили"
+          child_themes_check: "Стиль включает дочерние стили"
+          css_html: "Настройка CSS/HTML"
+          edit_css_html: "Редактировать CSS/HTML"
+          edit_css_html_help: "Вы не внесли никаких изменений в CSS или HTML"
+          import_web_tip: "Репозиторий стиля"
+          import_file_tip: "файл стиля .dcstyle.json"
+          about_theme: "О стиле"
+          license: "Лицензия"
+          update_to_latest: "Обновить"
+          check_for_updates: "Проверить обновления"
+          updating: "Обновляю..."
+          up_to_date: "Стиль текущей версии, последняя проверка:"
+          add: "Добавить"
+          commits_behind:
+            one: "Есть 1 обновление стиля!"
+            few: "Есть {{count}} обновления стиля!"
+            many: "Есть {{count}} обновлений стиля!"
+            other: "Есть {{count}} обновлений стиля!"
+          scss:
+            text: "CSS"
+            title: "Введите CSS; допускаются все стили CSS и SCSS"
+          header:
+            text: "Шапка"
+            title: "Введите HTML для размещения над шапкой сайта"
+          after_header:
+            text: "Под шапкой"
+            title: "Введите HTML для размещения на всех страницах под шапкой"
+          footer:
+            text: "Подвал"
+            title: "Введите HTML для отображения в подвале сайта (внизу)"
+          embedded_scss:
+            text: "Встроенный CSS"
+            title: "Введите CSS для встраивания комментариев"
+          head_tag:
+            text: "</head>"
+            title: "HTML для размещения перед тегом </head>"
+          body_tag:
+            text: "</body>"
+            title: "HTML для размещения перед тегом </body>"
         colors:
+          select_base:
+            title: "Выберите базовую цветовую гамму"
+            description: "Базовая схема"
           title: "Цвета"
+          edit: "Редактировать цветовые схемы"
           long_title: "Цветовые схемы"
-          about: "Изменить цвета, используемые на этом сайте, без редактирования CSS. Добавьте новую схему для начала."
+          about: "Настройте цвета, используемые вашими стилями. Начните с создания новой цветовой схемы."
           new_name: "Новая цветовая схема"
           copy_name_prefix: "Копия"
           delete_confirm: "Удалить эту цветовую схему?"
@@ -2642,12 +2860,14 @@ ru:
         delivery_method: "Метод отправки"
         preview_digest_desc: "Предпросмотр сводки новостей на отправку неактивным пользователям."
         refresh: "Обновить"
+        send_digest_label: "Отправить этот результат на:"
         send_digest: "Отправить"
         sending_email: "Отправка письма..."
         format: "Формат"
         html: "html"
         text: "текст"
         last_seen_user: "Последний раз был:"
+        no_result: "Ничего не найдено для сводки новостей."
         reply_key: "Ключ ответа"
         skipped_reason: "Причина пропуска"
         incoming_emails:
@@ -2717,8 +2937,8 @@ ru:
             change_trust_level: "изменен уровень доверия"
             change_username: "изменен псевдоним"
             change_site_setting: "изменена настройка сайта"
-            change_site_customization: "изменена настройка сайта"
-            delete_site_customization: "удалена настройка сайта"
+            change_theme: "Изменить стиль"
+            delete_theme: "Удалить стиль"
             change_site_text: "изменен текст"
             suspend_user: "пользователь заморожен"
             unsuspend_user: "пользователь разморожен"
@@ -2739,8 +2959,17 @@ ru:
             revoke_admin: "отозваны права администратора"
             grant_moderation: "выданы права модератора"
             revoke_moderation: "отозваны права модератора"
-            backup_operation: "операции резервного копирования"
+            backup_create: "создать резервную копию"
             deleted_tag: "удаленный тег"
+            renamed_tag: "переименованный тэг"
+            revoke_email: "отозвать e-mail"
+            lock_trust_level: "заморозка уровня доверия"
+            unlock_trust_level: "разморозка уровня доверия"
+            activate_user: "активация пользователя"
+            deactivate_user: "деактивация пользователя"
+            change_readonly_mode: "изменение режима \"только для чтения\""
+            backup_download: "скачать резервную копию"
+            backup_destroy: "удалить резервную копию"
         screened_emails:
           title: "Почтовые адреса"
           description: "Когда кто-то создает новую учетную запись, проверяется данный почтовый адрес и регистрация блокируется или производятся другие дополнительные действия."
@@ -2772,7 +3001,7 @@ ru:
             text: "Группировка"
             title: "Создание новой записи бана целой подсети если уже имеется хотя бы 'min_ban_entries_for_roll_up' записей отдельных IP адресов."
         logster:
-          title: "Журнаш ошибок"
+          title: "Журнал ошибок"
       impersonate:
         title: "Войти от имени пользователя"
         help: "Используйте этот инструмент, чтобы войти от имени пользователя. Может быть полезно для отладки. После этого необходимо выйти и зайти под своей учетной записью снова."
@@ -2843,24 +3072,26 @@ ru:
         suspend_reason: "Причина"
         suspended_by: "Заморожен"
         delete_all_posts: "Удалить все сообщения"
+        delete_all_posts_confirm_MF: "Вы собираетесь удалить {POSTS, plural, one {1 сообщение} other {# сообщений}} и {TOPICS, plural, one {1 тему} other {# тем}}. Вы уверены?"
         suspend: "Заморозить"
         unsuspend: "Разморозить"
         suspended: "Заморожен?"
         moderator: "Модератор?"
         admin: "Администратор?"
         blocked: "Заблокирован?"
+        staged: "Имитация?"
         show_admin_profile: "Администратор"
-        edit_title: "Редактировать заголовок"
-        save_title: "Сохранить заголовок"
         refresh_browsers: "Выполнить перезагрузку браузера"
         refresh_browsers_message: "Сообщение отправлено всем клиентам!"
         show_public_profile: "Показать публичный профиль"
         impersonate: 'Представиться как пользователь'
+        action_logs: "Журнал действий"
         ip_lookup: "Поиск IP"
         log_out: "Выйти"
         logged_out: "Пользователь вышел с сайта на всех устройствах"
         revoke_admin: 'Лишить прав Администратора'
         grant_admin: 'Выдать права Администратора'
+        grant_admin_confirm: "Мы отправили вам письмо с инструкциями для активации нового администратора."
         revoke_moderation: 'Лишить прав Модератора'
         grant_moderation: 'Выдать права Модератора'
         unblock: 'Разблокировать'
@@ -2921,11 +3152,18 @@ ru:
         block_failed: 'Не удалось заблокировать пользователя.'
         block_confirm: 'Вы уверены что хотите заблокировать этого пользователя? Он больше не сможет создавать темы и отправлять сообщения.'
         block_accept: 'Подтвердить блокировку'
+        bounce_score: "Возвратов Писем"
         reset_bounce_score:
           label: "Сбросить"
+          title: "сбросить карму к 0"
         deactivate_explanation: "Дезактивированные пользователи должны заново подтвердить свой e-mail."
         suspended_explanation: "Замороженный пользователь не может войти."
         block_explanation: "Заблокированный не может отвечать и создавать новые темы."
+        staged_explanation: "Имитированный пользователь может отправлять сообщения только по эл.почте в определённые темы."
+        bounce_score_explanation:
+          none: "Нет возвратов полученных недавно от этой эл.почты."
+          some: "Несколько возвратов получено недавно от этой эл.почты."
+          threshold_reached: "Получено слишком много возвратов от этой эл.почты."
         trust_level_change_failed: "Возникла ошибка при изменении уровня доверия пользователя."
         suspend_modal_title: "Заморозить пользователя"
         trust_level_2_users: "Пользователи с уровнем доверия 2"
@@ -2936,6 +3174,11 @@ ru:
         unlock_trust_level: "Разморозить уровень доверия"
         tl3_requirements:
           title: "Требования для 3 уровня доверия"
+          table_title:
+            one: "За последний день:"
+            few: "За последние %{count} дней:"
+            many: "За последние %{count} дней:"
+            other: "За последние %{count} дней:"
           value_heading: "Значение"
           requirement_heading: "Требование"
           visits: "Посещений"
@@ -3035,6 +3278,7 @@ ru:
           developer: 'Программистам'
           embedding: "Встраивание"
           legal: "Юридическое"
+          user_api: 'Пользовательский API'
           uncategorized: 'Вне разделов'
           backups: "Резервные копии"
           login: "Учетные записи"
@@ -3042,6 +3286,7 @@ ru:
           user_preferences: "Пользовательские настройки"
           tags: "Тэги"
           search: "Поиск"
+          groups: "Группы"
       badges:
         title: Награды
         new_badge: Новая награда
@@ -3125,6 +3370,7 @@ ru:
         sample: "Используйте следующий HTML-код на своем сайте, для возможности создания связанных тем. Замените <b>REPLACE_ME</b> канонической ссылкой страницы, куда производится встраивание."
         title: "Встраивание"
         host: "Разрешённые Хосты"
+        path_whitelist: "Разрешённый Путь"
         edit: "изменить"
         category: "Опубликовать в разделе"
         add_host: "Добавить хост"
@@ -3168,8 +3414,15 @@ ru:
       upload: "Загрузить"
       uploading: "Загрузка..."
       quit: "Может быть позже"
+      staff_count:
+        one: "В Вашем сообществе 1 сотрудник."
+        few: "В Вашем сообществе %{count} сотрудника."
+        many: "В Вашем сообществе %{count} сотрудников."
+        other: "В Вашем сообществе %{count} сотрудников."
       invites:
         add_user: "добавить"
+        none_added: "Вы ещё не пригласили сотрудников. Вы уверены, что хотите продолжить?"
         roles:
           admin: "Администратор"
           moderator: "Модератор"
+          regular: "Постоянный Пользователь"

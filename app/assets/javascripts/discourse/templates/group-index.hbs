@@ -1,7 +1,4 @@
-{{#if model.members}}
-  {{group-membership-button model=model
-      createNewMessageViaParams='createNewMessageViaParams'}}
-
+{{#if hasMembers}}
   {{#load-more selector=".group-members tr" action="loadMore"}}
     <table class='group-members'>
       <thead>
@@ -32,5 +29,7 @@
 
   {{conditional-loading-spinner condition=loading}}
 {{else}}
+  <br>
+
   <div>{{i18n "groups.empty.members"}}</div>
 {{/if}}

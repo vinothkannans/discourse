@@ -15,9 +15,9 @@ describe "Groups" do
     end
 
     context 'when group directory is disabled' do
-      site_setting(:enable_group_directory, false)
-
       it 'should deny access' do
+        SiteSetting.enable_group_directory = false
+
         get "/groups.json"
         expect(response).to be_forbidden
       end
@@ -148,6 +148,26 @@ describe "Groups" do
 
         expect(response.status).to eq(403)
       end
+    end
+  end
+
+  describe 'owners' do
+    let(:user1) { Fabricate(:user, last_seen_at: Time.zone.now) }
+    let(:user2) { Fabricate(:user, last_seen_at: Time.zone.now - 1 .day) }
+    let(:group) { Fabricate(:group, users: [user, user1, user2]) }
+
+    it 'should return the right list of owners' do
+      group.add_owner(user1)
+      group.add_owner(user2)
+
+      xhr :get, "/groups/#{group.name}/owners"
+
+      expect(response).to be_success
+
+      owners = JSON.parse(response.body)
+
+      expect(owners.count).to eq(2)
+      expect(owners.map { |o| o["id"] }.sort).to eq([user1.id, user2.id])
     end
   end
 

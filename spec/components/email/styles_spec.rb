@@ -30,8 +30,14 @@ describe Email::Styles do
       expect(frag.at("img")["style"]).to match("max-width")
     end
 
-    it "adds a width and height to images with an emoji path" do
+    it "adds a width and height to emojis" do
       frag = basic_fragment("<img src='/images/emoji/fish.png' class='emoji'>")
+      expect(frag.at("img")["width"]).to eq("20")
+      expect(frag.at("img")["height"]).to eq("20")
+    end
+
+    it "adds a width and height to custom emojis" do
+      frag = basic_fragment("<img src='/uploads/default/_emoji/fish.png' class='emoji emoji-custom'>")
       expect(frag.at("img")["width"]).to eq("20")
       expect(frag.at("img")["height"]).to eq("20")
     end
@@ -169,5 +175,11 @@ describe Email::Styles do
     end
   end
 
+  context "onebox_styles" do
+    it "renders quote as <blockquote>" do
+      fragment = html_fragment('<aside class="quote"> <div class="title"> <div class="quote-controls"> <i class="fa fa-chevron-down" title="expand/collapse"></i><a href="/t/xyz/123" title="go to the quoted post" class="back"></a> </div> <img alt="" width="20" height="20" src="https://cdn-enterprise.discourse.org/boingboing/user_avatar/bbs.boingboing.net/techapj/40/54379_1.png" class="avatar">techAPJ: </div> <blockquote> <p>lorem ipsum</p> </blockquote> </aside>')
+      expect(fragment.to_s.squish).to match(/^<blockquote.+<\/blockquote>$/)
+    end
+  end
 
 end

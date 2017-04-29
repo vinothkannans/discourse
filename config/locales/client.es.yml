@@ -99,7 +99,7 @@ es:
         x_years:
           one: "%{count} año después"
           other: "%{count} años después"
-      previous_month: 'Anterior mes'
+      previous_month: 'Mes anterior'
       next_month: 'Próximo mes'
     share:
       topic: 'comparte un enlace a este tema'
@@ -136,17 +136,20 @@ es:
         enabled: 'listado %{when}'
         disabled: 'quitado de la lista, invisible %{when}'
     topic_admin_menu: "acciones de administrador para el tema"
-    wizard_required: "¡Hora de configurar tu foro! ¡<a href='%{url}' data-auto-route='true'>Inicia el Asistente de Configuración</a>!"
+    wizard_required: "¡Bienvenido a tu nuevo Discourse! Empezaremos con <a href='%{url}' data-auto-route='true'>el asistente de configuración</a>  ✨"
     emails_are_disabled: "Todos los emails salientes han sido desactivados por un administrador. No se enviará ninguna notificación por email."
     bootstrap_mode_enabled: "Para lanzar tu nuevo sitio más fácilmente, estás en modo de arranque. A todos los nuevos usuarios se les concederá el nivel 1 de confianza y recibirán resúmenes diarios por email. Esto se desactivará automáticamente cuando el número total de usuarios exceda los %{min_users}."
     bootstrap_mode_disabled: "El modo de arranque se desactivará en las próximas 24 horas."
+    themes:
+      default_description: "Por defecto"
     s3:
       regions:
-        us_east_1: "US East (N. Virginia)"
-        us_west_1: "US West (N. California)"
-        us_west_2: "US West (Oregon)"
+        us_east_1: "EEUU Este (Virginia del Norte)"
+        us_west_1: "EEUU Oeste (Californa norte)"
+        us_west_2: "EEUU Oeste (Oregon)"
         us_gov_west_1: "AWS GovCloud (US)"
         eu_west_1: "UE (Irlanda)"
+        eu_west_2: "EU (Londres)"
         eu_central_1: "UE (Frankfurt)"
         ap_southeast_1: "Asia Pacific (Singapur)"
         ap_southeast_2: "Asia Pacific (Sydney)"
@@ -211,10 +214,10 @@ es:
         all_time: "Todo el tiempo"
         last_7_days: "Últimos 7 días"
         last_30_days: "Últimos 30 días"
-      like_count: "Me Gusta"
+      like_count: "Me gusta"
       topic_count: "Temas"
       post_count: "Posts"
-      user_count: "Nuevos usuarios"
+      user_count: "Usuarios"
       active_user_count: "Usuarios activos"
       contact: "Contáctanos"
       contact_info: "En caso de un error crítico o un asunto urgente referente a este sitio, por favor, contáctanos en %{contact_info}."
@@ -222,8 +225,8 @@ es:
       title: "Marcador"
       clear_bookmarks: "Quitar Marcadores"
       help:
-        bookmark: "Clic para guardar en marcadores el primer post de este tema"
-        unbookmark: "Clic para quitar todos los marcadores de este tema"
+        bookmark: "Haz clic para guardar en marcadores el primer post de este tema"
+        unbookmark: "Haz clic para quitar todos los marcadores de este tema"
     bookmarks:
       not_logged_in: "Lo sentimos, debes iniciar sesión para guardar posts en marcadores."
       created: "has guardado este post en marcadores"
@@ -270,18 +273,18 @@ es:
       approve: 'Aprobar'
       reject: 'Rechazar'
       delete_user: 'Eliminar usuario'
-      title: "Necesita Aprobación"
-      none: "No hay posts para revisar"
+      title: "Necesita aprobación"
+      none: "No hay posts para revisar."
       edit: "Editar"
       cancel: "Cancelar"
       view_pending: "ver posts pendientes"
       has_pending_posts:
         one: "Este tema tiene <b>1</b> post esperando aprobación"
         other: "Este tema tiene <b>{{count}}</b> posts esperando aprobación"
-      confirm: "Guardar Cambios"
+      confirm: "Guardar cambios"
       delete_prompt: "¿Seguro que quieres eliminar a <b>%{username}</b>? Se eliminarán todos sus posts y se bloqueará su email y dirección IP."
       approval:
-        title: "El Post Necesita Aprobación"
+        title: "El post necesita aprobación"
         description: "Hemos recibido tu nuevo post pero necesita ser aprobado por un moderador antes de aparecer. Por favor, ten paciencia."
         pending_posts:
           one: "Tienes <strong>1</strong> post pendiente."
@@ -302,17 +305,17 @@ es:
       sent_by_user: "Enviado por <a href='{{userUrl}}'>{{user}}</a>"
       sent_by_you: "Enviado por <a href='{{userUrl}}'>ti</a>"
     directory:
-      filter_name: "filtrar por usuario"
+      filter_name: "filtrar por nombre de usuario"
       title: "Usuarios"
       likes_given: "Dados"
       likes_received: "Recibidos"
       topics_entered: "Vistos"
       topics_entered_long: "Temas vistos"
-      time_read: "Tiempo de Lectura"
+      time_read: "Tiempo de lectura"
       topic_count: "Temas"
       topic_count_long: "Temas creados"
       post_count: "Respuestas"
-      post_count_long: "Posts escritos"
+      post_count_long: "Respuestas publicadas"
       no_results: "No se encontraron resultados."
       days_visited: "Visitas"
       days_visited_long: "Días visitados"
@@ -321,21 +324,62 @@ es:
       total_rows:
         one: "1 usuario"
         other: "%{count} usuarios"
+    group_histories:
+      actions:
+        change_group_setting: "Cambiar ajustes de grupo"
+        add_user_to_group: "Añadir usuario"
+        remove_user_from_group: "Quitar usuario"
+        make_user_group_owner: "Convertir en dueño"
+        remove_user_as_group_owner: "Quitar de dueño"
     groups:
+      logs:
+        title: "Registros"
+        when: "Cuándo"
+        action: "Acción"
+        acting_user: "Usuario que actuó"
+        target_user: "Usuario objetivo"
+        subject: "Sujeto"
+        details: "Detalles"
+        from: "De"
+        to: "A"
+      edit:
+        title: 'Editar grupo'
+        full_name: 'Nombre completo'
+        add_members: "Añadir miembros"
+        delete_member_confirm: "¿Quitar a '%{username}' del grupo '%{group}'?"
+      request_membership_pm:
+        title: "Solicitud de miembro"
+        body: "Me gustaría pertenecer al grupo @%{groupName}."
+      name_placeholder: "Nombre del grupo, sin espacios, igual que los nombres de usuarios"
+      public: "Permitir a los usuarios unirse o salir del grupo cuando quieran (es necesario que el grupo sea visible)"
       empty:
-        posts: "No hay mensajes publicados por los miembros de este grupo."
-        members: "Este grupo no tiene miembros."
+        posts: "No existe ningún post de miembros de este grupo"
+        members: "No hay miembros en este grupo."
         mentions: "No hay menciones de este grupo."
-        messages: "No hay mensajes para este grupo."
+        messages: "No hay menciones a este grupo."
         topics: "No hay temas de miembros de este grupo."
+        logs: "No hay registros para este grupo."
       add: "Añadir"
+      join: "Unirse al grupo"
+      leave: "Salir del grupo"
+      request: "Solicitar unirse al grupo"
+      automatic_group: Grupo automático
+      closed_group: Grupo cerrado
+      is_group_user: "Eres miembro de este grupo"
+      membership: "Membresía"
+      name: "Nombre"
+      user_count: "Número de miembros"
+      bio: "Acerca del grupo"
       selector_placeholder: "Añadir miembros"
       owner: "propietario"
       visible: "El grupo es visible para todos los usuarios"
-      index: "Grupos"
+      index:
+        title: "Grupos"
+        empty: "No hay grupos visibles."
       title:
         one: "grupo"
         other: "grupos"
+      activity: "Actividad"
       members: "Miembros"
       topics: "Temas"
       posts: "Posts"
@@ -354,7 +398,7 @@ es:
       notifications:
         watching:
           title: "Vigilando"
-          description: "e te notificará de cada nuevo post en este mensaje y se mostrará un contador de nuevos posts."
+          description: "Se te notificará de cada nuevo post en este mensaje y se mostrará un contador de nuevos posts."
         watching_first_post:
           title: "Vigilar Primer Post"
           description: "Sólo se te notificará del primer post en cada nuevo tema en este grupo."
@@ -367,6 +411,15 @@ es:
         muted:
           title: "Silenciado"
           description: "Nunca se te notificará de nada sobre temas en este grupo."
+      flair_url: "Adorno de imagen de usuario"
+      flair_url_placeholder: "(Opcional) Dirección URL de una imagen o clase de Font Awesome"
+      flair_bg_color: "Color de fondo del adorno de la imagen de usuario"
+      flair_bg_color_placeholder: "(Opcional) Valor del color en hexadecimal"
+      flair_color: "Color del adorno de la imagen de usuario"
+      flair_color_placeholder: "(Opcional) Valor del color en hexadecimal"
+      flair_preview_icon: "Previsualización del icono"
+      flair_preview_image: "Previsualización de la imagen"
+      flair_note: "Nota: el adorno solo se mostrará para el grupo primario del usuario."
     user_action_groups:
       '1': "'Me gusta' Dados"
       '2': "'Me gusta' Recibidos"
@@ -515,6 +568,7 @@ es:
       revoke_access: "Revocar acceso"
       undo_revoke_access: "Deshacer revocación de acceso"
       api_approved: "Aprobado:"
+      theme: "Tema"
       staff_counters:
         flags_given: "reportes útiles"
         flagged_posts: "posts reportados"
@@ -538,6 +592,8 @@ es:
         error: "(error)"
         action: "Enviar email para restablecer la contraseña"
         set_password: "Establecer contraseña"
+        choose_new: "Escoge una nueva contraseña"
+        choose: "Escoge una contraseña"
       change_about:
         title: "Cambiar 'Acerca de mí'"
         error: "Hubo un error al cambiar este valor."
@@ -572,7 +628,7 @@ es:
         instructions: "Imágenes de fondo serán centrados y tendrán un ancho por default de 590px."
       email:
         title: "E-mail"
-        instructions: "Nunca se mostrará públicamente"
+        instructions: "nunca se mostrará al público"
         ok: "Te enviaremos un email para confirmar"
         invalid: "Por favor, introduce una dirección de correo válida"
         authenticated: "Tu dirección de correo ha sido autenticada por {{provider}}"
@@ -582,22 +638,20 @@ es:
           other: "Sólo te enviaremos si no te hemos visto en los últimos {{count}} minutos."
       name:
         title: "Nombre"
-        instructions: "Tu nombre completo (opcional)"
+        instructions: "tu nombre completo (opcional)"
         instructions_required: "Tu nombre completo"
         too_short: "Tu nombre es demasiado corto"
         ok: "Tu nombre es válido"
       username:
         title: "Nombre de usuario"
-        instructions: "Debe ser único, sin espacios y conciso"
+        instructions: "único, sin espacios y corto"
         short_instructions: "Los demás usuarios pueden mencionarte como @{{username}}"
         available: "Tu nombre de usuario está disponible"
-        global_match: "La dirección coincide con la del nombre de usuario registrado"
-        global_mismatch: "Ya está registrado. ¿Prueba {{suggestion}}?"
         not_available: "No disponible. ¿Prueba {{suggestion}}?"
+        not_available_no_suggestion: "No disponible"
         too_short: "Tu nombre de usuario es demasiado corto"
         too_long: "Tu nombre de usuario es demasiado largo"
         checking: "Comprobando la disponibilidad del nombre de usuario..."
-        enter_email: 'Nombre de usuario encontrado; introduce la dirección de correo correspondiente'
         prefilled: "El email coincide con el nombre de usuario registrado"
       locale:
         title: "Idioma de la interfaz"
@@ -695,9 +749,10 @@ es:
         link_generated: "¡Enlace de invitación generado satisfactoriamente!"
         valid_for: "El enlace de invitación sólo es válido para esta dirección: %{email}"
         bulk_invite:
-          none: "Aún no has invitado a nadie aquí. Puedes enviar invitaciones individuales, o invitar varias personas a la vez <a href='https://meta.discourse.org/t/send-bulk-invites/16468'>subiendo un archivo CSV</a>."
+          none: "No has invitado a nadie aún. Puedes enviar invitaciones individuales o invitar a varias personas a la vez <a href='https://meta.discourse.org/t/send-bulk-invites/16468'>subiendo un archivo de invitación en masa</a>."
           text: "Archivo de Invitación en Masa"
           success: "Archivo subido correctamente, se te notificará con un mensaje cuando se complete el proceso."
+          error: "Lo siento, el archivo debe tener formato CSV. "
       password:
         title: "Contraseña"
         too_short: "Tu contraseña es demasiada corta."
@@ -705,7 +760,7 @@ es:
         same_as_username: "Tu contraseña es la misma que tu nombre de usuario."
         same_as_email: "Tu contraseña es la misma que tu dirección de correo electrónico."
         ok: "Tu contraseña es válida."
-        instructions: "Debe contener al menos %{count} caracteres."
+        instructions: "debe tener al menos %{count} caracteres"
       summary:
         title: "Resumen"
         stats: "Estadísticas"
@@ -791,9 +846,9 @@ es:
       enabled: "Este sitio está en modo solo-lectura. Puedes continuar navegando pero algunas acciones como responder o dar \"me gusta\" no están disponibles por ahora."
       login_disabled: "Iniciar sesión está desactivado mientras el foro esté en modo solo lectura."
       logout_disabled: "Cerrar sesión está desactivado mientras el sitio se encuentre en modo de sólo lectura."
-    too_few_topics_and_posts_notice: "¡Vamos a <a href='http://blog.discourse.org/2014/08/building-a-discourse-community/'>dar por comenzada la comunidad!</a> Hay <strong>%{currentTopics} / %{requiredTopics}</strong> temas y <strong>%{currentPosts} / %{requiredPosts}</strong> mensajes. Los nuevos visitantes necesitan algo que leer y a lo que responder."
+    too_few_topics_and_posts_notice: "¡Vamos a <a href='http://blog.discourse.org/2014/08/building-a-discourse-community/'>dar por comenzada la comunidad!</a> Hay <strong>%{currentTopics} / %{requiredTopics}</strong> temas y <strong>%{currentPosts} / %{requiredPosts}</strong> posts. Los nuevos visitantes necesitan algo que leer y a lo que responder."
     too_few_topics_notice: "¡Vamos a <a href='http://blog.discourse.org/2014/08/building-a-discourse-community/'>dar por comenzada la comunidad!</a> Hay <strong>%{currentTopics} / %{requiredTopics}</strong> temas. Los nuevos visitantes necesitan algo que leer y a lo que responder."
-    too_few_posts_notice: "¡Vamos a <a href='http://blog.discourse.org/2014/08/building-a-discourse-community/'>dar por empezada la comunidad!</a> Hay <strong>%{currentPosts} / %{requiredPosts}</strong> mensajes. Los nuevos visitantes necesitan algo que leer y a lo que responder."
+    too_few_posts_notice: "¡Vamos a <a href='http://blog.discourse.org/2014/08/building-a-discourse-community/'>dar por empezada la comunidad!</a> Hay <strong>%{currentPosts} / %{requiredPosts}</strong> posts. Los nuevos visitantes necesitan algo que leer y a lo que responder."
     logs_error_rate_notice:
       reached: "<b>%{relativeAge}</b> – <a href='%{url}' target='_blank'>%{rate}</a> alcanzó el límite establecido en las opciones del sitio del %{siteSettingRate}."
       exceeded: "<b>%{relativeAge}</b> – <a href='%{url}' target='_blank'>%{rate}</a> excedió el límite establecido en las opciones del sitio del %{siteSettingRate}."
@@ -824,7 +879,7 @@ es:
       hide_forever: "no, gracias"
       hidden_for_session: "Vale, te preguntaremos mañana. Recuerda que también puedes usar el botón 'Iniciar sesión' para crear una cuenta en cualquier momento."
       intro: "¡Hola! :heart_eyes: Parece que estás interesado en las cosas que nuestros usuarios publican, pero no tienes una cuenta registrada."
-      value_prop: "Cuando te registras, recordamos lo que has leído, para que puedas volver justo donde estabas leyendo. También recibes notificaciones, por aquí y por email, cuando se publican nuevos mensajes. ¡También puedes darle a Me gusta a los mensajes! :heartbeat:"
+      value_prop: "Cuando te registras, recordamos lo que has leído, para que puedas volver justo donde estabas leyendo. También recibes notificaciones, por aquí y por email, cuando se publican nuevos posts. ¡También puedes darle a Me gusta a los mensajes! :heartbeat:"
     summary:
       enabled_description: "Estás viendo un resumen de este tema: los posts más interesantes determinados por la comunidad."
       description: "Hay <b>{{replyCount}}</b> respuestas."
@@ -876,17 +931,22 @@ es:
       logging_in: "Iniciando Sesión"
       or: "O"
       authenticating: "Autenticando..."
-      awaiting_confirmation: "Tu cuenta está pendiente de activación, usa el enlace de 'olvidé contraseña' para recibir otro e-mail de activación."
+      awaiting_activation: "Tu cuenta está pendiente de activación, usa el enlace de 'olvidé contraseña' para recibir otro e-mail de activación."
       awaiting_approval: "Tu cuenta todavía no ha sido aprobada por un moderador. Recibirás un e-mail cuando sea aprobada."
       requires_invite: "Lo sentimos pero solo se puede acceder a este foro mediante invitación."
       not_activated: "No puedes iniciar sesión todavía. Anteriormente te hemos enviado un email de activación a <b>{{sentTo}}</b>. Por favor sigue las instrucciones en ese email para activar tu cuenta."
       not_allowed_from_ip_address: "No puedes iniciar sesión desde esa dirección IP."
       admin_not_allowed_from_ip_address: "No puedes iniciar sesión como admin desde esta dirección IP."
       resend_activation_email: "Has clic aquí para enviar el email de activación nuevamente."
+      resend_title: "Enviar de nuevo el email de activación"
+      change_email: "Cambiar dirección de email"
+      provide_new_email: "Escribe una nueva dirección y le reenviaremos el correo de confirmación."
+      submit_new_email: "Actualizar dirección de email"
       sent_activation_email_again: "Te hemos enviado otro e-mail de activación a <b>{{currentemail}}</b>. Podría tardar algunos minutos en llegar; asegúrate de revisar tu carpeta de spam."
       to_continue: "Por favor, inicia sesión"
       preferences: "Debes tener una sesión iniciada para cambiar tus preferencias de usuario."
       forgot: "No me acuerdo de los detalles de mi cuenta."
+      not_approved: "Tu cuenta aún no ha sido aprobada. Se te notificará por email cuando todo esté listo para iniciar sesión."
       google:
         title: "con Google"
         message: "Autenticando con Google (asegúrate de desactivar cualquier bloqueador de pop ups)"
@@ -908,6 +968,17 @@ es:
       github:
         title: "con GitHub"
         message: "Autenticando con GitHub (asegúrate de desactivar cualquier bloqueador de pop ups)"
+    invites:
+      accept_title: "Invitación"
+      welcome_to: "Bienvenido a %{site_name}!"
+      invited_by: "Has sido invitado por:"
+      social_login_available: "También serás capaz de loguearte usando cualquier red social usando ese email."
+      your_email: "Tu cuenta de correo electrónico es <b>%{email}</b>."
+      accept_invite: "Aceptar invitación"
+      success: "Tu nueva cuenta está confirmada y ahora estás logueado/a."
+      password_label: "Establecer contraseña (opcional)"
+    password_reset:
+      continue: "Continuar a %{site_name}"
     emoji_set:
       apple_international: "Apple/Internacional"
       google: "Google"
@@ -962,6 +1033,7 @@ es:
       title: "O pulsa Ctrl+Intro"
       users_placeholder: "Añadir usuario"
       title_placeholder: "En una frase breve, ¿de qué trata este tema?"
+      title_or_link_placeholder: "Escribe un título o pega un enlace aquí"
       edit_reason_placeholder: "¿Por qué lo estás editando?"
       show_edit_reason: "(añadir motivo de edición)"
       topic_featured_link_placeholder: "Introduce el enlace mostrado con el título."
@@ -1008,15 +1080,6 @@ es:
         title: "¿Olvidaste añadir destinatarios?"
         body: "¡Vas a enviarte este mensaje a ti mismo!"
       admin_options_title: "Opciones de moderación para este tema"
-      auto_close:
-        label: "Tiempo para cierre automático del tema"
-        error: "Por favor introduzca un valor válido."
-        based_on_last_post: "No cerrar hasta que el último post en el tema es al menos así de antiguo."
-        all:
-          examples: 'Introduzca el número de horas (24), tiempo absoluto (17:30) o timestamp (2013-11-22 14:00).'
-        limited:
-          units: "(# de horas)"
-          examples: 'Introduzca el número de horas (24).'
     notifications:
       title: "notificaciones por menciones a tu @nombre, respuestas a tus posts y temas, mensajes, etc"
       none: "No se han podido cargar las notificaciones."
@@ -1086,6 +1149,7 @@ es:
       sort_by: "Ordenar por"
       relevance: "Relevancia"
       latest_post: "Post más reciente"
+      latest_topic: "Último tema"
       most_viewed: "Más visto"
       most_liked: "Más \"Me gusta\" recibidos"
       select_all: "Seleccionar todo"
@@ -1127,6 +1191,8 @@ es:
           first: son el primer post del tema
           pinned: están destacados con pin
           unpinned: no están destacados con pin
+          seen: Leídos
+          unseen: No leídos
           wiki: son tipo wiki
         statuses:
           label: Donde los temas
@@ -1172,7 +1238,9 @@ es:
           one: "Has seleccionado <b>1</b> tema."
           other: "Has seleccionado <b>{{count}}</b> temas."
         change_tags: "Cambiar etiquetas"
+        append_tags: "Añadir etiquetas"
         choose_new_tags: "Elige nuevas etiquetas para estos temas:"
+        choose_append_tags: "Elige nuevas etiquetas a añadir para estos temas:"
         changed_tags: "Las etiquetas de esos temas fueron cambiadas."
       none:
         unread: "No hay temas que sigas y que no hayas leído ya."
@@ -1260,11 +1328,33 @@ es:
       jump_reply_up: saltar a la primera respuesta
       jump_reply_down: saltar a la última respuesta
       deleted: "El tema ha sido borrado"
-      auto_close_notice: "Este tema se cerrará automáticamente en %{timeLeft}."
-      auto_close_notice_based_on_last_post: "Este tema cerrara %{duration} después de la última respuesta."
+      topic_status_update:
+        time: "Tiempo:"
+        publish_to: "Publicar a:"
+      auto_update_input:
+        limited:
+          units: "(número de horas)"
+          examples: 'Introduce las horas (24).'
+        all:
+          examples: 'Introduce el número de horas (24), hora absoluta (17:30) o timestamp (2013-11-22 14:00).'
+      publish_to_category:
+        title: "Programar publicación"
+      temp_open:
+        title: "Abrir temporalmente"
+      auto_reopen:
+        title: "Abrir tema automáticamente"
+      temp_close:
+        title: "Cerrar temporalmente"
+      auto_close:
+        title: "Cerrar tema automáticamente"
+        error: "Por favor, introduce un valor válido."
+        based_on_last_post: "No cerrar hasta que el último post en el tema sea al menos así de antiguo."
+      status_update_notice:
+        auto_open: "Este tema se abrirá automáticamente %{timeLeft}."
+        auto_close: "Este tema se cerrará automáticamente %{timeLeft}."
+        auto_publish_to_category: "Este tema será publicado en <a href=%{categoryUrl}>#%{categoryName}</a> %{timeLeft}."
+        auto_close_based_on_last_post: "Este tema se cerrará %{duration} después de la última respuesta."
       auto_close_title: 'Configuración de auto-cerrado'
-      auto_close_save: "Guardar"
-      auto_close_remove: "No Auto-Cerrar Este Tema"
       auto_close_immediate:
         one: "El último post se publicó hace 1 hora, por lo que el tema se cerrará inmediatamente."
         other: "El último post se publicó hace %{count} horas, por lo que el tema se cerrará inmediatamente."
@@ -1278,7 +1368,8 @@ es:
         go_bottom: "abajo"
         go: "ir"
         jump_bottom: "salta al último post"
-        jump_prompt: "saltar al post"
+        jump_prompt: "saltar a..."
+        jump_prompt_of: "de %{count} posts"
         jump_prompt_long: "¿Hacia qué post quieres saltar?"
         jump_bottom_with_number: "saltar al post %{post_number}"
         total: posts totales
@@ -1296,7 +1387,7 @@ es:
           '2_8': 'Recibirás notificaciones porque estás siguiendo esta categoría.'
           '2_4': 'Recibirás notificaciones porque has publicado una respuesta en este tema.'
           '2_2': 'Recibirás notificaciones porque estás siguiendo este tema.'
-          '2': 'Recibirás notificaciones porque <a href="/users/{{username}}/preferences">has leído este tema</a>.'
+          '2': 'Recibirás notificaciones porque has <a href="/u/{{username}}/preferences">leído este tema</a>.'
           '1_2': 'Se te notificará solo si alguien menciona tu @nombre o te responde a un post.'
           '1': 'Se te notificará si alguien menciona tu @nombre o te responde a un post.'
           '0_7': 'Estás ignorando todas las notificaciones en esta categoría.'
@@ -1332,7 +1423,6 @@ es:
         open: "Abrir tema"
         close: "Cerrar tema"
         multi_select: "Seleccionar posts..."
-        auto_close: "Auto-cierre..."
         pin: "Destacar tema..."
         unpin: "Dejar de destacar..."
         unarchive: "Desarchivar Tema"
@@ -1476,8 +1566,10 @@ es:
       edit: "Editando {{link}} {{replyAvatar}} {{username}}"
       edit_reason: "Motivo:"
       post_number: "post {{number}}"
+      wiki_last_edited_on: "wiki editada por última vez"
       last_edited_on: "post editado por última ven en"
       reply_as_new_topic: "Responder como tema enlazado"
+      reply_as_new_private_message: "Responder como mensaje nuevo a los mismos destinatarios"
       continue_discussion: "Continuando la discusión desde {{postLink}}:"
       follow_quote: "ir al post citado"
       show_full: "Mostrar todo el post"
@@ -1510,7 +1602,7 @@ es:
         file_too_large: "Lo sentimos, ese archivo es demasiado grande (el tamaño máximo es {{max_size_kb}}kb). ¿Quizá podrías subir el archivo a un servicio de almacenamiento en la nube y compartir aquí el enlace?"
         too_many_uploads: "Lo siento solo puedes subir un archivo cada vez."
         too_many_dragged_and_dropped_files: "Lo sentimos, sólo puedes subir 10 archivos a la vez."
-        upload_not_authorized: "Lo sentimos, el archivo que intenta cargar no está autorizado (authorized extension: {{authorized_extensions}})."
+        upload_not_authorized: "Lo sentimos, el archivo que estás intentando subir no está permitido (extensiones autorizadas: {{authorized_extensions}})."
         image_upload_not_allowed_for_new_user: "Lo siento, usuarios nuevos no pueden subir imágenes."
         attachment_upload_not_allowed_for_new_user: "Lo siento, usuarios nuevos no pueden subir archivos adjuntos."
         attachment_download_requires_login: "Lo sentimos, necesitas haber iniciado sesión para descargar archivos adjuntos."
@@ -1522,7 +1614,7 @@ es:
       via_auto_generated_email: "este post llegó a través de un email generado automáticamente"
       whisper: "esto post es un susurro privado para moderadores"
       wiki:
-        about: "este post es tipo wiki"
+        about: "este es un tema de tipo wiki"
       archetypes:
         save: 'Guardar opciones'
       few_likes_left: "¡Gracias por compartir tu afecto! Te quedan solo unos pocos me gusta para hoy."
@@ -1649,33 +1741,30 @@ es:
           hide: "Ocultar revisión."
           show: "Mostrar revisión."
           revert: "Volver a esta revisión"
+          edit_wiki: "Editar Wiki"
+          edit_post: "Editar post"
           comparing_previous_to_current_out_of_total: "<strong>{{previous}}</strong> <i class='fa fa-arrows-h'></i> <strong>{{current}}</strong> / {{total}}"
         displays:
           inline:
             title: "Muestra la producción asistida con adiciones y eleminaciones en línea"
-            button: '<i class="fa fa-square-o"></i> HTML'
+            button: 'HTML'
           side_by_side:
             title: "Mostrar la producción asistida estas de lado a lado"
-            button: '<i class="fa fa-columns"></i> HTML'
+            button: 'HTML'
           side_by_side_markdown:
             title: "Mostrar las diferencias crudas a la par"
-            button: '<i class="fa fa-columns"></i> Crudo'
-    group:
-      edit:
-        title: 'Editar grupo'
-      title: 'Títul'
-      name: "Nombre"
-      bio: "Sobre el grupo"
-      name_placeholder: "Nombre del grupo, sin espacios, al igual que un usuario"
-      flair_url: "Imagen distintiva"
-      flair_url_placeholder: "(Opcional) URL de la imagen o Clase de Font Awesome"
-      flair_bg_color: "Color de fondo de la imagen distintiva"
-      flair_bg_color_placeholder: "(Opcional) Valor hexadecimal del color"
-      flair_color: "Color de la imagen distintiva"
-      flair_color_placeholder: "(Opcional) Valor hexadecimal del color"
-      flair_preview_icon: "Vista previa del icono"
-      flair_preview_image: "Vista previa de la imagen"
-      flair_note: "Nota: la imagen distintiva sólo se mostrará para el grupo primario del usuario."
+            button: 'Fuente'
+      raw_email:
+        displays:
+          raw:
+            title: "Mostrar emails sin procesar"
+            button: 'Sin procesar'
+          text_part:
+            title: "Mostrar la parte del texto del email"
+            button: 'Texto'
+          html_part:
+            title: "Mostrar la parte HTML del email"
+            button: 'HTML'
     category:
       can: 'puede&hellip; '
       none: '(sin categoría)'
@@ -1692,7 +1781,7 @@ es:
       tags_allowed_tag_groups: "Grupos de etiquetas que sólo pueden pueden utilizarse en esta categoría:"
       tags_placeholder: "(Opcional) lista de etiquetas permitidas"
       tag_groups_placeholder: "(Opcional) lista de grupos de etiquetas permitidos"
-      topic_featured_link_allowed: "Limita la edición del enlace destacado del tema en esta categoría. Requiere que la opción topic_featured_link_enabled esté habilitada."
+      topic_featured_link_allowed: "Permitir enlaces destacados en esta categoría"
       delete: 'Eliminar categoría'
       create: 'Crear categoría'
       create_long: 'Crear una nueva categoría'
@@ -1727,7 +1816,11 @@ es:
       email_in_disabled: "La posibilidad de publicar nuevos temas por email está deshabilitada en los ajustes del sitio. Para habilitar la publicación de nuevos temas por email,"
       email_in_disabled_click: 'activa la opción "email in".'
       suppress_from_homepage: "Ocultar categoría de la página de inicio."
-      sort_order: "Orden por defecto:"
+      show_subcategory_list: "Mostrar la lista de subcategorías encima de los temas en esta categoría."
+      num_featured_topics: "Número de temas a mostrar en la página de categorías:"
+      subcategory_num_featured_topics: "Número de temas destacados a mostrar en la página superior de categorías:"
+      all_topics_wiki: "Hacer todos los temas wiki por defecto"
+      subcategory_list_style: "Estilo de la lista de subcategorías:"
       allow_badges_label: "Permitir conceder distintivos en esta categoría"
       edit_permissions: "Editar permisos"
       add_permission: "Añadir permisos"
@@ -1765,6 +1858,11 @@ es:
         created: "Cread"
       sort_ascending: 'Ascendente'
       sort_descending: 'Descendente'
+      subcategory_list_styles:
+        rows: "Filas"
+        rows_with_featured_topics: "Filas con temas destacados"
+        boxes: "Caja"
+        boxes_with_featured_topics: "Cajas con temas destacados"
     flagging:
       title: '¡Gracias por ayudar a mantener una comunidad civilizada!'
       action: 'Reportar post'
@@ -1849,7 +1947,9 @@ es:
       one: "visita"
       other: "visitas"
     replies: "Respuestas"
-    views_long: "este tema se ha visto {{number}} veces"
+    views_long:
+      one: "este tema se ha visto 1 vez"
+      other: "este tema se ha visto {{number}} veces"
     activity: "Actividad"
     likes: "Likes"
     likes_lowercase:
@@ -1864,7 +1964,7 @@ es:
     history: "Historia"
     changed_by: "por {{author}}"
     raw_email:
-      title: "E-mail Original"
+      title: "Emails entrantes"
       not_available: "¡No disponible!"
     categories_list: "Lista de categorías"
     filters:
@@ -2005,7 +2105,7 @@ es:
       earned_n_times:
         one: "Ganó este distintivo 1 vez"
         other: "Ganó este distintivo %{count} veces"
-      granted_on: "Concedido el %{date}"
+      granted_on: "Concedido hace: %{date}"
       others_count: "Otras personas con este distintivo (%{count})"
       title: Distintivos
       allow_title: "título disponible"
@@ -2154,8 +2254,8 @@ es:
         backups: "backups"
         traffic_short: "Tráfico"
         traffic: "Peticiones web de la app"
-        page_views: "Peticiones de API"
-        page_views_short: "Peticiones de API"
+        page_views: "Páginas vistas"
+        page_views_short: "Páginas vistas"
         show_traffic_report: "Mostrar informe detallado del tráfico"
         reports:
           today: "Hoy"
@@ -2250,7 +2350,6 @@ es:
         delete: "Borrar"
         delete_confirm: "Borrar este grupo?"
         delete_failed: "No se pudo borrar el grupo. Si este es un grupo automático, no se puede destruir."
-        delete_member_confirm: "¿Eliminar a '%{username}' del grupo '%{group}'?"
         delete_owner_confirm: "¿Quitar privilegios de propietario para '%{username}'?"
         add: "Añadir"
         add_members: "Añadir miembros"
@@ -2268,6 +2367,8 @@ es:
         add_owners: Añadir propietarios
         incoming_email: "Correos electrónicos entrantes personalizados"
         incoming_email_placeholder: "introducir dirección de email"
+        none_selected: "Selecciona un grupo para empezar"
+        no_custom_groups: "Crear un nuevo grupo personalizado"
       api:
         generate_master: "Generar clave maestra de API"
         none: "No hay ninguna clave de API activa en este momento."
@@ -2299,7 +2400,7 @@ es:
         warn_local_payload_url: "Parece que estás estableciendo el webhook a una url local. El evento enviado a una dirección local podría causar algún efecto secundario o comportamientos inesperados. ¿Continuar?"
         secret_invalid: "Secret no debe tener espacios en blanco."
         secret_too_short: "Secret debería tener al menos 12 caracteres."
-        secret_placeholder: "Una cadena opcional, para generar firma"
+        secret_placeholder: "Una cadena opcional, utilizada para generar una firma"
         event_type_missing: "Necesitas establecer al menos un tipo de evento."
         content_type: "Tipo de contenido"
         secret: "Secret"
@@ -2322,7 +2423,7 @@ es:
           details: "Cuando se publique, edite, elimine o recupere una respuesta."
         user_event:
           name: "Evento de usuario"
-          details: "Cuando se cree o apruebe un usuario."
+          details: "Cuando un usuario es creado, aprobado o actualizado."
         delivery_status:
           title: "Estado de entrega"
           inactive: "Inactivo"
@@ -2403,7 +2504,8 @@ es:
             without_uploads: "Sí (no incluir archivos)"
           download:
             label: "Descargar"
-            title: "Descargar la copia de seguridad"
+            title: "Enviar email con enlace de descarga"
+            alert: "El enlace para descargar este backup te ha sido enviado por email."
           destroy:
             title: "Borrar la copia de seguridad"
             confirm: "¿Estás seguro que quieres borrar esta copia de seguridad?"
@@ -2434,32 +2536,12 @@ es:
       customize:
         title: "Personalizar"
         long_title: "Personalizaciones del sitio"
-        css: "CSS"
-        header: "Encabezado"
-        top: "Top"
-        footer: "Pie de página"
-        embedded_css: "CSS embebido"
-        head_tag:
-          text: "</head>"
-          title: "HTML insertado antes de la etiqueta </head>"
-        body_tag:
-          text: "</body>"
-          title: "HTML insertado antes de la etiqueta </body>"
-        override_default: "No incluir hoja de estilo estándar"
-        enabled: "¿Activado?"
         preview: "vista previa"
-        undo_preview: "eliminar vista previa"
-        rescue_preview: "estilo por defecto"
-        explain_preview: "Ver el sitio con esta hoja de estilo"
-        explain_undo_preview: "Volver a la hoja de estilo personalizada activada actualmente"
-        explain_rescue_preview: "Ver el sitio con la hoja de estilo por defecto"
         save: "Guardar"
         new: "Nuevo"
         new_style: "Nuevo Estilo"
         import: "Importar"
-        import_title: "Selecciona un archivo o pega texto"
         delete: "Eliminar"
-        delete_confirm: "¿Eliminar esta personalización?"
         about: "Modifica hojas de estilo CSS y cabeceras HTML en el sitio. Añade una personalización para empezar."
         color: "Color"
         opacity: "Opacidad"
@@ -2472,13 +2554,40 @@ es:
           none_selected: "Selecciona un 'diseño de email' para comenzar a editar"
           revert: "Revertir los cambios"
           revert_confirm: "¿Estás seguro de querer revertir los cambios?"
-        css_html:
-          title: "CSS/HTML"
-          long_title: "Personalizaciones CSS y HTML"
+        theme:
+          edit: "Editar"
+          common: "Común"
+          desktop: "Ordenador"
+          mobile: "Móvil"
+          preview: "Previsualizar"
+          is_default: "Tema activado por defecto"
+          user_selectable: "Tema seleccionable por los usuarios"
+          color_scheme: "Paleta de color"
+          color_scheme_select: "Colores a utilizar por el tema:"
+          included_themes: "Temas incluidos"
+          child_themes_check: "El tema incluye otros temas"
+          css_html: "CSS/HTML personalizado"
+          edit_css_html: "Editar CSS/HTML"
+          edit_css_html_help: "No se ha editado ningún CSS ni HTML"
+          import_web_tip: "Repositorio que contiene el tema"
+          about_theme: "Sobre el tem"
+          license: "Licencia"
+          update_to_latest: "Actualizar a la última versión"
+          check_for_updates: "Comprobar actualizaciones"
+          updating: "Actualizando..."
+          up_to_date: "El tema está actualizado, última comprobación:"
+          add: "Añadir"
+          commits_behind:
+            one: "¡El tema está 1 commit atrasado!"
+            other: "¡El tema está {{count}} commits atrasado!"
+          scss:
+            text: "CSS"
+            title: "Introducir CSS personalizado, se acepta tanto CSS como SCSS"
+          header:
+            text: "Header"
         colors:
           title: "Colores"
           long_title: "Esquemas de color"
-          about: "Modifica los colores utilizados en el sitio sin editar el CSS. Añade un esquema de color para empezar."
           new_name: "Nuevo esquema de color"
           copy_name_prefix: "Copia de"
           delete_confirm: "¿Eliminar este esquema de color?"
@@ -2617,8 +2726,8 @@ es:
             change_trust_level: "cambiar nivel de confianza"
             change_username: "cambiar nombre de usuario"
             change_site_setting: "cambiar configuración del sitio"
-            change_site_customization: "cambiar customización del sitio"
-            delete_site_customization: "borrar customización del sitio"
+            change_theme: "cambiar tem"
+            delete_theme: "borrar tema"
             change_site_text: "cambiar textos"
             suspend_user: "suspender usuario"
             unsuspend_user: "desbloquear usuario"
@@ -2639,10 +2748,17 @@ es:
             revoke_admin: "revocar administración"
             grant_moderation: "conceder moderación"
             revoke_moderation: "revocar moderación"
-            backup_operation: "operación de copia de seguridad de respaldo"
+            backup_create: "crear copia de seguridad"
             deleted_tag: "etiqueta eliminada"
             renamed_tag: "etiqueta renombrada"
             revoke_email: "revocar email"
+            lock_trust_level: "Bloqueó el nivel de confianza"
+            unlock_trust_level: "Desbloqueó el nivel de confianza"
+            activate_user: "activó a un usuario"
+            deactivate_user: "desactivó a un usuario"
+            change_readonly_mode: "cambio a modo de sólo lectura"
+            backup_download: "descargar copia de seguridad"
+            backup_destroy: "destruir copia de seguridad"
         screened_emails:
           title: "Correos bloqueados"
           description: "Cuando alguien trata de crear una cuenta nueva, los siguientes correos serán revisados y el registro será bloqueado, o alguna otra acción será realizada."
@@ -2746,17 +2862,17 @@ es:
         blocked: "¿Bloqueado?"
         staged: "¿Provisional?"
         show_admin_profile: "Administrador"
-        edit_title: "Editar título"
-        save_title: "Guardar título"
         refresh_browsers: "Forzar recarga del navegador"
         refresh_browsers_message: "¡Mensaje enviado a todos los clientes!"
         show_public_profile: "Ver perfil público"
         impersonate: 'Impersonar a'
+        action_logs: "Registro de acciones"
         ip_lookup: "Búsqueda de IP"
         log_out: "Cerrar sesión"
         logged_out: "El usuario ha cerrado sesión desde todos los dispositivos"
         revoke_admin: 'Revocar administrador'
         grant_admin: 'Conceder administración'
+        grant_admin_confirm: "Te hemos enviado un email para verificar el nuevo administrador. Por favor, ábrelo y sigue las instrucciones."
         revoke_moderation: 'Revocar moderación'
         grant_moderation: 'Conceder moderación'
         unblock: 'Desbloquear'
@@ -2943,6 +3059,7 @@ es:
           user_preferences: "Preferencias de los Usuarios"
           tags: "Etiquetas"
           search: "Búsqueda"
+          groups: "Grupos"
       badges:
         title: Distintivos
         new_badge: Nuevo distintivo
