@@ -121,10 +121,8 @@ module Jobs
 
     def extract_images_from(html)
       doc = Nokogiri::HTML::fragment(html)
-      images = doc.css("img[src]") - doc.css("img.avatar")
-      doc.css(".onebox-body img").each do |image|
-        images -= image if image['src'].start_with?("https://")
-      end
+      images = doc.css("img[src]")
+
       images
     end
 
