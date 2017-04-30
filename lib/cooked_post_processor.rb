@@ -59,6 +59,15 @@ class CookedPostProcessor
       end
     end
 
+    urls = oneboxed_images.map { |img| img["src"] }
+    uploads = Upload.where(origin: urls).select(:id, :url, :origin)
+    oneboxed_images.each do |img|
+      upload = uploads.detect { |u| u.origin == img["src"] }
+      next unless upload.present?
+      img["src"] = upload.url
+      upload_ids << upload.id
+    end
+
     values = upload_ids.map{ |u| "(#{@post.id},#{u})" }.join(",")
     PostUpload.transaction do
       PostUpload.delete_all(post_id: @post.id)
@@ -105,7 +114,7 @@ class CookedPostProcessor
   end
 
   def oneboxed_images
-    @doc.css(".onebox-result img, .onebox img")
+    @doc.css(".onebox-body img, .onebox img")
   end
 
   def limit_size!(img)
