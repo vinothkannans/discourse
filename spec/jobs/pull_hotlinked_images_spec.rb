@@ -28,4 +28,38 @@ describe Jobs::PullHotlinkedImages do
     expect(post.raw).to match(/^<img src='\/uploads/)
   end
 
+  describe 'onebox' do
+
+    class Onebox::Engine::WhitelistedGenericOnebox
+      def data
+        @data ||= begin
+          d = { link: link }.merge(raw)
+
+          d[:title] = "Longcat1"
+          d[:description] = "About Longcat1 in Mozilla's wiki article"
+          d[:domain] = "wiki.mozilla.org"
+          d[:image] = "http://wiki.mozilla.org/images/2/2e/Longcat1.png"
+
+          d
+        end
+      end
+    end
+
+    let(:url) { "http://nytimes.com/about-longcat1" }
+
+    before do
+      stub_request(:get, url).to_return(body: "{title: 'hello'}")
+    end
+
+    it 'replaces image src' do
+      post = Fabricate(:post, raw: "#{url}")
+
+      Jobs::PullHotlinkedImages.new.execute(post_id: post.id)
+      post.reload
+
+      expect(post.cooked).to match(/^<img src='\/uploads/)
+    end
+
+  end
+
 end
