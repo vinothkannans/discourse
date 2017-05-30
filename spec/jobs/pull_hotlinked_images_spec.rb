@@ -30,34 +30,36 @@ describe Jobs::PullHotlinkedImages do
 
   describe 'onebox' do
 
-    class Onebox::Engine::WhitelistedGenericOnebox
+    Onebox::Engine::WikimediaOnebox.class_eval do
+      private
+
       def data
         @data ||= begin
-          d = { link: link }.merge(raw)
-
-          d[:title] = "Longcat1"
-          d[:description] = "About Longcat1 in Mozilla's wiki article"
-          d[:domain] = "wiki.mozilla.org"
-          d[:image] = "http://wiki.mozilla.org/images/2/2e/Longcat1.png"
-
-          d
+          {
+            link: 'https://commons.wikimedia.org/wiki/File:Brisbane_May_2013.jpg',
+            title: 'File:Brisbane May 2013.jpg',
+            image: 'http://wiki.mozilla.org/images/2/2e/Longcat1.png',
+            thumbnail: 'http://wiki.mozilla.org/images/2/2e/Longcat1.png'
+          }
         end
       end
     end
 
-    let(:url) { "http://nytimes.com/about-longcat1" }
+    let(:url) { "https://commons.wikimedia.org/wiki/File:Brisbane_May_2013.jpg" }
 
     before do
-      stub_request(:get, url).to_return(body: "{title: 'hello'}")
+      SiteSetting.queue_jobs = true
+      stub_request(:get, url).to_return(body: '')
     end
 
     it 'replaces image src' do
       post = Fabricate(:post, raw: "#{url}")
-
+      
       Jobs::PullHotlinkedImages.new.execute(post_id: post.id)
+      Jobs::ProcessPost.new.execute(post_id: post.id)
       post.reload
 
-      expect(post.cooked).to match(/^<img src='\/uploads/)
+      expect(post.cooked).to match(/<img src=.*\/uploads/)
     end
 
   end
