@@ -83,6 +83,41 @@ describe Jobs::PullHotlinkedImages do
     end
   end
 
+  describe '#replace' do
+    let(:image_url) { "http://wiki.mozilla.org/images/2/2e/Longcat1.png" }
+    let(:png) { Base64.decode64("R0lGODlhAQABALMAAAAAAIAAAACAAICAAAAAgIAAgACAgMDAwICAgP8AAAD/AP//AAAA//8A/wD//wBiZCH5BAEAAA8ALAAAAAABAAEAAAQC8EUAOw==") }
+
+    before do
+      SiteSetting.download_remote_images_to_local = true
+    end
+
+    it 'broken image with placeholder' do
+      stub_request(:head, image_url).to_return(status: 404)
+
+      post = Fabricate(:post, raw: "<img src='#{image_url}'>")
+
+      Jobs::ProcessPost.new.execute(post_id: post.id)
+      Jobs::PullHotlinkedImages.new.execute(post_id: post.id)
+      post.reload
+
+      expect(post.cooked).to match(/<span .*\ class="broken-image fa fa-chain-broken/)
+    end
+
+    it 'large image with placeholder' do
+      SiteSetting.max_image_size_kb = 0
+      stub_request(:get, image_url).to_return(body: png, headers: { "Content-Type" => "image/png" })
+      stub_request(:head, image_url)
+
+      post = Fabricate(:post, raw: "<img src='#{image_url}'>")
+
+      Jobs::ProcessPost.new.execute(post_id: post.id)
+      Jobs::PullHotlinkedImages.new.execute(post_id: post.id)
+      post.reload
+
+      expect(post.cooked).to match(/<a .*\ href=.*\ target="_blank"><span class="large-image fa fa-picture-o"><\/span><\/a>/)
+    end
+  end
+
   describe '#is_valid_image_url' do
     subject { described_class.new }
 
