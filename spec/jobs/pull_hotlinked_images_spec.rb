@@ -3,19 +3,24 @@ require 'jobs/regular/pull_hotlinked_images'
 
 describe Jobs::PullHotlinkedImages do
 
-  describe '#execute' do
-    let(:image_url) { "http://wiki.mozilla.org/images/2/2e/Longcat1.png" }
-    let(:png) { Base64.decode64("R0lGODlhAQABALMAAAAAAIAAAACAAICAAAAAgIAAgACAgMDAwICAgP8AAAD/AP//AAAA//8A/wD//wBiZCH5BAEAAA8ALAAAAAABAAEAAAQC8EUAOw==") }
+  let(:image_url) { "http://wiki.mozilla.org/images/2/2e/Longcat1.png" }
+  let(:broken_image_url) { "http://wiki.mozilla.org/images/2/2e/Longcat2.png" }
+  let(:png) { Base64.decode64("R0lGODlhAQABALMAAAAAAIAAAACAAICAAAAAgIAAgACAgMDAwICAgP8AAAD/AP//AAAA//8A/wD//wBiZCH5BAEAAA8ALAAAAAABAAEAAAQC8EUAOw==") }
 
+  before do
+    stub_request(:get, image_url).to_return(body: png, headers: { "Content-Type" => "image/png" })
+    stub_request(:head, image_url)
+    stub_request(:head, broken_image_url).to_return(status: 404)
+    SiteSetting.download_remote_images_to_local = true
+  end
+
+  describe '#execute' do
     before do
-      stub_request(:get, image_url).to_return(body: png, headers: { "Content-Type" => "image/png" })
-      stub_request(:head, image_url)
-      SiteSetting.download_remote_images_to_local = true
       FastImage.expects(:size).returns([100, 100]).at_least_once
     end
 
     it 'replaces images' do
-      post = Fabricate(:post, raw: "<img src='http://wiki.mozilla.org/images/2/2e/Longcat1.png'>")
+      post = Fabricate(:post, raw: "<img src='#{image_url}'>")
 
       Jobs::PullHotlinkedImages.new.execute(post_id: post.id)
       post.reload
@@ -24,7 +29,8 @@ describe Jobs::PullHotlinkedImages do
     end
 
     it 'replaces images without protocol' do
-      post = Fabricate(:post, raw: "<img src='//wiki.mozilla.org/images/2/2e/Longcat1.png'>")
+      url = image_url.sub(/^https?\:/,'')
+      post = Fabricate(:post, raw: "<img src='#{url}'>")
 
       Jobs::PullHotlinkedImages.new.execute(post_id: post.id)
       post.reload
@@ -33,10 +39,10 @@ describe Jobs::PullHotlinkedImages do
     end
 
     it 'replaces images without extension' do
-      extensionless_url = "http://wiki.mozilla.org/images/2/2e/Longcat1"
-      stub_request(:get, extensionless_url).to_return(body: png, headers: { "Content-Type" => "image/png" })
-      stub_request(:head, extensionless_url)
-      post = Fabricate(:post, raw: "<img src='#{extensionless_url}'>")
+      url = image_url.sub(/\.[a-zA-Z0-9]+$/, '')
+      stub_request(:get, url).to_return(body: png, headers: { "Content-Type" => "image/png" })
+      stub_request(:head, url)
+      post = Fabricate(:post, raw: "<img src='#{url}'>")
 
       Jobs::PullHotlinkedImages.new.execute(post_id: post.id)
       post.reload
@@ -80,21 +86,25 @@ describe Jobs::PullHotlinkedImages do
 
         expect(post.cooked).to match(/<img src=.*\/uploads/)
       end
+
+      it 'replaces image src and broken image' do
+        post = Fabricate(:post, raw: "#{url}\n<img src='#{broken_image_url}'>")
+
+        Jobs::ProcessPost.new.execute(post_id: post.id)
+        Jobs::PullHotlinkedImages.new.execute(post_id: post.id)
+        Jobs::ProcessPost.new.execute(post_id: post.id)
+        Jobs::PullHotlinkedImages.new.execute(post_id: post.id)
+        post.reload
+
+        expect(post.cooked).to match(/<img src=.*\/uploads/)
+        expect(post.cooked).to match(/<span .*\ class="broken-image fa fa-chain-broken/)
+      end
     end
   end
 
   describe '#replace' do
-    let(:image_url) { "http://wiki.mozilla.org/images/2/2e/Longcat1.png" }
-    let(:png) { Base64.decode64("R0lGODlhAQABALMAAAAAAIAAAACAAICAAAAAgIAAgACAgMDAwICAgP8AAAD/AP//AAAA//8A/wD//wBiZCH5BAEAAA8ALAAAAAABAAEAAAQC8EUAOw==") }
-
-    before do
-      SiteSetting.download_remote_images_to_local = true
-    end
-
     it 'broken image with placeholder' do
-      stub_request(:head, image_url).to_return(status: 404)
-
-      post = Fabricate(:post, raw: "<img src='#{image_url}'>")
+      post = Fabricate(:post, raw: "<img src='#{broken_image_url}'>")
 
       Jobs::ProcessPost.new.execute(post_id: post.id)
       Jobs::PullHotlinkedImages.new.execute(post_id: post.id)
@@ -105,8 +115,6 @@ describe Jobs::PullHotlinkedImages do
 
     it 'large image with placeholder' do
       SiteSetting.max_image_size_kb = 0
-      stub_request(:get, image_url).to_return(body: png, headers: { "Content-Type" => "image/png" })
-      stub_request(:head, image_url)
 
       post = Fabricate(:post, raw: "<img src='#{image_url}'>")
 
