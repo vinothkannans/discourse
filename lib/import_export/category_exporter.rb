@@ -48,14 +48,10 @@ module ImportExport
       self
     end
 
-    GROUP_ATTRS = [ :id, :name, :created_at, :mentionable_level, :messageable_level, :visible,
-                    :automatic_membership_email_domains, :automatic_membership_retroactive,
-                    :primary_group, :title, :grant_trust_level, :incoming_email]
-
     def export_groups(group_names)
       group_names.each do |name|
         group = Group.find_by_name(name)
-        group_attrs = GROUP_ATTRS.inject({}) { |h, a| h[a] = group.send(a); h }
+        group_attrs = ImportExport::group_attrs(group)
         group_attrs[:user_ids] = group.users.pluck(:id)
         @export_data[:groups] << group_attrs
       end
