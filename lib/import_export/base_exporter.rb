@@ -1,7 +1,7 @@
 module ImportExport
   class BaseExporter
 
-    attr_reader :export_data, :categories
+    attr_reader :export_data, :categories, :topics
 
     CATEGORY_ATTRS = [:id, :name, :color, :created_at, :user_id, :slug, :description, :text_color,
                       :auto_close_hours, :parent_category_id, :auto_close_based_on_last_post,
@@ -12,6 +12,11 @@ module ImportExport
                     :primary_group, :title, :grant_trust_level, :incoming_email]
 
     USER_ATTRS = [:id, :email, :username, :name, :created_at, :trust_level, :active, :last_emailed_at]
+
+    TOPIC_ATTRS = [:id, :title, :created_at, :views, :category_id, :closed, :archived, :archetype]
+
+    POST_ATTRS = [:id, :user_id, :post_number, :raw, :created_at, :reply_to_post_number, :hidden,
+                  :hidden_reason_id, :wiki]
 
     def categories
       @categories ||= Category.all.to_a
@@ -64,7 +69,6 @@ module ImportExport
     end
 
     def export_group_users
-      users = []
       user_ids = []
 
       @export_data[:groups].each do |g|
@@ -74,22 +78,70 @@ module ImportExport
       user_ids.uniq!
       return [] if user_ids.empty?
 
-      # TODO: avatar
-      User.where(id: user_ids).each do |u|
-        x = USER_ATTRS.inject({}) { |h, a| h[a] = u.send(a); h; }
-        x.merge(bio_raw: u.user_profile.bio_raw,
-                website: u.user_profile.website,
-                location: u.user_profile.location)
-        users << x
-      end
-
-      users
+      users = User.where(id: user_ids)
+      export_users(users)
     end
 
     def export_group_users!
       @export_data[:users] = export_group_users
 
       self
+    end
+
+    def export_topics
+      data = []
+
+      topics.each do |topic|
+        puts topic.title
+
+        topic_data = TOPIC_ATTRS.inject({}) { |h, a| h[a] = topic.send(a); h; }
+        topic_data[:posts] = []
+
+        topic.ordered_posts.find_each do |post|
+          h = POST_ATTRS.inject({}) { |h, a| h[a] = post.send(a); h; }
+          h[:raw] = h[:raw].gsub('src="/uploads', "src=\"#{Discourse.base_url_no_prefix}/uploads")
+          topic_data[:posts] << h
+        end
+
+        data << topic_data
+      end
+
+      data
+    end
+
+    def export_topics!
+      @export_data[:topics] = export_topics
+
+      self
+    end
+
+    def export_topic_users
+      topic_ids = @export_data[:topics].pluck(:id)
+
+      users = TopicUser.includes(user: [:user_profile]).where(topic_id: topic_ids).joined_includes_values.pluck(:user)
+      users.uniq!
+
+      export_users(users)
+    end
+
+    def export_topic_users!
+      @export_data[:users] = export_topic_users
+
+      self
+    end
+
+    def export_users(users)
+      data = []
+
+      users.each do |u|
+        x = USER_ATTRS.inject({}) { |h, a| h[a] = u.send(a); h; }
+        x.merge(bio_raw: u.user_profile.bio_raw,
+                website: u.user_profile.website,
+                location: u.user_profile.location)
+        data << x
+      end
+
+      data
     end
 
     def default_filename_prefix
