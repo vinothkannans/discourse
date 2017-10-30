@@ -1,7 +1,7 @@
 require File.join(Rails.root, 'script', 'import_scripts', 'base.rb')
 
 module ImportExport
-  class CategoriesImporter < ImportScripts::Base
+  class CategoryStructureImporter < ImportScripts::Base
     def initialize(export_data)
       @export_data = export_data
     end
