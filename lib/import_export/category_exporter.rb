@@ -1,5 +1,8 @@
+require "import_export/base_exporter"
+require "import_export/topic_exporter"
+
 module ImportExport
-  class CategoryExporter < ImportExport::BaseExporter
+  class CategoryExporter < BaseExporter
 
     def initialize(category_id)
       @category = Category.find(category_id)

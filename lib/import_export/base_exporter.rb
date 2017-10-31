@@ -1,7 +1,7 @@
 module ImportExport
   class BaseExporter
 
-    attr_reader :export_data, :categories, :topics
+    attr_reader :export_data, :categories
 
     CATEGORY_ATTRS = [:id, :name, :color, :created_at, :user_id, :slug, :description, :text_color,
                       :auto_close_hours, :parent_category_id, :auto_close_based_on_last_post,
@@ -91,7 +91,7 @@ module ImportExport
     def export_topics
       data = []
 
-      topics.each do |topic|
+      @topics.each do |topic|
         puts topic.title
 
         topic_data = TOPIC_ATTRS.inject({}) { |h, a| h[a] = topic.send(a); h; }
@@ -116,9 +116,10 @@ module ImportExport
     end
 
     def export_topic_users
+      return if @export_data[:topics].blank?
       topic_ids = @export_data[:topics].pluck(:id)
 
-      users = TopicUser.includes(user: [:user_profile]).where(topic_id: topic_ids).joined_includes_values.pluck(:user)
+      users = User.joins(:topics).where('topics.id IN (?)', topic_ids).to_a
       users.uniq!
 
       export_users(users)

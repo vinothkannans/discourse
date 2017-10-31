@@ -1,3 +1,5 @@
+require "import_export/base_exporter"
+
 module ImportExport
   class CategoryStructureExporter < ImportExport::BaseExporter
 
