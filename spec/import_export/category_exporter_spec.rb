@@ -28,14 +28,14 @@ describe ImportExport::CategoryExporter do
     end
 
     it 'export the category with topics and users' do
-      topic1 = Fabricate(:topic, category: category)
+      topic1 = Fabricate(:topic, category: category, user_id: -1)
       topic2 = Fabricate(:topic, category: category, user: user)
       data = ImportExport::CategoryExporter.new(category.id).perform.export_data
 
       expect(data[:categories].count).to eq(1)
       expect(data[:groups].count).to eq(0)
       expect(data[:topics].count).to eq(2)
-      expect(data[:users].count).to eq(2)
+      expect(data[:users].count).to eq(1)
     end
   end
 

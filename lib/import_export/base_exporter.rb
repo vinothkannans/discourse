@@ -79,7 +79,7 @@ module ImportExport
       return [] if user_ids.empty?
 
       users = User.where(id: user_ids)
-      export_users(users)
+      export_users(users.to_a)
     end
 
     def export_group_users!
@@ -122,7 +122,7 @@ module ImportExport
       users = User.joins(:topics).where('topics.id IN (?)', topic_ids).to_a
       users.uniq!
 
-      export_users(users)
+      export_users(users.to_a)
     end
 
     def export_topic_users!
@@ -133,6 +133,7 @@ module ImportExport
 
     def export_users(users)
       data = []
+      users.reject! { |u| u.id == Discourse::SYSTEM_USER_ID }
 
       users.each do |u|
         x = USER_ATTRS.inject({}) { |h, a| h[a] = u.send(a); h; }
