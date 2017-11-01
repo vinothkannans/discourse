@@ -38,7 +38,6 @@ module ImportExport
       self
     end
 
-    # export groups that are mentioned in category permissions
     def export_category_groups
       groups = []
       group_names = []
