@@ -81,9 +81,68 @@ class CookedPostProcessor
     return if images.blank?
 
     images.each do |img|
+      next if large_images.include?(img["src"]) && add_large_image_placeholder!(img)
+
       limit_size!(img)
       convert_to_link!(img)
     end
+  end
+
+  def add_large_image_placeholder!(img)
+    url = img["src"]
+
+    is_hyperlinked = is_a_hyperlink?(img)
+
+    placeholder = Nokogiri::XML::Node.new("div", @doc)
+    placeholder["class"] = "large-image-placeholder"
+    img.add_next_sibling(placeholder)
+    placeholder.add_child(img)
+
+    a = Nokogiri::XML::Node.new("a", @doc)
+    a["href"] = url
+    a["target"] = "_blank"
+    a["rel"] = "nofollow noopener"
+    img.add_next_sibling(a)
+
+    uspan = Nokogiri::XML::Node.new("span", @doc)
+    uspan["class"] = "url"
+    uspan.content = url
+    a.add_child(uspan)
+
+    i = Nokogiri::XML::Node.new("i", @doc)
+    i["class"] = "fa fa-fw fa-image"
+    uspan.add_previous_sibling(i)
+
+    hspan = Nokogiri::XML::Node.new("span", @doc)
+    hspan["class"] = "help"
+    hspan.content = I18n.t("upload.placeholders.too_large", max_size_kb: SiteSetting.max_image_size_kb)
+    uspan.add_next_sibling(hspan)
+
+    if is_hyperlinked
+      parent = placeholder.parent
+      parent.add_next_sibling(placeholder)
+
+      if parent.name == 'a' && parent["href"].present? && url != parent["href"]
+        parent["class"] = "link"
+        a.add_previous_sibling(parent)
+
+        lspan = Nokogiri::XML::Node.new("span", @doc)
+        lspan["class"] = "url"
+        lspan.content = parent["href"]
+        parent.add_child(lspan)
+
+        i = Nokogiri::XML::Node.new("i", @doc)
+        i["class"] = "fa fa-fw fa-link"
+        lspan.add_previous_sibling(i)
+      end
+    end
+
+    img.remove
+    true
+  end
+
+  def large_images
+    @large_images ||= eval(@post.custom_fields[Jobs::PullHotlinkedImages::LARGE_IMAGES].presence || "[]")
   end
 
   def extract_images
@@ -317,14 +376,17 @@ class CookedPostProcessor
 
     uploads = oneboxed_image_uploads.select(:url, :origin)
     oneboxed_images.each do |img|
+      if large_images.include?(img["src"])
+        img.remove
+        next
+      end
+
       url = img["src"].sub(/^https?:/i, "")
       upload = uploads.find { |u| u.origin.sub(/^https?:/i, "") == url }
       img["src"] = upload.url if upload.present?
-    end
 
-    # make sure we grab dimensions for oneboxed images
-    # and wrap in a div
-    oneboxed_images.each do |img|
+      # make sure we grab dimensions for oneboxed images
+      # and wrap in a div
       limit_size!(img)
       if img.parent["class"].include?("onebox-body") && (width = img["width"].to_i) > 0 && (height = img["height"].to_i) > 0
         img.delete('width')
