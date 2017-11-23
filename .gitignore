@@ -116,3 +116,6 @@ vendor/bundle/*
 
 #ignore jetbrains ide file
 *.iml
+
+# Ignore Salt file.replace state module backups created in-place.
+*.bak
