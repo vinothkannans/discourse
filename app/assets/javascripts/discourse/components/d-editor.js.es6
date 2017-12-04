@@ -9,6 +9,8 @@ import { emojiUrlFor } from 'discourse/lib/text';
 import { getRegister } from 'discourse-common/lib/get-owner';
 import { findRawTemplate } from 'discourse/lib/raw-templates';
 import { determinePostReplaceSelection, clipboardData } from 'discourse/lib/utilities';
+import { ajax } from 'discourse/lib/ajax';
+import { popupAjaxError } from 'discourse/lib/ajax-error';
 import deprecated from 'discourse-common/lib/deprecated';
 
 // Our head can be a static string or a function that returns a string
@@ -636,23 +638,44 @@ export default Ember.Component.extend({
     return null;
   },
 
+  @computed
+  pastePlaceholder() {
+    return I18n.t('pasting');
+  },
+
   paste(e) {
     const clipboard = clipboardData(e);
     const types = clipboard.types;
-    let preventDefault = false;
+    const plainText = clipboard.getData("text/plain");
+    const placeholder = plainText || this.get('pastePlaceholder');
+    let handled = false;
 
-    if (types.some(t => t === "text/plain")) {
-      const text = clipboard.getData("text/plain");
-      const table = this._detectTable(text);
+    if (plainText) {
+      const table = this._detectTable(plainText);
       if (table) {
         this._addText(this._getSelected(), table);
-        preventDefault = true;
+        handled = true;
       }
-    } else if (types.some(t => t === "Files")) {
-      preventDefault = true;
     }
 
-    if (preventDefault) {
+    if (!handled && types.some(t => t === "text/html")) {
+      const html = clipboard.getData("text/html");
+      const self = this;
+      ajax('/composer/parse_html', {
+        type: 'POST',
+        data: { html }
+      }).then(response => {
+        self.appEvents.trigger('composer:replace-text', placeholder, response.markdown);
+      }).catch(error => {
+        if (!plainText) {
+          popupAjaxError(error);
+        }
+      });
+      this.appEvents.trigger('composer:insert-text', placeholder);
+      handled = true;
+    }
+
+    if (handled || (types.some(t => t === "Files") && !plainText)) {
       e.preventDefault();
     }
   },
