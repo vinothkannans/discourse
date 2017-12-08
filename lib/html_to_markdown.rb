@@ -129,13 +129,14 @@ class HtmlToMarkdown
     RUBY
   end
 
-  WHITELISTED ||= %w{del ins kbd s small strike sub sup}
+  WHITELISTED ||= %w{del ins kbd s small strike sub sup table thead tbody tr th td}
   WHITELISTED.each do |tag|
     class_eval <<-RUBY
       def visit_#{tag}(node)
         @stack[-1].markdown << "<#{tag}>"
         traverse(node)
         @stack[-1].markdown << "</#{tag}>"
+        @stack[-1].markdown << "\n\n" if "#{tag}" === "table"
       end
     RUBY
   end
