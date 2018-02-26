@@ -16,6 +16,11 @@ export default Ember.Component.extend({
     return (!isPM) || this.siteSettings.enable_personal_messages;
   },
 
+  @computed('topic.isPrivateMessage')
+  showEditButton(isPM) {
+    return isPM && this.site.can_tag_pms;
+  },
+
   @computed('topic.details.can_invite_to')
   canInviteTo(result) {
     return !this.site.mobileView && result;

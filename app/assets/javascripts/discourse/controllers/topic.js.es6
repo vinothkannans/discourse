@@ -246,6 +246,11 @@ export default Ember.Controller.extend(BufferedContent, {
       return this.get('model.details').removeAllowedGroup(group);
     },
 
+    editFirstPost() {
+      const post = null; // have to load first post from this.get('model.postStream')
+      this.send("editPost", post);
+    },
+
     deleteTopic() {
       this.deleteTopic();
     },

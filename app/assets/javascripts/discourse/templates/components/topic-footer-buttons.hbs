@@ -50,6 +50,14 @@
                disabled=inviteDisabled}}
   {{/if}}
 
+  {{#if showEditButton}}
+    {{d-button class="edit-topic"
+                   title="topic.edit_topic.help"
+                   label="topic.edit_topic.title"
+                   icon="pencil"
+                   action=editFirstPost}}
+  {{/if}}
+
   {{#if canArchive}}
     {{d-button class="standard archive-topic"
                title=archiveTitle
