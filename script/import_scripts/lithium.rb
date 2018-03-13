@@ -53,6 +53,7 @@ class ImportScripts::Lithium < ImportScripts::Base
 
     @max_start_id = Post.maximum(:id)
 
+    import_groups
     import_categories
     import_users
     import_topics
@@ -70,15 +71,15 @@ class ImportScripts::Lithium < ImportScripts::Base
     puts "", "importing groups..."
 
     groups = mysql_query <<-SQL
-        SELECT usergroupid, title
-          FROM usergroup
-      ORDER BY usergroupid
+        SELECT DISTINCT name id, name
+          FROM roles
+      ORDER BY name
     SQL
 
     create_groups(groups) do |group|
       {
-        id: group["usergroupid"],
-        name: @htmlentities.decode(group["title"]).strip
+        id: group["id"],
+        name: @htmlentities.decode(group["name"]).strip
       }
     end
   end
@@ -106,7 +107,7 @@ class ImportScripts::Lithium < ImportScripts::Base
         {
           id: user["id"],
           name: user["nlogin"],
-          username: user["login-canon"],
+          username: user["login_canon"],
           email: user["email"].presence || fake_email,
           # website: user["homepage"].strip,
           # title: @htmlentities.decode(user["usertitle"]).strip,
@@ -183,89 +184,43 @@ class ImportScripts::Lithium < ImportScripts::Base
   def import_categories
     puts "", "importing top level categories..."
 
-    categories = mysql_query("SELECT node_id, display_id, position, parent_node_id from nodes").to_a
+    categories = mysql_query("SELECT n.node_id, n.display_id, s.nvalue, n.position, n.parent_node_id from nodes n LEFT JOIN settings s ON n.node_id = s.node_id AND s.param = 'category.title'").to_a
 
-    category_info = {}
-    top_level_ids = Set.new
-    child_ids = Set.new
+    top_level_categories = categories.select { |c| c["parent_node_id"] <= 2 }
 
-    parent = nil
-    CSV.foreach(CATEGORY_CSV) do |row|
-      display_id = row[2].strip
-
-      node = {
-        name: (row[0] || row[1]).strip,
-        secure: row[3] == "x",
-        top_level: !!row[0]
-      }
-
-      if row[0]
-        top_level_ids << display_id
-        parent = node
-      else
-        child_ids << display_id
-        node[:parent] = parent
-      end
-
-      category_info[display_id] = node
-
-    end
-
-    top_level_categories = categories.select { |c| top_level_ids.include? c["display_id"] }
-
-    create_categories(top_level_categories) do |category|
-      info = category_info[category["display_id"]]
-      info[:id] = category["node_id"]
-
+    create_categories(categories) do |category|
       {
-        id: info[:id],
-        name:  info[:name],
+        id: category["node_id"],
+        name:  category["nvalue"] || category["display_id"],
         position: category["position"]
       }
     end
 
     puts "", "importing children categories..."
 
-    children_categories = categories.select { |c| child_ids.include? c["display_id"] }
+    children_categories = categories.select { |c| c["parent_node_id"] > 2 }
 
     create_categories(children_categories) do |category|
-      info = category_info[category["display_id"]]
-      info[:id] = category["node_id"]
-
       {
-        id: info[:id],
-        name: info[:name],
+        id: category["node_id"],
+        name: category["nvalue"] || category["display_id"],
         position: category["position"],
-        parent_category_id: category_id_from_imported_category_id(info[:parent][:id])
+        parent_category_id: category_id_from_imported_category_id(category["parent_node_id"])
       }
     end
-
-    puts "", "securing categories"
-    category_info.each do |_, info|
-      if info[:secure]
-        id = category_id_from_imported_category_id(info[:id])
-        if id
-          cat = Category.find(id)
-          cat.set_permissions({})
-          cat.save
-          putc "."
-        end
-      end
-    end
-
   end
 
   def import_topics
     puts "", "importing topics..."
 
-    topic_count = mysql_query("SELECT COUNT(*) count FROM message2 where id = root_id").first["count"]
+    topic_count = mysql_query("SELECT COUNT(*) count FROM message2 where id = root_id AND deleted = 0 AND body != ''").first["count"]
 
     batches(BATCH_SIZE) do |offset|
       topics = mysql_query <<-SQL
           SELECT id, subject, body, deleted, user_id,
                  post_date, views, node_id, unique_id
             FROM message2
-        WHERE id = root_id #{TEMP} AND deleted = 0
+        WHERE id = root_id #{TEMP} AND deleted = 0 AND body != ''
         ORDER BY node_id, id
            LIMIT #{BATCH_SIZE}
           OFFSET #{offset}
@@ -303,8 +258,7 @@ class ImportScripts::Lithium < ImportScripts::Base
 
   def import_posts
 
-    post_count = mysql_query("SELECT COUNT(*) count FROM message2
-                              WHERE id <> root_id").first["count"]
+    post_count = mysql_query("SELECT COUNT(*) count FROM message2 WHERE id <> root_id AND body != ''").first["count"]
 
     puts "", "importing posts... (#{post_count})"
 
@@ -313,7 +267,7 @@ class ImportScripts::Lithium < ImportScripts::Base
           SELECT id, body, deleted, user_id,
                  post_date, parent_id, root_id, node_id, unique_id
             FROM message2
-        WHERE id <> root_id #{TEMP} AND deleted = 0
+        WHERE id <> root_id #{TEMP} AND body != ''
         ORDER BY node_id, root_id, id
            LIMIT #{BATCH_SIZE}
           OFFSET #{offset}
@@ -324,7 +278,6 @@ class ImportScripts::Lithium < ImportScripts::Base
       next if all_records_exist? :posts, posts.map { |post| "#{post["node_id"]} #{post["root_id"]} #{post["id"]}" }
 
       create_posts(posts, total: post_count, offset: offset) do |post|
-        raw = post["raw"]
         next unless topic = topic_lookup_from_imported_post_id("#{post["node_id"]} #{post["root_id"]}")
 
         raw = post["body"]

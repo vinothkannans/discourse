@@ -180,12 +180,12 @@ gem 'rqrcode'
 
 gem 'sshkey', require: false
 
-if ENV["IMPORT"] == "1"
+# if ENV["IMPORT"] == "1"
   gem 'mysql2'
   gem 'redcarpet'
   gem 'sqlite3', '~> 1.3.13'
   gem 'ruby-bbcode-to-md', github: 'nlalonde/ruby-bbcode-to-md'
   gem 'reverse_markdown'
-end
+# end
 
 gem 'ox'
