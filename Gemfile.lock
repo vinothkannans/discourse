@@ -239,6 +239,7 @@ GEM
     openid-redis-store (0.0.2)
       redis
       ruby-openid
+    ox (2.8.4)
     parallel (1.12.0)
     parser (2.4.0.0)
       ast (~> 2.2)
@@ -467,6 +468,7 @@ DEPENDENCIES
   omniauth-twitter
   onebox (= 1.8.42)
   openid-redis-store
+  ox
   pg (~> 0.21.0)
   pry-nav
   pry-rails

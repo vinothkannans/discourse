@@ -25,12 +25,12 @@ class ImportScripts::Lithium < ImportScripts::Base
   BATCH_SIZE = 1000
 
   # CHANGE THESE BEFORE RUNNING THE IMPORTER
-  DATABASE = "wd"
-  PASSWORD = "password"
+  DATABASE = "gartner"
+  PASSWORD = "vinkas"
   CATEGORY_CSV = "/tmp/wd-cats.csv"
-  UPLOAD_DIR = '/tmp/uploads'
+  UPLOAD_DIR = '/home/vinkas/discourse/tmp/uploads/image_extract'
 
-  OLD_DOMAIN = 'community.wd.com'
+  OLD_DOMAIN = 'community.gartner.com'
 
   TEMP = ""
 
