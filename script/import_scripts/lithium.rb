@@ -11,7 +11,6 @@
 #
 
 require 'mysql2'
-require 'csv'
 require 'reverse_markdown'
 require File.expand_path(File.dirname(__FILE__) + "/base.rb")
 require 'htmlentities'
@@ -27,7 +26,7 @@ class ImportScripts::Lithium < ImportScripts::Base
   # CHANGE THESE BEFORE RUNNING THE IMPORTER
   DATABASE = "gartner"
   PASSWORD = "vinkas"
-  CATEGORY_CSV = "/tmp/wd-cats.csv"
+  ATTACHMENT_DIR = '/home/vinkas/discourse/tmp/attachments'
   UPLOAD_DIR = '/home/vinkas/discourse/tmp/uploads/image_extract'
 
   OLD_DOMAIN = 'community.gartner.com'
@@ -51,18 +50,19 @@ class ImportScripts::Lithium < ImportScripts::Base
 
   def execute
 
-    @max_start_id = Post.maximum(:id)
+    @max_start_id = 0 # Post.maximum(:id)
 
-    import_groups
-    import_categories
-    import_users
-    import_topics
-    import_posts
-    import_likes
-    import_accepted_answers
-    import_pms
-    close_topics
-    create_permalinks
+    #import_groups
+    #import_categories
+    #import_users
+    #import_topics
+    #import_posts
+    #import_tags
+    #import_likes
+    #import_accepted_answers
+    #import_pms
+    #close_topics
+    #create_permalinks
 
     post_process_posts
   end
@@ -305,6 +305,25 @@ class ImportScripts::Lithium < ImportScripts::Base
     end
   end
 
+  def staff_guardian
+    @_staff_guardian ||= Guardian.new(Discourse.system_user)
+  end
+
+  def import_tags
+    puts "\nimporting tags..."
+    SiteSetting.tagging_enabled = true
+    SiteSetting.max_tags_per_topic = 10
+    SiteSetting.max_tag_length = 100
+
+    result = mysql_query("SELECT e.target_id topic_id, e.target_group2_id node_id, GROUP_CONCAT(l.tag_text SEPARATOR ',') tags FROM tag_events_label_message e LEFT JOIN tags_label l ON e.tag_id = l.tag_id GROUP BY e.target_id, e.target_group2_id")
+
+    result.each do |data|
+      next unless topic = PostCustomField.find_by(name: "import_id", value: "#{data["node_id"]} #{data["topic_id"]}")&.post&.topic
+      tag_names = data["tags"].split(",")
+      DiscourseTagging.tag_topic_by_names(topic, staff_guardian, tag_names)
+    end
+  end
+
   SMILEY_SUBS = {
     "smileyhappy" => "smiley",
     "smileyindifferent" => "neutral_face",
@@ -333,7 +352,7 @@ class ImportScripts::Lithium < ImportScripts::Base
   def import_likes
     puts "\nimporting likes..."
 
-    sql = "select source_id user_id, target_id post_id, row_version created_at from wd.tag_events_score_message"
+    sql = "select source_id user_id, target_id post_id, row_version created_at from tag_events_score_message"
     results = mysql_query(sql)
 
     puts "loading unique id map"
@@ -640,26 +659,14 @@ SQL
   end
 
   # find the uploaded file information from the db
-  def find_upload(post, attachment_id)
-    sql = "SELECT a.attachmentid attachment_id, a.userid user_id, a.filedataid file_id, a.filename filename,
-                  a.caption caption
-             FROM attachment a
-            WHERE a.attachmentid = #{attachment_id}"
-    results = mysql_query(sql)
-
-    unless (row = results.first)
-      puts "Couldn't find attachment record for post.id = #{post.id}, import_id = #{post.custom_fields['import_id']}"
-      return nil
-    end
-
-    filename = File.join(ATTACHMENT_DIR, row['user_id'].to_s.split('').join('/'), "#{row['file_id']}.attach")
+  def find_upload(user_id, attachment_id, real_filename)
+    filename = File.join(ATTACHMENT_DIR, "#{attachment_id}.dat")
     unless File.exists?(filename)
       puts "Attachment file doesn't exist: #{filename}"
       return nil
     end
-    real_filename = row['filename']
     real_filename.prepend SecureRandom.hex if real_filename[0] == '.'
-    upload = create_upload(post.user.id, filename, real_filename)
+    upload = create_upload(user_id, filename, real_filename)
 
     if upload.nil? || !upload.valid?
       puts "Upload not valid :("
@@ -693,6 +700,7 @@ SQL
           next
         end
         new_raw = postprocess_post_raw(raw, post.user_id)
+        new_raw = add_attachments(new_raw, post.user_id, id)
         post.raw = new_raw
         post.save
       rescue PrettyText::JavaScriptError
@@ -765,6 +773,22 @@ SQL
     end
     # nbsp central
     raw.gsub!(/([a-zA-Z0-9])&nbsp;([a-zA-Z0-9])/, "\\1 \\2")
+    raw
+  end
+
+  def add_attachments(raw, user_id, message_uid)
+    result = mysql_query("SELECT a.attachment_id, a.file_name FROM tblia_attachment a INNER JOIN tblia_message_attachments m ON a.attachment_id = m.attachment_id AND m.message_uid = #{message_uid}")
+
+    attachments = "";
+    result.each do |attachment|
+      upload, filename = find_upload(user_id, attachment["attachment_id"], attachment["file_name"])
+      if upload.present?
+        attachments << "\n" if attachments.present?
+        attachments << html_for_upload(upload, filename)
+      end
+    end
+
+    raw << attachments if attachments.present?
     raw
   end
 
