@@ -3,11 +3,7 @@
     <button type="button" class="emoji" tabindex="-1" title="{{i18n 'emoji_picker.recent'}}" data-section="recent" data-tabicon="star"></button>
   </div>
 
-  <% JSON.parse(File.read("lib/emoji/groups.json")).each.with_index do |group, group_index| %>
-    <div class='category-icon'>
-    <button type="button" class="emoji" tabindex="-1" data-tabicon="<%= group["tabicon"] %>" data-section="<%= group["name"] %>" title="{{i18n '<%= "emoji_picker.#{group["name"]}" %>'}}"></button>
-    </div>
-  <% end %>
+  
 
   <% if !Emoji.custom.blank? %>
     <div class='category-icon'>
@@ -36,18 +32,7 @@
       <div class='section-group'></div>
     </div>
 
-    <% JSON.parse(File.read("lib/emoji/groups.json")).each.with_index do |group, group_index| %>
-      <div class='section' data-section='<%= group["name"] %>'>
-        <div class='section-header'>
-          <span class="title">{{i18n 'emoji_picker.<%= group["name"] %>'}}</span>
-        </div>
-        <div class='section-group'>
-          <% group["icons"].each  do |icon| %>
-            <button type="button" class="emoji <%= "diversity" if icon["diversity"] %>" tabindex="-1" title="<%= icon['name']%>"></button>
-          <% end %>
-        </div>
-      </div>
-    <% end %>
+  
 
     {{#if customEmojis.length}}
       <div class='section' data-section='ungrouped'>
