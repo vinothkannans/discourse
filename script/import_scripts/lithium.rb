@@ -25,12 +25,12 @@ class ImportScripts::Lithium < ImportScripts::Base
   BATCH_SIZE = 1000
 
   # CHANGE THESE BEFORE RUNNING THE IMPORTER
-  DATABASE = "wd"
-  PASSWORD = "password"
+  DATABASE = "gartner"
+  PASSWORD = "vinkas"
   CATEGORY_CSV = "/tmp/wd-cats.csv"
-  UPLOAD_DIR = '/tmp/uploads'
+  UPLOAD_DIR = '/home/vinkas/discourse/tmp/uploads/image_extract'
 
-  OLD_DOMAIN = 'community.wd.com'
+  OLD_DOMAIN = 'community.gartner.com'
 
   TEMP = ""
 
@@ -50,18 +50,17 @@ class ImportScripts::Lithium < ImportScripts::Base
   end
 
   def execute
+    @max_start_id = 0 #Post.maximum(:id)
 
-    @max_start_id = Post.maximum(:id)
-
-    import_categories
-    import_users
-    import_topics
-    import_posts
-    import_likes
-    import_accepted_answers
-    import_pms
-    close_topics
-    create_permalinks
+    # import_categories
+    # import_users
+    # import_topics
+    # import_posts
+    # import_likes
+    # import_accepted_answers
+    # import_pms
+    # close_topics
+    # create_permalinks
 
     post_process_posts
   end
@@ -728,22 +727,21 @@ SQL
     current = 0
     max = Post.count
 
-    mysql_query("create index idxUniqueId on message2(unique_id)") rescue nil
-
     Post.where('id > ?', @max_start_id).find_each do |post|
       begin
-        id = post.custom_fields["import_unique_id"]
-        next unless id
-        raw = mysql_query("select body from message2 where unique_id = '#{id}'").first['body']
-        unless raw
-          puts "Missing raw for post: #{post.id}"
-          next
-        end
+        raw = post.raw
         new_raw = postprocess_post_raw(raw, post.user_id)
-        post.raw = new_raw
-        post.save
+        unless raw == new_raw
+          post.raw = new_raw
+          cpp = CookedPostProcessor.new(post)
+          cpp.keep_reverse_index_up_to_date
+          post.save
+        end
       rescue PrettyText::JavaScriptError
         puts "GOT A JS error on post: #{post.id}"
+        nil
+      rescue URI::InvalidComponentError
+        puts "GOT A Invalid component error on post: #{post.id}"
         nil
       ensure
         print_status(current += 1, max)
@@ -752,13 +750,18 @@ SQL
   end
 
   def postprocess_post_raw(raw, user_id)
-
+    initial_import = false
     doc = Nokogiri::HTML.fragment(raw)
+    importing_tags = "li-image" # "a,img,li-image"
 
-    doc.css("a,img").each do |l|
-      uri = URI.parse(l["href"] || l["src"]) rescue nil
-      if uri && uri.hostname == OLD_DOMAIN
-        uri.hostname = nil
+    doc.css(importing_tags).each do |l|
+      if l.name == "li-image" && l["id"]
+        upload_name = l["id"]
+      else
+        uri = URI.parse(l["href"] || l["src"]) rescue nil
+        if uri && uri.hostname == OLD_DOMAIN
+          uri.hostname = nil
+        end
       end
 
       if uri && !uri.hostname
@@ -770,48 +773,51 @@ SQL
             l["href"] = permalink.target_url
           end
         elsif l["src"]
-
           # we need an upload here
           upload_name = $1 if uri.path =~ /image-id\/([^\/]+)/
-          if upload_name
-            png = UPLOAD_DIR + "/" + upload_name + ".png"
-            jpg = UPLOAD_DIR + "/" + upload_name + ".jpg"
-            gif = UPLOAD_DIR + "/" + upload_name + ".gif"
+        end
+      end
 
-            # check to see if we have it
-            if File.exist?(png)
-              image = png
-            elsif File.exists?(jpg)
-              image = jpg
-            elsif File.exists?(gif)
-              image = gif
-            end
-          end
+      if upload_name
+        png = UPLOAD_DIR + "/" + upload_name + ".png"
+        jpg = UPLOAD_DIR + "/" + upload_name + ".jpg"
+        gif = UPLOAD_DIR + "/" + upload_name + ".gif"
 
-          if image
-            File.open(image) do |file|
-              upload = UploadCreator.new(file, "image." + (image.ends_with?(".png") ? "png" : "jpg")).create_for(user_id)
-              l["src"] = upload.url
-            end
-          else
-            puts "image was missing #{l["src"]}"
-          end
-
+        # check to see if we have it
+        if File.exist?(png)
+          image = png
+        elsif File.exists?(jpg)
+          image = jpg
+        elsif File.exists?(gif)
+          image = gif
         end
 
+        if image
+          File.open(image) do |file|
+            upload = UploadCreator.new(file, "image." + (image.ends_with?(".png") ? "png" : "jpg")).create_for(user_id)
+            l.name = "img" if l.name == "li-image"
+            l["src"] = upload.url
+          end
+        else
+          puts "image was missing #{l["src"]}"
+        end
       end
 
     end
 
-    raw = ReverseMarkdown.convert(doc.to_s)
-    raw.gsub!(/^\s*&nbsp;\s*$/, "")
-    # ugly quotes
-    raw.gsub!(/^>[\s\*]*$/, "")
-    raw.gsub!(/:([a-z]+):/) do |match|
-      ":#{SMILEY_SUBS[$1] || $1}:"
+    unless initial_import
+      raw = doc.to_s
+    else
+      raw = ReverseMarkdown.convert(doc.to_s)
+      raw.gsub!(/^\s*&nbsp;\s*$/, "")
+      # ugly quotes
+      raw.gsub!(/^>[\s\*]*$/, "")
+      raw.gsub!(/:([a-z]+):/) do |match|
+        ":#{SMILEY_SUBS[$1] || $1}:"
+      end
+      # nbsp central
+      raw.gsub!(/([a-zA-Z0-9])&nbsp;([a-zA-Z0-9])/, "\\1 \\2")
     end
-    # nbsp central
-    raw.gsub!(/([a-zA-Z0-9])&nbsp;([a-zA-Z0-9])/, "\\1 \\2")
     raw
   end
 
