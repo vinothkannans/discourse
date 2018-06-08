@@ -371,3 +371,23 @@ task 'posts:reorder_posts', [:topic_id] => [:environment] do |_, args|
 
   puts "", "Done.", ""
 end
+
+desc 'Pull post excerpt and store it in custom fields'
+task 'posts:excerpt' => :environment do
+  total = Post.count
+  updated = 0
+
+  Post.find_each do |post|
+    begin
+      post.custom_fields["excerpt"] = post.excerpt(post.cooked.length)
+      post.save!
+      updated += 1
+    rescue
+      # skip
+    end
+
+    print_status(updated, total)
+  end
+
+  puts "", "#{updated} excerpts saved!", ""
+end
