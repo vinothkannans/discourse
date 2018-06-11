@@ -82,6 +82,53 @@ task "users:update_posts", [:old_username, :current_username] => [:environment] 
   puts "", "Username updated!", ""
 end
 
+require 'mysql2'
+
+desc "Updates imported sso id."
+task "users:sso_id" => [:environment] do |_, args|
+  # fields = UserCustomField.where(name: "sso_id", value: "")
+  ids = UserCustomField.where(name: "sso_id").order(updated_at: :desc).pluck(:user_id).first(100)
+  total = ids.count
+  updated = 0
+
+  @client = Mysql2::Client.new(
+    host: "localhost",
+    username: "root",
+    password: "vinkas",
+    database: "gartner"
+  )
+
+  ids.each do |user_id|
+    begin
+      user = User.find(user_id)
+      import_id = user.custom_fields["import_id"]
+      next if import_id.blank?
+
+      result = @client.query("SELECT sso_id FROM users WHERE id = #{import_id}")
+      next if result.blank?
+
+      sso_id = result.first["sso_id"]
+      next if sso_id.blank?
+
+      # field.value = sso_id
+      # field.save!
+      if user.custom_fields["sso_id"].to_s != sso_id.to_s
+        user.custom_fields["sso_id"] = sso_id
+        user.save!
+        updated += 1
+      end
+    rescue => e
+      puts import_id
+      raise e
+      # skip
+    end
+
+    print_status(updated, total)
+  end
+
+  puts "", "User sso ids are updated!", ""
+end
+
 def find_user(username)
   user = User.find_by_username(username)
 

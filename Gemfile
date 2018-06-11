@@ -177,7 +177,7 @@ gem 'rotp'
 gem 'rqrcode'
 
 gem 'sshkey', require: false
-
+gem 'mysql2'
 if ENV["IMPORT"] == "1"
   gem 'mysql2'
   gem 'redcarpet'
