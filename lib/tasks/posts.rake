@@ -379,7 +379,7 @@ task 'posts:excerpt' => :environment do
 
   Post.find_each do |post|
     begin
-      post.custom_fields["excerpt"] = post.excerpt(post.cooked.length)
+      post.custom_fields["excerpt"] = post.excerpt(post.cooked.length, strip_links: true, strip_images: true)
       post.save!
       updated += 1
     rescue

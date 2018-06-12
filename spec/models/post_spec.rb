@@ -1054,6 +1054,14 @@ describe Post do
     end
   end
 
+  describe ".excerpt_for_topic" do
+    it "will remove links and images from cooked" do
+      post = create_post
+      excerpt = post.excerpt_for_topic
+      raise excerpt
+    end
+  end
+
   describe ".unhide!" do
     before { SiteSetting.unique_posts_mins = 5 }
 
