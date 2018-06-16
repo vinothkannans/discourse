@@ -129,10 +129,13 @@ module FlagQuery
     # TODO: add serializer so we can skip this
     posts.map!(&:marshal_dump)
 
+    users = User.includes(:user_stat).where(id: user_ids.to_a).to_a
+    User.preload_custom_fields(users, User.whitelisted_user_custom_fields(guardian))
+
     [
       posts,
       Topic.with_deleted.where(id: topic_ids.to_a).to_a,
-      User.includes(:user_stat).where(id: user_ids.to_a).to_a,
+      users,
       all_post_actions,
       total_rows
     ]
@@ -224,14 +227,14 @@ module FlagQuery
 
   private
 
-    def self.excerpt(cooked)
-      excerpt = Post.excerpt(cooked, 200, keep_emoji_images: true)
-      # remove the first link if it's the first node
-      fragment = Nokogiri::HTML.fragment(excerpt)
-      if fragment.children.first == fragment.css("a:first").first && fragment.children.first
-        fragment.children.first.remove
-      end
-      fragment.to_html.strip
+  def self.excerpt(cooked)
+    excerpt = Post.excerpt(cooked, 200, keep_emoji_images: true)
+    # remove the first link if it's the first node
+    fragment = Nokogiri::HTML.fragment(excerpt)
+    if fragment.children.first == fragment.css("a:first").first && fragment.children.first
+      fragment.children.first.remove
     end
+    fragment.to_html.strip
+  end
 
 end

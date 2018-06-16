@@ -9,7 +9,7 @@ describe PostAction do
   let(:eviltrout) { Fabricate(:evil_trout) }
   let(:admin) { Fabricate(:admin) }
   let(:post) { Fabricate(:post) }
-  let(:second_post) { Fabricate(:post, topic_id: post.topic_id) }
+  let(:second_post) { Fabricate(:post, topic: post.topic) }
   let(:bookmark) { PostAction.new(user_id: post.user_id, post_action_type_id: PostActionType.types[:bookmark] , post_id: post.id) }
 
   def value_for(user_id, dt)
@@ -429,7 +429,6 @@ describe PostAction do
       post = create_post
       walterwhite = Fabricate(:walter_white)
 
-      SiteSetting.queue_jobs = true
       SiteSetting.flags_required_to_hide_post = 2
       Discourse.stubs(:site_contact_user).returns(admin)
 
@@ -658,6 +657,7 @@ describe PostAction do
     end
 
     it "should create a notification in the related topic" do
+      SiteSetting.queue_jobs = false
       post = Fabricate(:post)
       user = Fabricate(:user)
       action = PostAction.act(user, post, PostActionType.types[:spam], message: "WAT")

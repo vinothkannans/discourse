@@ -1342,6 +1342,8 @@ en:
 
     strip_image_metadata: "Strip image metadata."
 
+    min_ratio_to_crop: "Ratio used to crop tall images. Enter the result of width / height."
+
     enable_flash_video_onebox: "Enable embedding of swf and flv (Adobe Flash) links in oneboxes. WARNING: may introduce security risks."
 
     default_invitee_trust_level: "Default trust level (0-4) for invited users."
@@ -1391,6 +1393,8 @@ en:
     min_trust_to_flag_posts: "The minimum trust level required to flag posts"
     min_trust_to_post_links: "The minimum trust level required to include links in posts"
     min_trust_to_post_images: "The minimum trust level required to include images in a post"
+
+    whitelisted_link_domains: "Domains that users may link to even if they don't have the appropriate trust level to post links"
 
     newuser_max_links: "How many links a new user can add to a post."
     newuser_max_images: "How many images a new user can add to a post."
@@ -1484,7 +1488,7 @@ en:
     alternative_reply_by_email_addresses: "List of alternative templates for reply by email incoming email addresses. Example: %{reply_key}@reply.example.com|replies+%{reply_key}@example.com"
     incoming_email_prefer_html: "Use HTML instead of text for incoming email."
 
-    disable_emails: "Prevent Discourse from sending any kind of emails"
+    disable_emails: "Prevent Discourse from sending any kind of emails. Select 'yes' to disable emails for all users. Select 'non-staff' to disable emails for non-staff users only."
 
     strip_images_from_short_emails: "Strip images from emails having size less than 2800 Bytes"
     short_email_length: "Short email length in Bytes"
@@ -2623,14 +2627,15 @@ en:
 
     header_instructions: ''
     reply_by_email: "[Visit Topic](%{base_url}%{url}) or reply to this email to respond."
-    reply_by_email_pm: "[Visit Message](%{base_url}%{url}) or reply to this email to respond."
+    reply_by_email_pm: "[Visit Message](%{base_url}%{url}) or reply to this email to respond to %{participants}."
     only_reply_by_email: "Reply to this email to respond."
+    only_reply_by_email_pm: "Reply to this email to respond to %{participants}."
     visit_link_to_respond: "[Visit Topic](%{base_url}%{url}) to respond."
-    visit_link_to_respond_pm: "[Visit Message](%{base_url}%{url}) to respond."
+    visit_link_to_respond_pm: "[Visit Message](%{base_url}%{url}) to respond to %{participants}."
 
     posted_by: "Posted by %{username} on %{post_date}"
 
-    pm_participants: "Participants:"
+    pm_participants: "Participants: %{participants}"
 
     invited_group_to_private_message_body: |
       %{username} invited @%{group_name} to a message
@@ -3848,8 +3853,14 @@ en:
             choices:
               latest:
                 label: "Latest Topics"
-              categories:
-                label: "Categories"
+              categories_only:
+                label: "Categories Only"
+              categories_with_featured_topics:
+                label: "Categories with Featured Topics"
+              categories_and_latest_topics:
+                label: "Categories and Latest Topics"
+              categories_and_top_topics:
+                label: "Categories and Top Topics"
 
       emoji:
         title: "Emoji"
@@ -3881,3 +3892,8 @@ en:
       linked: '%{username} linked to your post from "%{topic}" - %{site_title}'
       confirm_title: 'Notifications enabled - %{site_title}'
       confirm_body: 'Success! Notifications have been enabled.'
+
+  staff_action_logs:
+    not_found: "not found"
+    unknown: "unknown"
+    user_merged: "%{username} was merged into this account"

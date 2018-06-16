@@ -1,7 +1,9 @@
 class UserMerger
-  def initialize(source_user, target_user)
+  def initialize(source_user, target_user, acting_user = nil)
     @source_user = source_user
     @target_user = target_user
+    @acting_user = acting_user
+    @source_primary_email = source_user.email
   end
 
   def merge!
@@ -19,15 +21,17 @@ class UserMerger
 
     delete_source_user
     delete_source_user_references
+    log_merge
   end
 
   protected
 
   def update_username
-    Jobs::UpdateUsername.new.execute(user_id: @source_user.id,
-                                     old_username: @source_user.username,
-                                     new_username: @target_user.username,
-                                     avatar_template: @target_user.avatar_template)
+    UsernameChanger.update_username(user_id: @source_user.id,
+                                    old_username: @source_user.username,
+                                    new_username: @target_user.username,
+                                    avatar_template: @target_user.avatar_template,
+                                    asynchronous: false)
   end
 
   def move_posts
@@ -347,8 +351,12 @@ class UserMerger
 
   def delete_source_user
     @source_user.reload
-    @source_user.update_attribute(:admin, false)
-    UserDestroyer.new(Discourse.system_user).destroy(@source_user)
+    @source_user.update_attributes(
+      admin: false,
+      email: "#{@source_user.username}_#{SecureRandom.hex}@no-email.invalid"
+    )
+
+    UserDestroyer.new(Discourse.system_user).destroy(@source_user, quiet: true)
   end
 
   def delete_source_user_references
@@ -359,6 +367,11 @@ class UserMerger
     UserAuthTokenLog.where(user_id: @source_user.id).delete_all
     UserAvatar.where(user_id: @source_user.id).delete_all
     UserAction.where(acting_user_id: @source_user.id).delete_all
+  end
+
+  def log_merge
+    logger = StaffActionLogger.new(@acting_user || Discourse.system_user)
+    logger.log_user_merge(@target_user, @source_user.username, @source_primary_email)
   end
 
   def update_user_id(table_name, opts = {})

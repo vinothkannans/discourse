@@ -27,7 +27,6 @@ describe ActiveRecord::ConnectionHandling do
   let(:postgresql_fallback_handler) { PostgreSQLFallbackHandler.instance }
 
   before do
-    skip("Figure out why this test leaks connections")
     postgresql_fallback_handler.initialized = true
 
     ['default', multisite_db].each do |db|
@@ -37,7 +36,9 @@ describe ActiveRecord::ConnectionHandling do
 
   after do
     postgresql_fallback_handler.setup!
-    postgresql_fallback_handler.clear_connections
+    Discourse.disable_readonly_mode(Discourse::PG_READONLY_MODE_KEY)
+    ActiveRecord::Base.unstub(:postgresql_connection)
+    ActiveRecord::Base.establish_connection
   end
 
   describe "#postgresql_fallback_connection" do
@@ -54,7 +55,6 @@ describe ActiveRecord::ConnectionHandling do
 
     context 'when master server is down' do
       before do
-
         @replica_connection = mock('replica_connection')
       end
 

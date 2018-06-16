@@ -19,6 +19,7 @@ addons:
   chrome: stable
   postgresql: 9.6
   apt:
+    update: true
     packages:
     - gifsicle
     - jpegoptim
@@ -39,6 +40,7 @@ sudo: required
 dist: trusty
 
 cache:
+  apt: true
   yarn: true
   directories:
     - vendor/bundle
@@ -53,13 +55,15 @@ before_install:
   - git clone --depth=1 https://github.com/discourse/discourse-assign.git plugins/discourse-assign
   - git clone --depth=1 https://github.com/discourse/discourse-patreon.git plugins/discourse-patreon
   - git clone --depth=1 https://github.com/discourse/discourse-staff-notes.git plugins/discourse-staff-notes
+  - git clone --depth=1 https://github.com/discourse/discourse-group-tracker
   - export PATH=$HOME/.yarn/bin:$PATH
 
 install:
-  - bash -c "if [ '$RAILS_MASTER' == '1' ]; then bundle update --retry=3 --jobs=3 arel rails seed-fu; fi"
-  - bash -c "if [ '$RAILS_MASTER' == '0' ]; then bundle install --without development --deployment --retry=3 --jobs=3; fi"
-  - bash -c "if [ '$RUN_LINT' == '1' ]; then yarn global add eslint babel-eslint; fi"
-  - bash -c "if [ '$QUNIT_RUN' == '1' ]; then yarn install --dev; fi"
+  - bash -c "if [ '$RAILS_MASTER' == '1' ]; then bundle update --retry=3 --jobs=3 arel rails seed-fu > /dev/null; fi"
+  - bash -c "if [ '$RAILS_MASTER' == '0' ]; then bundle install --without development --deployment --retry=3 --jobs=3 > /dev/null; fi"
+  - bash -c "if [ '$RUN_LINT' == '1' ]; then yarn global add eslint babel-eslint > /dev/null; fi"
+  - bash -c "if [ '$QUNIT_RUN' == '1' ]; then yarn install --dev > /dev/null; fi"
+  - bash -c "if [ '$RUN_LINT' != '1' ]; then bundle exec rake db:create db:migrate > /dev/null; fi"
 
 script:
   - |
@@ -72,8 +76,6 @@ script:
         eslint --ext .es6 plugins/**/test/javascripts && \
         eslint app/assets/javascripts test/javascripts
       else
-        bundle exec rake db:create db:migrate
-
         if [ '$QUNIT_RUN' == '1' ]; then
           bundle exec rake qunit:test['500000'] && \
           bundle exec rake plugin:qunit
