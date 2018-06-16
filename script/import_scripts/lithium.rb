@@ -25,13 +25,13 @@ class ImportScripts::Lithium < ImportScripts::Base
   BATCH_SIZE = 1000
 
   # CHANGE THESE BEFORE RUNNING THE IMPORTER
-  DATABASE = "wd"
-  PASSWORD = "password"
+  DATABASE = "gartner"
+  PASSWORD = ""
   AVATAR_DIR = '/tmp/avatars'
   ATTACHMENT_DIR = '/tmp/attachments'
   UPLOAD_DIR = '/tmp/uploads'
 
-  OLD_DOMAIN = 'community.wd.com'
+  OLD_DOMAIN = 'community.gartner.com'
 
   TEMP = ""
 
@@ -40,9 +40,10 @@ class ImportScripts::Lithium < ImportScripts::Base
     { name: "user_field_1", profile: "jobtitle" },
     { name: "user_field_2", profile: "company" },
     { name: "user_field_3", profile: "industry" },
+    { name: "show_company", profile: "showcompany" },
   ]
 
-  LITHIUM_PROFILE_FIELDS = "'profile.jobtitle', 'profile.company', 'profile.industry', 'profile.location'"
+  LITHIUM_PROFILE_FIELDS = "'profile.jobtitle', 'profile.company', 'profile.industry', 'profile.location', 'profile.showcompany'"
 
   USERNAME_MAPPINGS = {
     "admins": "admin_user"
