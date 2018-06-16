@@ -411,6 +411,9 @@ class ImportScripts::Lithium < ImportScripts::Base
                 tag_names = result.first["tags"].split(",")
                 DiscourseTagging.tag_topic_by_names(post.topic, staff_guardian, tag_names)
               end
+
+              post.custom_fields["excerpt"] = post.excerpt(post.cooked.length, strip_links: true, strip_images: true, text_entities: true)
+              post.save_custom_fields
             end
           }
         else
@@ -466,7 +469,11 @@ class ImportScripts::Lithium < ImportScripts::Base
             created_at: unix_time(post["post_date"]),
             deleted_at: deleted_at,
             custom_fields: { import_unique_id: post["unique_id"] },
-            import_mode: true
+            import_mode: true,
+            post_create_action: proc do |post|
+              post.custom_fields["excerpt"] = post.excerpt(post.cooked.length, strip_links: true, strip_images: true, text_entities: true)
+              post.save_custom_fields
+            end
           }
 
           if parent = topic_lookup_from_imported_post_id("#{post["node_id"]} #{post["root_id"]} #{post["parent_id"]}")
