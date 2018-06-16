@@ -40,7 +40,7 @@ class ImportScripts::Lithium < ImportScripts::Base
     { name: "user_field_1", profile: "jobtitle" },
     { name: "user_field_2", profile: "company" },
     { name: "user_field_3", profile: "industry" },
-    { name: "show_company", profile: "showcompany" },
+    { name: "saml_showcompany", profile: "showcompany" },
   ]
 
   LITHIUM_PROFILE_FIELDS = "'profile.jobtitle', 'profile.company', 'profile.industry', 'profile.location', 'profile.showcompany'"
