@@ -71,6 +71,7 @@ class ImportScripts::Lithium < ImportScripts::Base
     import_groups
     import_categories
     import_users
+    import_user_visits
     import_topics
     import_posts
     import_likes
@@ -129,7 +130,7 @@ class ImportScripts::Lithium < ImportScripts::Base
         ORDER BY user_id
       SQL
 
-      duplicate_emails = mysql_query("SELECT email FROM users GROUP BY email HAVING COUNT(email) > 1").map { |e| [e["email"], 0] }.to_h
+      duplicate_emails = mysql_query("SELECT email_lower FROM users GROUP BY email_lower HAVING COUNT(email_lower) > 1").map { |e| [e["email_lower"], 0] }.to_h
 
       create_users(users, total: user_count, offset: offset) do |user|
         user_id = user["id"]
@@ -140,9 +141,10 @@ class ImportScripts::Lithium < ImportScripts::Base
         username = USERNAME_MAPPINGS[username] if USERNAME_MAPPINGS[username].present?
 
         email = user["email"].presence || fake_email
-        if duplicate_emails.key?(email)
-          duplicate_emails[email] += 1
-          email.sub!("@", "+#{duplicate_emails[email]}@")
+        email_lower = email.downcase
+        if duplicate_emails.key?(email_lower)
+          duplicate_emails[email_lower] += 1
+          email.sub!("@", "+#{duplicate_emails[email_lower]}@")
         end
 
         {
@@ -158,20 +160,6 @@ class ImportScripts::Lithium < ImportScripts::Base
           created_at: unix_time(user["registration_time"]),
           post_create_action: proc do |u|
             @old_username_to_new_usernames[user["login_canon"]] = u.username
-
-            # import user visits
-            visits = mysql_query <<-SQL
-                SELECT login_time
-                  FROM user_log
-                WHERE user_id = #{user_id}
-            SQL
-
-            if visits.count > 0
-              visits.each do |visit|
-                date = unix_time(visit["login_time"]).to_date
-                u.update_visit_record!(date)
-              end
-            end
 
             # import user avatar
             sso_id = u.custom_fields["sso_id"]
@@ -196,6 +184,35 @@ class ImportScripts::Lithium < ImportScripts::Base
             end
           end
         }
+      end
+    end
+  end
+
+  def import_user_visits
+    puts "", "importing user visits"
+
+    batches(BATCH_SIZE) do |offset|
+      visits = mysql_query <<-SQL
+          SELECT user_id, login_time
+            FROM user_log
+        ORDER BY user_id
+           LIMIT #{BATCH_SIZE}
+          OFFSET #{offset}
+      SQL
+
+      break if visits.size < 1
+
+      user_ids = visits.uniq { |v| v["user_id"] }
+
+      user_ids.each do |user_id|
+        user = UserCustomField.find_by(name: "import_id", value: user_id).try(:user)
+        raise "User not found for id #{user_id}" if user.blank?
+
+        user_visits = visits.select { |v| v["user_id"] == user_id }
+        user_visits.each do |v|
+          date = unix_time(v["login_time"])
+          user.update_visit_record!(date)
+        end
       end
     end
   end
@@ -829,7 +846,8 @@ SQL
   end
 
   def find_upload(user_id, attachment_id, real_filename)
-    filename = File.join(ATTACHMENT_DIR, "#{attachment_id.to_s.rjust(4, "0")}.dat")
+    filename = attachment_id.to_s.rjust(4, "0")
+    filename = File.join(ATTACHMENT_DIR, "000#{filename[0]}/#{filename}.dat")
 
     unless File.exists?(filename)
       puts "Attachment file doesn't exist: #{filename}"
@@ -983,7 +1001,7 @@ SQL
         user = UserCustomField.find_by(name: 'import_id', value: uid).try(:user)
         if user.present?
           username = user.username
-          span = doc.create_element "span"
+          span = l.document.create_element "span"
           span.inner_html = "@#{username}"
           l.replace span
         end

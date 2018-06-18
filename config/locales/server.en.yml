@@ -1012,7 +1012,7 @@ en:
       xaxis: "Day"
       yaxis: "Total"
     mobile_visits:
-      title: "User Visits"
+      title: "User Visits (mobile)"
       xaxis: "Day"
       yaxis: "Number of visits"
     web_crawlers:
@@ -3897,3 +3897,4 @@ en:
     not_found: "not found"
     unknown: "unknown"
     user_merged: "%{username} was merged into this account"
+    user_delete_self: "Deleted by self from %{url}"
