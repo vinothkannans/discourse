@@ -70,7 +70,6 @@ class ImportScripts::Lithium < ImportScripts::Base
 
     import_groups
     import_categories
-    import_category_slugs
     import_users
     import_user_visits
     import_topics
@@ -305,11 +304,7 @@ class ImportScripts::Lithium < ImportScripts::Base
       node_id = category.custom_fields["node_id"]
       next if node_id.blank?
 
-      display_id = mysql_query("SELECT display_id FROM nodes WHERE node_id = #{node_id}").first["display_id"]
-      raise "Slug not found for #{node_id}" if display_id.blank?
 
-      category.custom_fields["import_display_id"] = display_id
-      category.save_custom_fields
     end
   end
 
@@ -340,6 +335,7 @@ class ImportScripts::Lithium < ImportScripts::Base
         id: category["node_id"],
         name:  category["name"],
         position: category["position"],
+        custom_fields: { import_display_id: category["display_id"] },
         post_create_action: lambda do |record|
           after_category_create(record, category)
         end
@@ -355,6 +351,7 @@ class ImportScripts::Lithium < ImportScripts::Base
         id: category["node_id"],
         name: category["name"],
         position: category["position"],
+        custom_fields: { import_display_id: category["display_id"] },
         parent_category_id: category_id_from_imported_category_id(category["parent_node_id"]),
         post_create_action: lambda do |record|
           after_category_create(record, category)
