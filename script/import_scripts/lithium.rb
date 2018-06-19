@@ -70,6 +70,7 @@ class ImportScripts::Lithium < ImportScripts::Base
 
     import_groups
     import_categories
+    import_category_slugs
     import_users
     import_user_visits
     import_topics
@@ -297,6 +298,19 @@ class ImportScripts::Lithium < ImportScripts::Base
   ensure
     file.close rescue nil
     file.unlink rescue nil
+  end
+
+  def import_category_slugs
+    Category.find_each do |category|
+      node_id = category.custom_fields["node_id"]
+      next if node_id.blank?
+
+      display_id = mysql_query("SELECT display_id FROM nodes WHERE node_id = #{node_id}").first["display_id"]
+      raise "Slug not found for #{node_id}" if display_id.blank?
+
+      category.custom_fields["import_display_id"] = display_id
+      category.save_custom_fields
+    end
   end
 
   def import_categories
