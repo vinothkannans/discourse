@@ -71,7 +71,7 @@ class ImportScripts::Lithium < ImportScripts::Base
     import_groups
     import_categories
     import_users
-    import_user_visits
+    # import_user_visits
     import_topics
     import_posts
     import_likes

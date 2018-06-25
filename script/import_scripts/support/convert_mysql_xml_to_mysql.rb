@@ -75,4 +75,4 @@ class Convert < Saxy
   end
 end
 
-Ox.sax_parse(Convert.new(skip_data: ['metrics2', 'email_tracking2']), File.open(ARGV[0]))
+Ox.sax_parse(Convert.new(skip_data: ['metrics2', 'email_tracking2', 'user_log']), File.open(ARGV[0]))
