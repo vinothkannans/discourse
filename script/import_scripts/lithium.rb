@@ -27,9 +27,9 @@ class ImportScripts::Lithium < ImportScripts::Base
   # CHANGE THESE BEFORE RUNNING THE IMPORTER
   DATABASE = "gartner"
   PASSWORD = ""
-  AVATAR_DIR = '/tmp/avatars'
-  ATTACHMENT_DIR = '/tmp/attachments'
-  UPLOAD_DIR = '/tmp/uploads'
+  AVATAR_DIR = '/shared/import/data/avatars'
+  ATTACHMENT_DIR = '/shared/import/data/attachments'
+  UPLOAD_DIR = '/shared/import/data/uploads'
 
   OLD_DOMAIN = 'community.gartner.com'
 
