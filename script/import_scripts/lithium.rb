@@ -66,12 +66,12 @@ class ImportScripts::Lithium < ImportScripts::Base
 
   def execute
 
-    @max_start_id = Post.maximum(:id)
+    @max_start_id = PostCustomField.where(name: "import_post_process", value: "t").maximum(:post_id) || Post.maximum(:id)
 
     import_groups
     import_categories
     import_users
-    # import_user_visits
+    import_user_visits
     import_topics
     import_posts
     import_likes
@@ -922,12 +922,12 @@ SQL
   end
 
   def postprocess_post_raw(raw, user_id)
-    matches = raw.match(/<messagetemplate.*<\/messagetemplate>/m) || []
-    matches.each do |match|
-      hash = Hash.from_xml(match)
+    match = raw.match(/<messagetemplate.*<\/messagetemplate>/m)
+    if match.present?
+      hash = Hash.from_xml(match[0])
       template = hash["messagetemplate"]["zone"]["item"]
       content = (template[0] || template)["content"] || ""
-      raw.sub!(match, content)
+      raw.sub!(match[0], content)
     end
 
     doc = Nokogiri::HTML.fragment(raw)
