@@ -25,11 +25,11 @@ class ImportScripts::Lithium < ImportScripts::Base
   BATCH_SIZE = 1000
 
   # CHANGE THESE BEFORE RUNNING THE IMPORTER
-  DATABASE = "gartner"
+  DATABASE = "gartner_01"
   PASSWORD = ""
-  AVATAR_DIR = '/shared/import/data/avatars'
-  ATTACHMENT_DIR = '/shared/import/data/attachments'
-  UPLOAD_DIR = '/shared/import/data/uploads'
+  AVATAR_DIR = '/shared/import/data/avatars_01'
+  ATTACHMENT_DIR = '/shared/import/data/attachments_01'
+  UPLOAD_DIR = '/shared/import/data/uploads_01'
 
   OLD_DOMAIN = 'community.gartner.com'
 
@@ -68,9 +68,9 @@ class ImportScripts::Lithium < ImportScripts::Base
 
     @max_start_id = PostCustomField.where(name: "import_post_process", value: "t").maximum(:post_id) || Post.maximum(:id)
 
-    import_groups
-    import_categories
-    import_users
+    # import_groups
+    # import_categories
+    # import_users
     import_user_visits
     import_topics
     import_posts
@@ -194,6 +194,7 @@ class ImportScripts::Lithium < ImportScripts::Base
       visits = mysql_query <<-SQL
           SELECT user_id, login_time
             FROM user_log
+           WHERE user_id != 4
         ORDER BY user_id
            LIMIT #{BATCH_SIZE}
           OFFSET #{offset}
@@ -201,11 +202,11 @@ class ImportScripts::Lithium < ImportScripts::Base
 
       break if visits.size < 1
 
-      user_ids = visits.uniq { |v| v["user_id"] }
+      user_ids = visits.map { |v| v["user_id"] }.uniq
 
       user_ids.each do |user_id|
         user = UserCustomField.find_by(name: "import_id", value: user_id).try(:user)
-        raise "User not found for id #{user_id}" if user.blank?
+        next if user.blank?
 
         user_visits = visits.select { |v| v["user_id"] == user_id }
         user_visits.each do |v|
