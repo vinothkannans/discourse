@@ -68,9 +68,9 @@ class ImportScripts::Lithium < ImportScripts::Base
 
     @max_start_id = PostCustomField.where(name: "import_post_process", value: "t").maximum(:post_id) || Post.maximum(:id)
 
-    # import_groups
-    # import_categories
-    # import_users
+    import_groups
+    import_categories
+    import_users
     import_user_visits
     import_topics
     import_posts
@@ -79,8 +79,37 @@ class ImportScripts::Lithium < ImportScripts::Base
     import_pms
     close_topics
     create_permalinks
+    import_user_groups
 
     post_process_posts
+  end
+
+  def import_user_groups
+    puts "", "importing user groups..."
+
+    count = 0
+    total = User.count
+    User.find_each do |user|
+      import_id = user.custom_fields["import_id"]
+      next if import_id.blank?
+
+      result = mysql_query <<-SQL
+          SELECT DISTINCT r.name 
+            FROM user_role u 
+            LEFT JOIN roles r ON u.role_id = r.id 
+          WHERE u.user_id = #{import_id}
+      SQL
+
+      result.each do |group|
+        name = group["name"]
+        gf = GroupCustomField.find_by(name: "import_id", value: name)
+        raise "Group '#{name}' not found" if gf.blank? || gf.group.blank?
+
+        gf.group.add user
+      end
+
+      print_status(count += 1, total)
+    end
   end
 
   def import_groups
