@@ -417,6 +417,7 @@ GEM
     thor (0.19.4)
     thread_safe (0.3.6)
     tilt (2.0.8)
+    tiny_tds (2.1.2)
     trollop (2.1.2)
     tzinfo (1.2.5)
       thread_safe (~> 0.1)
@@ -547,6 +548,7 @@ DEPENDENCIES
   stackprof
   thor
   tilt
+  tiny_tds
   uglifier
   unf
   unicorn
