@@ -122,8 +122,7 @@ class ImportScripts::Oo < ImportScripts::Base
 
     sql = <<-SQL
         SELECT ForumID, SiteID, Name, Description, DateCreated, SortOrder
-          FROM forums_Roles
-         WHERE RoleID > 0
+          FROM forums_Forums
     SQL
 
     categories = sql_query(sql).to_a
