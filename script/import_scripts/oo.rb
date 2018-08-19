@@ -52,7 +52,6 @@ class ImportScripts::Oo < ImportScripts::Base
   end
 
   def execute
-    raise "x"
     import_groups
     import_users
     import_categories
