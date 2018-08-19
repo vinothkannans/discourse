@@ -52,6 +52,7 @@ class ImportScripts::Oo < ImportScripts::Base
   end
 
   def execute
+    raise "x"
     import_groups
     import_users
     import_categories
@@ -71,10 +72,11 @@ class ImportScripts::Oo < ImportScripts::Base
     groups = sql_query(sql).to_a
 
     create_groups(groups) do |g|
-    {
-      id: g["RoleID"],
-      name: g["Name"]
-    }
+      {
+        id: g["RoleID"],
+        name: g["Name"]
+      }
+    end
   end
 
   def import_users
@@ -226,4 +228,3 @@ end
 if __FILE__ == $0
   ImportScripts::Oo.new.perform
 end
-
