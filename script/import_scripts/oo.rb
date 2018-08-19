@@ -223,6 +223,10 @@ class ImportScripts::Oo < ImportScripts::Base
       end
     end
   end
+
+  def sql_query(sql)
+    @client.execute(sql)
+  end
 end
 
 if __FILE__ == $0
