@@ -185,13 +185,14 @@ class ImportScripts::Oo < ImportScripts::Base
     puts "", "importing posts..."
 
     total_posts = sql_query("
-      SELECT COUNT(*) count FROM forums_Posts WHERE PostLevel = 1
+      SELECT COUNT(*) count FROM forums_Posts WHERE PostLevel != 1
     ").first["count"]
 
     batches(BATCH_SIZE) do |offset|
       sql = <<-SQL
         SELECT PostID, ThreadID, ParentID, UserID, PostDate, Body
           FROM forums_Posts
+        WHERE PostLevel != 1
       ORDER BY PostID
         OFFSET #{offset} ROWS
         FETCH NEXT #{BATCH_SIZE} ROWS ONLY
