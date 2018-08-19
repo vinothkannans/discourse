@@ -52,7 +52,7 @@ class ImportScripts::Oo < ImportScripts::Base
   end
 
   def execute
-    import_groups
+    # import_groups
     import_users
     import_categories
     import_topics
@@ -87,6 +87,7 @@ class ImportScripts::Oo < ImportScripts::Base
       sql = <<-SQL
         SELECT UserID, Email, DirectedId, DisplayUserName
           FROM forums_Users
+      ORDER BY UserID
         OFFSET #{offset} ROWS
         FETCH NEXT #{BATCH_SIZE} ROWS ONLY
       SQL
@@ -157,6 +158,7 @@ class ImportScripts::Oo < ImportScripts::Base
                P.Subject, P.Body
           FROM forums_Threads AS T
           INNER JOIN forums_Posts AS P ON T.ThreadID = P.ThreadID AND P.PostLevel = 1
+      ORDER BY T.ThreadID
         OFFSET #{offset} ROWS
         FETCH NEXT #{BATCH_SIZE} ROWS ONLY
       SQL
@@ -191,6 +193,7 @@ class ImportScripts::Oo < ImportScripts::Base
       sql = <<-SQL
         SELECT PostID, ThreadID, ParentID, UserID, PostDate, Body
           FROM forums_Posts
+      ORDER BY PostID
         OFFSET #{offset} ROWS
         FETCH NEXT #{BATCH_SIZE} ROWS ONLY
       SQL
