@@ -114,6 +114,7 @@ class ImportScripts::Oo < ImportScripts::Base
           end
         }
       end
+    end
   end
 
   def import_categories
