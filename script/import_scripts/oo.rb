@@ -134,7 +134,7 @@ class ImportScripts::Oo < ImportScripts::Base
       {
         id: c["ForumID"],
         name: name,
-        description: pre_process_raw(c["Description"].presence),
+        description: c["Description"].presence,
         position: c["SortOrder"],
         post_create_action: proc do |category|
           Permalink.find_or_create_by(url: "forums/viewforum.aspx?forumid=#{c["ForumID"]}", category_id: category.id)
