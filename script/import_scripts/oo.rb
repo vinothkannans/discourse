@@ -123,6 +123,7 @@ class ImportScripts::Oo < ImportScripts::Base
     sql = <<-SQL
         SELECT ForumID, SiteID, Name, Description, DateCreated, SortOrder
           FROM forums_Forums
+        WHERE ForumID > 1
     SQL
 
     categories = sql_query(sql).to_a
@@ -166,12 +167,15 @@ class ImportScripts::Oo < ImportScripts::Base
 
       break if topics.empty?
 
+      category_id = Category.find_by(name: "Staff")&.id if t['ForumID'] == 1
+      category_id ||= category_id_from_imported_category_id(t['ForumID'])
+
       create_posts(topics, total: total_topics, offset: offset) do |t|
         {
           id: "#{t['ThreadID']}",
           user_id: user_id_from_imported_user_id(t["UserID"]) || find_user_by_import_id(t["UserID"])&.id || -1,
           title: @htmlentities.decode(t['Subject']).strip[0...255],
-          category: category_id_from_imported_category_id(t['ForumID']),
+          category: category_id,
           views: t['TotalViews'],
           raw: t["Body"].gsub("[br]", "\n"),
           created_at: t["ThreadDate"],
