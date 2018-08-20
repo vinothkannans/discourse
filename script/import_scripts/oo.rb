@@ -173,7 +173,7 @@ class ImportScripts::Oo < ImportScripts::Base
           title: @htmlentities.decode(t['Subject']).strip[0...255],
           category: category_id_from_imported_category_id(t['ForumID']),
           views: t['TotalViews'],
-          raw: t["Body"],
+          raw: t["Body"].gsub("[br]", "\n"),
           created_at: t["ThreadDate"],
           import_mode: true
         }
@@ -209,7 +209,7 @@ class ImportScripts::Oo < ImportScripts::Base
           id: p['PostID'],
           user_id: user_id_from_imported_user_id(p["UserID"]) || find_user_by_import_id(p["UserID"])&.id || -1,
           topic_id: topic[:topic_id],
-          raw: p["Body"],
+          raw: p["Body"].gsub("[br]", "\n"),
           created_at: p["PostDate"],
           import_mode: true
         }
