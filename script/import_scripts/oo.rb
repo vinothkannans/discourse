@@ -167,10 +167,10 @@ class ImportScripts::Oo < ImportScripts::Base
 
       break if topics.empty?
 
-      category_id = Category.find_by(name: "Staff")&.id if t['ForumID'] == 1
-      category_id ||= category_id_from_imported_category_id(t['ForumID'])
-
       create_posts(topics, total: total_topics, offset: offset) do |t|
+        category_id = Category.find_by(name: "Staff")&.id if t['ForumID'] == 1
+        category_id ||= category_id_from_imported_category_id(t['ForumID'])
+
         {
           id: "#{t['ThreadID']}",
           user_id: user_id_from_imported_user_id(t["UserID"]) || find_user_by_import_id(t["UserID"])&.id || -1,
