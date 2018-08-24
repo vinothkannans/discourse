@@ -213,7 +213,7 @@ class ImportScripts::Oo < ImportScripts::Base
       break if posts.empty?
 
       create_posts(posts, total: total_posts, offset: offset) do |p|
-        next unless topic = topic_lookup_from_imported_post_id(p["ThreadID"])
+        next unless topic = topic_lookup_from_imported_post_id(p["PostID"])
 
         new_post = {
           id: p['PostID'],
@@ -242,7 +242,8 @@ class ImportScripts::Oo < ImportScripts::Base
 
     while data = raw.match(/\[quote postid="(\d+)" user="(.+)"\]/) do
       post_id = post_id_from_imported_post_id(data[1]) || ""
-      topic_id = post_id.present? ? Post.find(post_id).topic_id : ""
+      topic = topic_lookup_from_imported_post_id(data[1])
+      topic_id = topic.present? ? topic[:topic_id] : ""
       username = data[2] || ""
       tag = "[quote=\"#{username}, post:#{post_id}, topic:#{topic_id}\"]"
       raw.sub!(data[0], tag)
