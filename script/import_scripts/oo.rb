@@ -52,11 +52,14 @@ class ImportScripts::Oo < ImportScripts::Base
   end
 
   def execute
+    SiteSetting.download_remote_images_to_local = false
+
     import_groups
     import_users
     import_categories
     import_topics
     import_posts
+    create_permalinks
   end
 
   def import_groups
@@ -138,7 +141,7 @@ class ImportScripts::Oo < ImportScripts::Base
         description: c["Description"].presence,
         position: c["SortOrder"],
         post_create_action: proc do |category|
-          Permalink.find_or_create_by(url: "forums/viewforum.aspx?forumid=#{c["ForumID"]}", category_id: category.id)
+          Permalink.find_or_create_by(url: "/forums/viewforum.aspx?forumid=#{c["ForumID"]}", category_id: category.id)
         end
       }
     end
@@ -173,13 +176,14 @@ class ImportScripts::Oo < ImportScripts::Base
         category_id ||= category_id_from_imported_category_id(t['ForumID'])
 
         {
-          id: "#{t['ThreadID']}",
+          id: "#{t['PostID']}",
           user_id: user_id_from_imported_user_id(t["UserID"]) || find_user_by_import_id(t["UserID"])&.id || -1,
           title: @htmlentities.decode(t['Subject']).strip[0...255],
           category: category_id,
           views: t['TotalViews'],
-          raw: t["Body"].gsub("[br]", "\n"),
+          raw: format_raw(p),
           created_at: t["ThreadDate"],
+          custom_fields: { import_topic_id: t["ThreadID"] },
           import_mode: true
         }
       end
@@ -214,7 +218,7 @@ class ImportScripts::Oo < ImportScripts::Base
           id: p['PostID'],
           user_id: user_id_from_imported_user_id(p["UserID"]) || find_user_by_import_id(p["UserID"])&.id || -1,
           topic_id: topic[:topic_id],
-          raw: p["Body"].gsub("[br]", "\n"),
+          raw: format_raw(p),
           created_at: p["PostDate"],
           import_mode: true
         }
@@ -230,6 +234,50 @@ class ImportScripts::Oo < ImportScripts::Base
         new_post
       end
     end
+  end
+
+  def format_raw(post)
+    raw = post["Body"].gsub("[br]", "\n")
+
+    while data = raw.match(/\[quote postid="(\d+)" user="(.+)"\]/) do
+      post_id = post_id_from_imported_post_id(data[1]) || ""
+      topic_id = topic_id_from_imported_post_id(data[1]) || ""
+      username = data[2] || ""
+      tag = "[quote=\"#{username}, post:#{post_id}, topic:#{topic_id}\"]"
+      raw.sub!(data[0], tag)
+    end
+
+    raw
+  end
+
+  def create_permalinks
+    puts "Creating permalinks"
+
+    SiteSetting.permalink_normalizations = '/forums\\/viewpost\\.aspx\\?postid=(\\d+)//p/\\1'
+
+    sql = <<-SQL
+    INSERT INTO permalinks (url, topic_id, created_at, updated_at)
+    SELECT '/p/' || value, p.topic_id, current_timestamp, current_timestamp
+    FROM post_custom_fields f
+    JOIN posts p on f.post_id = p.id AND post_number = 1
+    LEFT JOIN permalinks pm ON url = '/p/' || value
+    WHERE pm.id IS NULL AND f.name = 'import_id'
+SQL
+
+    r = DB.exec sql
+    puts "#{r} permalinks to topics added!"
+
+    sql = <<-SQL
+    INSERT INTO permalinks (url, post_id, created_at, updated_at)
+    SELECT '/p/' || value, p.id, current_timestamp, current_timestamp
+    FROM post_custom_fields f
+    JOIN posts p on f.post_id = p.id AND post_number <> 1
+    LEFT JOIN permalinks pm ON url = '/p/' || value
+    WHERE pm.id IS NULL AND f.name = 'import_id'
+SQL
+
+    r = DB.exec sql
+    puts "#{r} permalinks to posts added!"
   end
 
   def sql_query(sql)
