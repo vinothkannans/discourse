@@ -243,11 +243,11 @@ class ImportScripts::Oo < ImportScripts::Base
     raw = post["Body"].gsub("[br]", "\n")
 
     while data = raw.match(/\[quote postid="(\d+)" user="(.+)"\]/) do
-      post_id = post_id_from_imported_post_id(data[1]) || ""
       topic = topic_lookup_from_imported_post_id(data[1])
+      post_number = topic.present? ? topic[:post_number] : ""
       topic_id = topic.present? ? topic[:topic_id] : ""
       username = data[2] || ""
-      tag = "[quote=\"#{username}, post:#{post_id}, topic:#{topic_id}\"]"
+      tag = "[quote=\"#{username}, post:#{post_number}, topic:#{topic_id}\"]"
       raw.sub!(data[0], tag)
     end
 
