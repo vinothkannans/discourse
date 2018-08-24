@@ -159,7 +159,7 @@ class ImportScripts::Oo < ImportScripts::Base
     batches(BATCH_SIZE) do |offset|
       sql = <<-SQL
         SELECT T.ThreadID, T.ForumID, T.UserID, T.ThreadDate, T.TotalViews, T.IsLocked,
-               P.Subject, P.Body
+               P.PostID, P.Subject, P.Body
           FROM forums_Threads AS T
           INNER JOIN forums_Posts AS P ON T.ThreadID = P.ThreadID AND P.PostLevel = 1
       ORDER BY T.ThreadID
