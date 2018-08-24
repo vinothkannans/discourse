@@ -241,7 +241,7 @@ class ImportScripts::Oo < ImportScripts::Base
 
     while data = raw.match(/\[quote postid="(\d+)" user="(.+)"\]/) do
       post_id = post_id_from_imported_post_id(data[1]) || ""
-      topic_id = topic_id_from_imported_post_id(data[1]) || ""
+      topic_id = post_id.present? ? Post.find(post_id).topic_id : ""
       username = data[2] || ""
       tag = "[quote=\"#{username}, post:#{post_id}, topic:#{topic_id}\"]"
       raw.sub!(data[0], tag)
