@@ -53,6 +53,7 @@ class ImportScripts::Oo < ImportScripts::Base
 
   def execute
     SiteSetting.download_remote_images_to_local = false
+    SiteSetting.login_required = true
 
     import_groups
     import_users
