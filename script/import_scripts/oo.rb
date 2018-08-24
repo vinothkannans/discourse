@@ -54,6 +54,7 @@ class ImportScripts::Oo < ImportScripts::Base
   def execute
     SiteSetting.download_remote_images_to_local = false
     SiteSetting.login_required = true
+    @thread_id_map = {}
 
     import_groups
     import_users
@@ -175,6 +176,7 @@ class ImportScripts::Oo < ImportScripts::Base
         category_id = nil
         category_id = Category.find_by(name: "Staff")&.id if t['ForumID'] == 1
         category_id ||= category_id_from_imported_category_id(t['ForumID'])
+        @thread_id_map[t["ThreadID"]] = t["PostID"]
 
         {
           id: "#{t['PostID']}",
@@ -213,7 +215,7 @@ class ImportScripts::Oo < ImportScripts::Base
       break if posts.empty?
 
       create_posts(posts, total: total_posts, offset: offset) do |p|
-        next unless topic = topic_lookup_from_imported_post_id(p["PostID"])
+        next unless topic = topic_lookup_from_imported_post_id(@thread_id_map[p["ThreadID"]])
 
         new_post = {
           id: p['PostID'],
