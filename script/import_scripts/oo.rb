@@ -181,7 +181,7 @@ class ImportScripts::Oo < ImportScripts::Base
           title: @htmlentities.decode(t['Subject']).strip[0...255],
           category: category_id,
           views: t['TotalViews'],
-          raw: format_raw(p),
+          raw: format_raw(t),
           created_at: t["ThreadDate"],
           custom_fields: { import_topic_id: t["ThreadID"] },
           import_mode: true
