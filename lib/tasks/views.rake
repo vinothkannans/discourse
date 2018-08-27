@@ -22,10 +22,10 @@ task 'import:logins', [:file_name] => [:environment] do |_, args|
     next if user.blank?
 
     last_login_date = DateTime.strptime(row["LAST_LOGIN_DT"], '%m/%d/%Y %H:%M:%S')
-    return if u.last_seen_at >= last_login_date
+    return if user.last_seen_at >= last_login_date
 
-    u.last_seen_at = last_login_date
-    if u.save
+    user.last_seen_at = last_login_date
+    if user.save
       puts "."
     else
       puts "X"
