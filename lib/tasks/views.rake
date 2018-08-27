@@ -4,10 +4,24 @@ task 'import:views', [:file_name] => [:environment] do |_, args|
   csv = CSV.parse(csv_text, :headers => true)
   csv.each do |row|
     views = row["VIEWS_COUNT"].to_i
-    next if views == 0
+    if views == 0
+      puts "."
+      next
+    end
 
     message_id = row["MESSAGE_ID"]
+    topic = PostCustomField.find_by(name: "import_unique_id", value: message_id).try(:post).try(:topic)
+    if topic.blank?
+      puts "topic not found"
+      next
+    end
 
+    topic.views += views
+    if topic.save
+      puts "."
+    else
+      puts "X"
+    end
   end
   puts "", "Done", ""
 end
