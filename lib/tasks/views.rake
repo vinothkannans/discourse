@@ -18,7 +18,7 @@ task 'import:logins', [:file_name] => [:environment] do |_, args|
   csv = CSV.parse(csv_text, :headers => true)
   csv.each do |row|
     lithium_id = row["LITHIUM_ID"]
-    user = User.find_by(name: "import_id", value: lithium_id)
+    user = UserCustomField.find_by(name: "import_id", value: lithium_id).try(:user)
     next if user.blank?
 
     last_login_date = DateTime.parse(row["LAST_LOGIN_DT"])
