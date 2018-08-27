@@ -12,7 +12,7 @@ task 'import:views', [:file_name] => [:environment] do |_, args|
     message_id = row["MESSAGE_ID"]
     topic = PostCustomField.find_by(name: "import_unique_id", value: message_id).try(:post).try(:topic)
     if topic.blank?
-      puts "topic not found"
+      puts "#{message_id} topic not found"
       next
     end
 
@@ -34,13 +34,13 @@ task 'import:logins', [:file_name] => [:environment] do |_, args|
     lithium_id = row["LITHIUM_ID"]
     user = UserCustomField.find_by(name: "import_id", value: lithium_id).try(:user)
     if user.blank?
-      puts "user not found"
+      puts "#{lithium_id} user not found"
       next
     end
 
     last_login_date = DateTime.strptime(row["LAST_LOGIN_DT"], '%m/%d/%Y %H:%M:%S')
     if user.last_seen_at >= last_login_date
-      puts "-"
+      puts "#{lithium_id} #{user.id} ---"
       next
     end
 
