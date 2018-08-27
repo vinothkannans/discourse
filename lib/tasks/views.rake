@@ -5,7 +5,7 @@ task 'import:views', [:file_name] => [:environment] do |_, args|
   csv.each do |row|
     views = row["VIEWS_COUNT"].to_i
     if views == 0
-      puts "."
+      puts "-"
       next
     end
 
@@ -40,7 +40,7 @@ task 'import:logins', [:file_name] => [:environment] do |_, args|
 
     last_login_date = DateTime.strptime(row["LAST_LOGIN_DT"], '%m/%d/%Y %H:%M:%S')
     if user.last_seen_at >= last_login_date
-      puts "."
+      puts "-"
       next
     end
 
