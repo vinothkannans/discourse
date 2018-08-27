@@ -19,10 +19,16 @@ task 'import:logins', [:file_name] => [:environment] do |_, args|
   csv.each do |row|
     lithium_id = row["LITHIUM_ID"]
     user = UserCustomField.find_by(name: "import_id", value: lithium_id).try(:user)
-    next if user.blank?
+    if user.blank?
+      puts "user not found"
+      next
+    end
 
     last_login_date = DateTime.strptime(row["LAST_LOGIN_DT"], '%m/%d/%Y %H:%M:%S')
-    return if user.last_seen_at >= last_login_date
+    if user.last_seen_at >= last_login_date
+      puts "."
+      next
+    end
 
     user.last_seen_at = last_login_date
     if user.save
