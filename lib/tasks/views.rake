@@ -21,7 +21,7 @@ task 'import:logins', [:file_name] => [:environment] do |_, args|
     user = UserCustomField.find_by(name: "import_id", value: lithium_id).try(:user)
     next if user.blank?
 
-    last_login_date = Date.strptime(row["LAST_LOGIN_DT"], '%m/%d/%y %h:%m:%s')
+    last_login_date = DateTime.strptime(row["LAST_LOGIN_DT"], '%m/%d/%Y %H:%M:%S')
     return if u.last_seen_at >= last_login_date
 
     u.last_seen_at = last_login_date
