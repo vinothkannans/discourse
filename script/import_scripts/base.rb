@@ -211,7 +211,7 @@ class ImportScripts::Base
 
     import_id_clause = import_ids.map { |id| "('#{PG::Connection.escape_string(id.to_s)}')" }.join(",")
 
-    connection.exec("INSERT INTO import_ids VALUES #{import_id_clause}")
+    connection.exec("INSERT INTO import_ids VALUES #{import_id_clause} ON CONFLICT (val) DO NOTHING")
 
     existing = "#{type.to_s.classify}CustomField".constantize
     existing = existing.where(name: 'import_id')
