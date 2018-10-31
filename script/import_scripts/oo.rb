@@ -42,7 +42,8 @@ class ImportScripts::Oo < ImportScripts::Base
       password: SQLSERVER_PW,
       host: SQLSERVER_HOST,
       port: SQLSERVER_PORT,
-      database: SQLSERVER_DB
+      database: SQLSERVER_DB,
+      timeout: 30
     )
   end
 
@@ -90,7 +91,7 @@ class ImportScripts::Oo < ImportScripts::Base
 
     batches(BATCH_SIZE) do |offset|
       sql = <<-SQL
-        SELECT UserID, Email, DirectedId, DisplayUserName
+        SELECT UserID, Email, DirectedId, DisplayUserName, DateCreated
           FROM forums_Users
       ORDER BY UserID
         OFFSET #{offset} ROWS
@@ -106,6 +107,7 @@ class ImportScripts::Oo < ImportScripts::Base
           id: u["UserID"],
           username: u["DisplayUserName"],
           email: ((u["Email"] || '').downcase.presence || "fakeemail#{u["UserID"]}@fakeemail.com").gsub(/[\s\/]/, ''),
+          created_at: u["DateCreated"],
           custom_fields: {
             directed_id: u["DirectedId"]
           },
