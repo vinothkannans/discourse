@@ -71,6 +71,8 @@ class BulkImport::Oot < BulkImport::Base
       topics.each do |t|
         @thread_id_map[t["ThreadID"]] = t["PostID"]
       end
+
+      puts "", offset
     end
   end
 
@@ -106,6 +108,8 @@ class BulkImport::Oot < BulkImport::Base
           raw: format_raw(p)
         }
       end
+
+      puts "", offset
     end
   end
 
@@ -125,6 +129,14 @@ class BulkImport::Oot < BulkImport::Base
 
   def sql_query(sql)
     @client.execute(sql)
+  end
+
+  def batches(batch_size = 1000)
+    offset = 0
+    loop do
+      yield offset
+      offset += batch_size
+    end
   end
 end
 
