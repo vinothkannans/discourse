@@ -94,7 +94,7 @@ class BulkImport::Oot < BulkImport::Base
       break if posts.empty?
 
       create_posts(posts) do |p|
-        next unless topic_id = topic_id_from_imported_id(@thread_id_map[p["ThreadID"]])
+        next unless topic_id = topic_id_from_imported_post_id(@thread_id_map[p["ThreadID"]])
         next if p['Body'].blank?
 
         reply_to_post_number = p["ParentID"].present? ? post_number_from_imported_id(p["ParentID"]) : nil
