@@ -57,7 +57,7 @@ class BulkImport::Oot < BulkImport::Base
       sql = <<-SQL
         SELECT U.UserID, I.FileName
           FROM forums_Users AS U
-          INNER JOIN WootImage AS I ON U.ObjectId = I.ObjectId
+          INNER JOIN WootImage AS I ON U.ObjectId = I.ObjectId AND I.FormatKey = "AvatarProfile"
       ORDER BY U.UserID
         OFFSET #{offset} ROWS
         FETCH NEXT #{BATCH_SIZE} ROWS ONLY
