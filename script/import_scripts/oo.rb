@@ -53,15 +53,15 @@ class ImportScripts::Oo < ImportScripts::Base
   end
 
   def execute
-    SiteSetting.download_remote_images_to_local = false
-    SiteSetting.login_required = true
-    @thread_id_map = {}
+    # SiteSetting.download_remote_images_to_local = false
+    # SiteSetting.login_required = true
+    # @thread_id_map = {}
 
-    import_groups
-    import_users
-    import_categories
-    import_topics
-    import_posts
+    # import_groups
+    # import_users
+    # import_categories
+    # import_topics
+    # import_posts
     create_permalinks
   end
 
