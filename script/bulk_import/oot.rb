@@ -29,8 +29,6 @@ class BulkImport::Oot < BulkImport::Base
   def initialize
     super
 
-    @htmlentities = HTMLEntities.new
-
     @client = TinyTds::Client.new(
       username: SQLSERVER_USER,
       password: SQLSERVER_PW,
@@ -45,10 +43,36 @@ class BulkImport::Oot < BulkImport::Base
     SiteSetting.download_remote_images_to_local = false
     SiteSetting.login_required = true
     SiteSetting.disable_emails = "non-staff"
-    @thread_id_map = {}
+    # @thread_id_map = {}
 
-    map_topics
-    import_posts
+    # map_topics
+    # import_posts
+    import_avatars
+  end
+
+  def import_avatars
+    puts "", "importing avatars..."
+
+    batches(BATCH_SIZE) do |offset|
+      sql = <<-SQL
+        SELECT U.UserID, I.FileName
+          FROM forums_Users AS U
+          INNER JOIN WootImage AS I ON U.ObjectId = I.ObjectId
+      ORDER BY U.UserID
+        OFFSET #{offset} ROWS
+        FETCH NEXT #{BATCH_SIZE} ROWS ONLY
+      SQL
+
+      avatars = sql_query(sql).to_a
+
+      break if avatars.empty?
+
+      avatars.each do |a|
+        UserCustomField.create(user_id: user_id_from_imported_id(a["UserID"]), name: "import_avatar_url", value: a["FileName"])
+      end
+
+      puts "", offset
+    end
   end
 
   def map_topics
