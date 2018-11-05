@@ -47,7 +47,49 @@ class BulkImport::Oot < BulkImport::Base
 
     # map_topics
     # import_posts
-    import_avatars
+    # import_avatars
+    fix_topic_timestamp
+  end
+
+  def fix_topic_timestamp
+    puts "", "fixing topic timestamps..."
+
+    batches(BATCH_SIZE) do |offset|
+      sql = <<-SQL
+        SELECT PostID, PostDate
+          FROM forums_Posts
+        WHERE PostLevel = 1
+        OFFSET #{offset} ROWS
+        FETCH NEXT #{BATCH_SIZE} ROWS ONLY
+      SQL
+
+      posts = sql_query(sql).to_a
+
+      break if posts.empty?
+
+      posts.each do |p|
+        next unless post_id = post_id_from_imported_id(t["PostID"])
+
+        post = Post.find(post_id)
+        timestamp = p["PostDate"]
+        post.created_at = timestamp
+        post.updated_at = timestamp
+        post.save!
+
+        topic = post.topic
+        topic.created_at = timestamp
+
+        if topic.posts_count <= 1
+          topic.last_posted_at = timestamp
+          topic.updated_at = timestamp
+          topic.bumped_at = timestamp
+        end
+
+        topic.save!
+      end
+
+      puts "", offset
+    end
   end
 
   def import_avatars
