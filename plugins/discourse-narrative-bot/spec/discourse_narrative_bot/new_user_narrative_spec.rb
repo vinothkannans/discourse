@@ -401,6 +401,22 @@ describe DiscourseNarrativeBot::NewUserNarrative do
 
             expect(narrative.get_data(user)[:state].to_sym).to eq(:tutorial_flag)
           end
+
+          describe 'when allow_flagging_staff is false' do
+            it 'should go to the right state' do
+              SiteSetting.allow_flagging_staff = false
+              post.update!(raw: skip_trigger)
+
+              DiscourseNarrativeBot::TrackSelector.new(
+                :reply,
+                user,
+                post_id: post.id
+              ).select
+
+              expect(narrative.get_data(user)[:state].to_sym)
+                .to eq(:tutorial_search)
+            end
+          end
         end
       end
 
@@ -687,6 +703,23 @@ describe DiscourseNarrativeBot::NewUserNarrative do
 
             expect(narrative.get_data(user)[:state].to_sym).to eq(:tutorial_mention)
           end
+        end
+      end
+
+      describe 'when user mentions is disabled' do
+        before do
+          SiteSetting.enable_mentions = false
+        end
+
+        it 'should skip the mention tutorial step' do
+          post.update!(
+            raw: ':monkey: :fries:'
+          )
+
+          narrative.expects(:enqueue_timeout_job).with(user)
+          narrative.input(:reply, user, post: post)
+
+          expect(narrative.get_data(user)[:state].to_sym).to eq(:tutorial_formatting)
         end
       end
 

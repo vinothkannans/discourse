@@ -35,10 +35,11 @@ describe Oneboxer do
 
       replier = Fabricate(:user)
 
-      public_post   = Fabricate(:post, raw: "This post has an emoji :+1:")
-      public_topic  = public_post.topic
-      public_reply  = Fabricate(:post, topic: public_topic, post_number: 2, user: replier)
-      public_hidden = Fabricate(:post, topic: public_topic, post_number: 3, hidden: true)
+      public_post             = Fabricate(:post, raw: "This post has an emoji :+1:")
+      public_topic            = public_post.topic
+      public_reply            = Fabricate(:post, topic: public_topic, post_number: 2, user: replier)
+      public_hidden           = Fabricate(:post, topic: public_topic, post_number: 3, hidden: true)
+      public_moderator_action = Fabricate(:post, topic: public_topic, post_number: 4, user: staff, post_type: Post.types[:moderator_action])
 
       user = public_post.user
       public_category = public_topic.category
@@ -56,6 +57,11 @@ describe Oneboxer do
       expect(onebox).to include(public_reply.excerpt)
       expect(onebox).to include(%{data-post="2"})
       expect(onebox).to include(PrettyText.avatar_img(replier.avatar_template, "tiny"))
+
+      onebox = preview(public_moderator_action.url, user, public_category)
+      expect(onebox).to include(public_moderator_action.excerpt)
+      expect(onebox).to include(%{data-post="4"})
+      expect(onebox).to include(PrettyText.avatar_img(staff.avatar_template, "tiny"))
 
       onebox = preview(public_reply.url, user, public_category, public_topic)
       expect(onebox).not_to include(public_topic.title)
@@ -105,6 +111,23 @@ describe Oneboxer do
       cpp.post_process_oneboxes
       expect(cpp.html).to eq("<p><a href=\"#{Discourse.base_url}/new?%27class=black\">http://test.localhost/new?%27class=black</a></p>")
     end
+  end
+
+  it "does not crawl blacklisted URLs" do
+    SiteSetting.onebox_domains_blacklist = "git.*.com|bitbucket.com"
+    url = 'https://github.com/discourse/discourse/commit/21b562852885f883be43032e03c709241e8e6d4f'
+    stub_request(:head, 'https://discourse.org/').to_return(status: 302, body: "", headers: { location: url })
+
+    expect(Oneboxer.external_onebox(url)[:onebox]).to be_empty
+    expect(Oneboxer.external_onebox('https://discourse.org/')[:onebox]).to be_empty
+  end
+
+  it "does not consider ignore_redirects domains as blacklisted" do
+    url = 'https://store.steampowered.com/app/271590/Grand_Theft_Auto_V/'
+    stub_request(:head, url).to_return(status: 200, body: "", headers: {})
+    stub_request(:get, url).to_return(status: 200, body: "", headers: {})
+
+    expect(Oneboxer.external_onebox(url)[:onebox]).to be_present
   end
 
 end

@@ -92,6 +92,7 @@ module Discourse
     if Rails.env == "development" || Rails.env == "test"
       config.assets.paths << "#{config.root}/test/javascripts"
       config.assets.paths << "#{config.root}/test/stylesheets"
+      config.assets.paths << "#{config.root}/node_modules"
     end
 
     # Allows us to skip minifincation on some files
@@ -116,6 +117,15 @@ module Discourse
       plugin-third-party.js
       markdown-it-bundle.js
       service-worker.js
+      google-tag-manager.js
+      google-universal-analytics.js
+      preload-application-data.js
+      authentication-complete.js
+      print-page.js
+      omniauth-complete.js
+      activate-account.js
+      auto-redirect.js
+      wizard-start.js
     }
 
     # Precompile all available locales
@@ -184,6 +194,9 @@ module Discourse
     # so nginx strips etags, may revisit when mainline nginx
     # supports etags (post 1.7)
     config.middleware.delete Rack::ETag
+
+    require 'content_security_policy'
+    config.middleware.swap ActionDispatch::ContentSecurityPolicy::Middleware, ContentSecurityPolicy::Middleware
 
     require 'middleware/discourse_public_exceptions'
     config.exceptions_app = Middleware::DiscoursePublicExceptions.new(Rails.public_path)

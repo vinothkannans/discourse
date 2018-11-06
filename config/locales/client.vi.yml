@@ -168,7 +168,7 @@ vi:
     guidelines: "Hướng dẫn"
     privacy_policy: "Chính sách về quyền riêng tư"
     privacy: "Sự riêng tư"
-    terms_of_service: "Điều khoản dịch vụ"
+    tos: "Điều khoản dịch vụ"
     mobile_view: "Xem ở chế độ di động"
     desktop_view: "Xem ở chế độ máy tính"
     you: "Bạn"
@@ -213,12 +213,8 @@ vi:
         bookmark: "Chọn bài viết đầu tiên của chủ đề cho vào dấu trang"
         unbookmark: "Chọn để xoá toàn bộ dấu trang trong chủ đề này"
     bookmarks:
-      not_logged_in: "rất tiếc, bạn phải đăng nhập để đánh dấu bài viết"
       created: "bạn đã đánh dấu bài viết này"
-      not_bookmarked: "bạn đã đọc bài viết này; nhấp chuột để đánh dấu"
-      last_read: "đây là bài viết cuối cùng bạn đã đọc; nhấp chuột để đánh dấu"
       remove: "Xóa dấu trang"
-      confirm_clear: "Bạn có chắc muốn xóa tất cả dấu trang ở topic này?"
     preview: "xem trước"
     cancel: "hủy"
     save: "Lưu thay đổi"
@@ -226,7 +222,6 @@ vi:
     saved: "Đã lưu!"
     upload: "Tải lên"
     uploading: "Đang tải lên..."
-    uploading_filename: "Đang tải lên {{filename}}..."
     uploaded: "Đã tải lên!"
     pasting: "Đang gõ"
     enable: "Kích hoạt"
@@ -500,7 +495,6 @@ vi:
       watched_first_post_tags: "Xem bài viết đầu tiên"
       watched_first_post_tags_instructions: "Bạn sẽ nhận được thông báo khi có ai đó đăng chủ đề mới có chứa thẻ này."
       muted_categories: "Im lặng"
-      muted_categories_instructions: "Bạn sẽ không bao giờ được thông báo về bất cứ điều gì về các chủ đề mới trong các chuyên mục này, và chúng sẽ không hiển thị mới nhất"
       delete_account: "Xoá Tài khoản của tôi"
       delete_account_confirm: "Bạn có chắc chắn muốn xóa vĩnh viễn tài khoản của bạn? Hành động này không thể được hoàn tác!"
       deleted_yourself: "Tài khoản của bạn đã được xóa thành công."
@@ -633,7 +627,6 @@ vi:
         always: "luôn luôn"
         never: "không"
       email_digests:
-        title: "Khi tôi không ghé thăm,  hãy gửi cho tôi email tóm tắt về các chủ đề nhiều người quan tâm nhất và các câu trả lời."
         every_30_minutes: "mỗi 30 phút"
         every_hour: "hàng giờ"
         daily: "hàng ngày"
@@ -789,9 +782,6 @@ vi:
       enabled: "Website đang ở chế độ chỉ đọc, bạn có thể duyệt xem nhưng không thể trả lời, likes, hay thực hiện các hành động khác."
       login_disabled: "Chức năng Đăng nhập đã bị tắt khi website trong trạng thái chỉ đọc"
       logout_disabled: "Chức năng đăng xuất đã bị tắt khi website đang trong trạng thái chỉ đọc."
-    too_few_topics_and_posts_notice: "Hãy <a href='http://blog.discourse.org/2014/08/building-a-discourse-community/'>bắt đầu thảo luận!</a> Hiện có <strong>%{currentTopics} / %{requiredTopics}</strong> chủ đề và <strong>%{currentPosts} / %{requiredPosts}</strong> bài viết. Khách ghé thăm cần một số chủ đề để đọc và trả lời."
-    too_few_topics_notice: "Hãy <a href='http://blog.discourse.org/2014/08/building-a-discourse-community/'>bắt đầu thảo luận!</a> Hiện có <strong>%{currentTopics} / %{requiredTopics}</strong> chủ đề. Khách ghé thăm cần một số chủ đề để đọc và trả lời."
-    too_few_posts_notice: "Hãy <a href='http://blog.discourse.org/2014/08/building-a-discourse-community/'>bắt đầu thảo luận!</a> Hiện có <strong>%{currentPosts} / %{requiredPosts}</strong> bài viết. Khách ghé thăm cần một số chủ đề để đọc và trả lời."
     logs_error_rate_notice:
       rate:
         other: "%{count} lỗi/%{duration}"
@@ -816,8 +806,6 @@ vi:
       hide_session: "Nhắc vào ngày mai"
       hide_forever: "không, cảm ơn"
       hidden_for_session: "OK, Tôi sẽ hỏi bạn vào ngày mai. Bạn có thể luôn luôn sử dụng chức năng đăng nhập để tạo tài khoản."
-      intro: "Xin chào! :heart_eyes: Có vẻ như bạn đang thích thú để thảo luận, nhưng bạn chưa đăng nhập."
-      value_prop: "Khi bạn tạo tài khoản, website nhớ chính xác những gì bạn đã đọc, vì vậy bạn sẽ luôn trở lại đúng nơi đã rời đi. Bạn cũng có thể nhận thông báo ở đây hoặc qua email mỗi khi có bài viết mới. Bạn cũng có thể like bài viết để chia sẻ cảm xúc của mình. :heartbeat:"
     summary:
       enabled_description: "Bạn đang xem một bản tóm tắt của chủ đề này: các bài viết thú vị nhất được xác định bởi cộng đồng."
       description: "Có <b>{{replyCount}}</b> trả lời."
@@ -831,7 +819,6 @@ vi:
       disable: "Xem các bài viết bị xoá"
     private_message_info:
       title: "Tin nhắn"
-      invite: "Mời người khác..."
       remove_allowed_user: "Bạn thực sự muốn xóa {{name}} từ tin nhắn này?"
     email: 'Email'
     username: 'Username'
@@ -983,7 +970,6 @@ vi:
       link_description: "Nhập mô tả liên kết ở đây"
       link_dialog_title: "Chèn liên kết"
       link_optional_text: "tiêu đề tùy chọn"
-      link_url_placeholder: "http://example.com"
       quote_title: "Trích dẫn"
       quote_text: "Trích dẫn"
       code_title: "Văn bản định dạng trước"
@@ -1352,13 +1338,9 @@ vi:
         instructions:
           other: "Hãy chọn chủ đề bạn muốn di chuyển <b>{{count}}</b> bài viết này tới."
       change_owner:
-        title: "Chuyển chủ sở hữu bài viết"
         action: "chuyển chủ sở hữu"
         error: "Có lỗi xảy ra khi thay đổi quyền sở hữu của các bài viết."
-        label: "Chủ sở hữ mới của Bài viết"
         placeholder: "tên đăng nhập của chủ sở hữu mới"
-        instructions:
-          other: "Hãy chọn chủ sở hữu mới cho {{count}} bài viết của <b>{{old_user}}</b>."
       change_timestamp:
         action: "đổi timestamp"
         invalid_timestamp: "Timestamp không thể trong tương lai."
@@ -1753,7 +1735,6 @@ vi:
         this_week: "Tuần"
         today: "Ngày"
         other_periods: "xem top"
-    browser_update: 'Không may, <a href="http://www.discourse.org/faq/#browser">trình duyệt của bạn quá cũ để website hoạt động</a>. Hãy <a href="http://browsehappy.com">nâng cấp trình duyệt</a> của bạn.'
     permission_types:
       full: "Tạo / Trả lời / Xem"
       create_post: "Trả lời / Xem"
@@ -2014,7 +1995,6 @@ vi:
         new_style: "Style mới"
         import: "Nhập"
         delete: "Xóa"
-        about: "Chỉnh sửa CSS  và HTML header trên trang. Thêm tùy biến để bắt đầu."
         color: "Màu sắc"
         opacity: "Độ mờ"
         copy: "Sao chép"
@@ -2142,7 +2122,6 @@ vi:
         staff_actions:
           title: "Staff Actions"
           clear_filters: "Hiện thị mọi thứ"
-          staff_user: "Tài khoản Nhân viên"
           target_user: "Target User"
           subject: "Chủ đề"
           when: "Khi"

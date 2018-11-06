@@ -9,6 +9,7 @@ import UsernameValidation from "discourse/mixins/username-validation";
 import NameValidation from "discourse/mixins/name-validation";
 import UserFieldsValidation from "discourse/mixins/user-fields-validation";
 import { userPath } from "discourse/lib/url";
+import { findAll } from "discourse/models/login-method";
 
 export default Ember.Controller.extend(
   ModalFunctionality,
@@ -176,6 +177,11 @@ export default Ember.Controller.extend(
       }
     }.observes("emailValidation", "accountEmail"),
 
+    // Determines whether at least one login button is enabled
+    hasAtLeastOneLoginButton: function() {
+      return findAll(this.siteSettings).length > 0;
+    }.property(),
+
     @on("init")
     fetchConfirmationValue() {
       return ajax(userPath("hp.json")).then(json => {
@@ -205,6 +211,11 @@ export default Ember.Controller.extend(
           "accountChallenge"
         );
         const userFields = this.get("userFields");
+        const destinationUrl = this.get("authOptions.destination_url");
+
+        if (!Ember.isEmpty(destinationUrl)) {
+          $.cookie("destination_url", destinationUrl, { path: "/" });
+        }
 
         // Add the userfields to the data
         if (!Ember.isEmpty(userFields)) {
@@ -255,10 +266,12 @@ export default Ember.Controller.extend(
                 this.get("rejectedPasswords").pushObject(attrs.accountPassword);
               }
               this.set("formSubmitted", false);
+              $.removeCookie("destination_url");
             }
           },
           () => {
             this.set("formSubmitted", false);
+            $.removeCookie("destination_url");
             return this.flash(I18n.t("create_account.failed"), "error");
           }
         );

@@ -30,7 +30,7 @@ PreloadStore.store("site", {
     { id: 21, name: "test" }
   ],
   filters: ["latest", "unread", "new", "starred", "read", "posted"],
-  periods: ["yearly", "monthly", "weekly", "daily"],
+  periods: ["all", "yearly", "monthly", "weekly", "daily"],
   top_menu_items: [
     "latest",
     "unread",
@@ -216,7 +216,7 @@ PreloadStore.store("site", {
     {
       id: 17,
       name: "uncategorized",
-      color: "AB9364",
+      color: "0088CC",
       text_color: "FFFFFF",
       slug: "uncategorized",
       topic_count: 229,

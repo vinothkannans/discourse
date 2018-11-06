@@ -103,10 +103,6 @@ da:
     embed:
       load_from_remote: "Der opstod en fejl ved indlæsningen af dette indlæg."
     site_settings:
-      min_username_length_exists: "Du kan ikke sætte minimumslængden for brugernavne over det korteste eksisterende brugernavn."
-      min_username_length_range: "Du kan ikke sætte minimum til mere end maksimum."
-      max_username_length_exists: "Du kan ikke sætte maksimumlængden for brugernavne under det længste eksisterende brugernavn."
-      max_username_length_range: "Du kan ikke sætte maksimum til mindre end minimum."
       default_categories_already_selected: "Du kan ikke vælge en kategori der er brugt i en anden liste."
       s3_upload_bucket_is_required: "Du kan ikke oploade til S3 med mindre du har angivet 's3_upload_bucket'."
   activemodel:
@@ -520,7 +516,6 @@ da:
       email_body: "%{link}\n\n%{message}"
     inappropriate:
       title: 'Upassende'
-      description: 'Dette indlæg har indhold som en rimelig person ville opfatte som stødende, udtryk for misbrug eller som et brud på <a href="/guidelines">vores sammenholds retningslinjer</a>.'
       long_form: 'markerede dette som stødende'
     notify_user:
       title: 'Send @{{username}} en besked'
@@ -554,11 +549,9 @@ da:
       long_form: 'markerede dette som spam'
     inappropriate:
       title: 'Upassende'
-      description: 'Dette emne har indlæg som en fornuftig person finder stødende, krænkende, eller som er i modstrid med <a href="/guidelines">Den Gode Tone</a>.'
       long_form: 'markeret upassende'
     notify_moderators:
       title: "Noget andet"
-      description: 'Dette emne kræver moderatorernes opmærksomhed baseret på <a href="/faq">Den Gode Tone</a>, <a href="%{tos_url}">Brugerbetingelser</a> eller en anden grund, som ikke er nævnt ovenfor.'
       long_form: 'markerede dette til gennemsyn'
       email_title: 'Emnet "%{title}" kræver moderator-opmærksomhed'
       email_body: "%{link}\n\n%{message}"
@@ -737,17 +730,9 @@ da:
   dashboard:
     rails_env_warning: "Din server kører i %{env}-tilstand."
     host_names_warning: "Filen config/database.yml bruger localhost som værtsnavn. Opdatér den med sitets værtsnavn."
-    gc_warning: 'Din server bruger Rubys standard garbage collection, hvilket ikke giver dig den bedste performance. Læs dette emne om performance-tuning: <a href="http://meta.discourse.org/t/tuning-ruby-and-rails-for-discourse/4126" target="_blank">Tuning Ruby and Rails for Discourse</a>.'
     sidekiq_warning: 'Sidekiq kører ikke. Mange opgaver, som f.eks. udsendelse af e-mail, afvikles asynkront af sidekiq. Du skal sikre dig at der kører mindst én sidekiq-proces. <a href="https://github.com/mperham/sidekiq" target="_blank">Læs mere om Sidekiq her</a>.'
     queue_size_warning: 'Antallet af job i kø er %{queue_size}, hvilket er højt. Dette kunne indikere at der er et problem med Sidekiq processerne, eller du behøver at tilføre flere Sidekiq resurser.'
     memory_warning: 'Din server kører med mindre end 1 GB samlet hukommelse. Det anbefales at have mindst 1 GB hukommelse.'
-    google_oauth2_config_warning: 'Serveren er konfigureret til at tillade signup med Google OAuth2 (enable_google_oauth2_logins),men klient id og klientens skjulte værdier er ikke indstillet. Gå til<a href="/admin/site_settings">the Site Settings</a> og opdater! <a href="https://meta.discourse.org/t/configuring-google-login-for-discourse/15858" target="_blank">Se denne guide for at lære mere</a>.'
-    facebook_config_warning: 'Serveren er konfigureret til at tillade tilmelding og login med Facebook (enable_facebook_logins), men app id og app secret værdierne er ikke angivet. Gå til <a href="/admin/site_settings">indstillinger</a> og opdatér indstillingerne. <a href="https://github.com/discourse/discourse/wiki/The-Discourse-Admin-Quick-Start-Guide#enable-facebook-logins" target="_blank">Se denne vejledning for mere information</a>.'
-    twitter_config_warning: 'Serveren er konfigureret til at tillade tilmelding og login med Twitter (enable_twitter_logins), men key og secret værdierne er ikke angivet. Gå til <a href="/admin/site_settings">indstillinger</a> og opdatér indstillingerne. <a href="https://github.com/discourse/discourse/wiki/The-Discourse-Admin-Quick-Start-Guide#enable-twitter-logins" target="_blank">Se denne vejledning for mere information</a>.'
-    github_config_warning: 'Serveren er konfigureret til at tillade tilmelding og login med GitHub (enable_github_logins), men client id og secret værdierne er ikke angivet. Gå til <a href="/admin/site_settings">indstillinger</a> og opdatér indstillingerne. <a href="https://github.com/discourse/discourse/wiki/The-Discourse-Admin-Quick-Start-Guide" target="_blank">Se denne vejledning for mere information</a>.'
-    s3_config_warning: 'Serveren er konfigureret til at uploade filer til s3, men mindst én af følgende indstililnger er ikke angivet: s3_access_key_id, s3_secret_access_key, s3_use_iam_profile eller s3_upload_bucket. Gå til <a href="/admin/site_settings">forum-indstillingerne</a> og opdatér indstillingerne. <a href="http://meta.discourse.org/t/how-to-set-up-image-uploads-to-s3/7229" target="_blank">Se "How to set up image uploads to S3?" for mere information</a>.'
-    image_magick_warning: 'Serveren er konfigureret til at lave thumbnails af store billeder, men ImageMagick er ikke installeret. Installér ImageMagick med din foretrukne package manager eller <a href="http://www.imagemagick.org/script/binary-releases.php" target="_blank">download den seneste udgave</a>.'
-    failing_emails_warning: 'Der er %{num_failed_jobs} email operationer der mislykkede. Tjek din app.yml for at sikre at din mail server indstillinger er korrekte. <a href="/sidekiq/retries" target="_blank">Se mislykkede operationer i Sidekiq</a>.'
     subfolder_ends_in_slash: "Din undermappe er ikke opsat korrekt; DISCOURSE_RELATIVE_URL_ROOT ender med en slash."
     email_polling_errored_recently:
       one: "Email afstemning har afstedkommet en fejl i de seneste 24 timer. Venligst se <a href='/logs' target='_blank'>the logs</a> for detaljer."
@@ -777,14 +762,12 @@ da:
     educate_until_posts: "When the user starts typing their first (n) new posts, show the pop-up new user education panel in the composer."
     title: "Sitets navn, som anvendt i tittel."
     site_description: "Beskriv denne side i én sætning, som anvendt i meta beskrivelsen."
-    contact_url: "Kontakt URL for denne side. Anvendt på kontakt admin, i tilfælde af hastesager."
     crawl_images: "Hent billeder fra eksterne URLs for at indsætte de korrekte bredde og højde dimensioner."
     download_remote_images_to_local: "Konverter eksterne billeder til lokale billeder ved at downloade dem; dette forebygger at billeder ikke forsvinder."
     download_remote_images_threshold: "Minimum hukommelse påkrævet på drev for at downloade billeder lokalt (i procent)"
     download_remote_images_max_days_old: "Undlade at downloade billeder til indlæg der er mere end n dage gamle."
     disabled_image_download_domains: "Eksterne billeder vil ikke blive hentet fra disse domæner. Afgrænset liste."
     editing_grace_period: "For (n) sekunder efter postering, vil redigering ikke skabe et nyt indlæg."
-    post_edit_time_limit: "The author can edit or delete their post for (n) minutes after posting. Set to 0 for forever."
     edit_history_visible_to_public: "Tillad alle at se tidligere versioner af et redigeret indlæg. Når slået fra, kan kun administrator se dette."
     delete_removed_posts_after: "Indlæg, fjernet af forfatteren, vil blive automatisk slettet efter (n) hours. Såfremt værdien sat til 0 vil indlæg blive fjernet straks."
     max_image_width: "Maximum thumbnail width of images in a post"
@@ -797,10 +780,7 @@ da:
     post_onebox_maxlength: "Max længde af Discourse indlæg i tegn"
     onebox_domains_blacklist: "En liste af domæner som aldrig vil blive onebox'et."
     max_oneboxes_per_post: "Maksimalt antal onebox-forekomster i et opslag."
-    logo_url: "Logoet på jeres site, øverst til venstre, burde være en bred rektangel. Hvis denne efterlades blank, vil sidens titel tekst blive vist."
     digest_logo_url: "Det alternative logo billede der anvendes øverst på jeres sides email opsummering, burde være en bred rektangel. Skal ikke være et SVG billede. Hvis denne efterlades blank, vil 'logo_url' blive anvendt."
-    logo_small_url: "Det lille logo øverst til venstre på siden burde være firkantet når der bladres ned. Såfremt denne efterlades blank. vil home 'glyph' blive vist."
-    favicon_url: "Favoritikonet for jeres side, se http://en.wikipedia.org/wiki/Favicon, bør være en png, for at det fungere korrekt over CDN."
     apple_touch_icon_url: "Ikon til Apple touch-enheder. Den anbefalede størrelse er 144px gange 144px."
     notification_email: "Afsender email adresse, anvendt når der sendes esentielle system emails. Domænet her skal have korrekt opsatte SPF, DKIM og 'PTR records', for succesfuld afskibning af mails."
     email_custom_headers: "En liste af brugerdefinerede e-mail-headers adskilt af |-tegn."
@@ -829,8 +809,6 @@ da:
     must_approve_users: "Personale skal godkende alle nye bruger konti inden de kan tilgå sitet. ADVARSEL: aktivering af dette for et live site vil medføre en ophævning af adgang for eksisterende ikke-personale brugere."
     pending_users_reminder_delay: "Underret moderatorer hvis nye brugere har ventet på godkendelse i længere end så mange timer. Skriv -1 for at deaktivere notifikationer."
     maximum_session_age: "Bruger vil forblive logget in for n hours siden sidste besøg"
-    ga_universal_tracking_code: "Google Universal Analytics (analytics.js) tracking code code, eg: UA-12345678-9; see http://google.com/analytics"
-    ga_universal_domain_name: "Google Universal Analytics (analytics.js) domain name, eg: mysite.com; see http://google.com/analytics"
     gtm_container_id: "Google Tag Manager container id. eg: GTM-ABCDEF"
     allow_moderators_to_create_categories: "Tillad moderatorer at skabe nye kategorier"
     use_admin_ip_whitelist: "Admins kan kun logge ind hvis de logger på fra en prædefineret IP liste:  (Admin > Logs > Screened Ips)."
@@ -855,14 +833,7 @@ da:
     enable_yahoo_logins: "Aktivér Yahoo-login"
     google_oauth2_client_id: "Client ID of your Google application."
     google_oauth2_client_secret: "Client secret of your Google application."
-    enable_twitter_logins: "Aktivér Twitter-login, kræver twitter_consumer_key og twitter_consumer_secret"
     enable_instagram_logins: "Aktivér Instagram-login, kræver instagram_consumer_key og instagram_consumer_secret"
-    enable_facebook_logins: "Aktivér Facebook-login, kræver facebook_app_id og facebook_app_secret"
-    facebook_app_id: "App id til Facebook-login, oprettes på https://developers.facebook.com/apps"
-    facebook_app_secret: "App secret til Facebook-login, oprettes på https://developers.facebook.com/apps"
-    enable_github_logins: "Aktivér Github-login, kræver github_client_id og github_client_secret"
-    github_client_id: "Client id til Github-login, oprettes på https://github.com/settings/applications."
-    github_client_secret: "Client secret til Github-login, oprettes på at https://github.com/settings/applications."
     readonly_mode_during_backup: "Slå \"read-only\" tilstand til mens der foretages backup"
     active_user_rate_limit_secs: "Hvor ofte vi opdaterer feltet 'last_seen_at', i sekunder."
     previous_visit_timeout_hours: "Hvor lang tid et besøg varer før vi regner det med i det 'forrige' besøg, i timer."
@@ -870,7 +841,6 @@ da:
     max_flags_per_day: "Maksimalt antal flagmarkeringer per bruger per dag."
     clean_orphan_uploads_grace_period_hours: "Grace-periode (i timer) før et forældreløst upload bliver fjernet."
     purge_deleted_uploads_grace_period_days: "Grace-periode (i dage) før et slettet upload bliver fjernet."
-    twitter_summary_large_image_url: "URL til standard Twitter Summary Card billede  (skal være mindst 280px i bredden og mindst 150px i højden)."
     tl1_requires_topics_entered: "Hvor mange emner en ny bruger skal læse før vedkommende forfremmes til tillidsniveau 1."
     tl1_requires_read_posts: "Hvor mange indlæg en ny bruger skal læse før vedkommende forfremmes til tillidsniveau 1."
     tl1_requires_time_spent_mins: "Hvor mange minutter en ny bruger skal læse indlæg før vedkommende forfremmes til tillidsniveau 1."
@@ -882,7 +852,6 @@ da:
     tl2_requires_likes_given: "Hvor mange likes en bruger skal give inden forfremmelse til tillidsniveau 2."
     tl3_requires_max_flagged: "Brugere må ikke have mere end x indlæg flagmarkeret af x forskellige brugere i løbet a de sidste (tl3 time period) dage for at kvalificere sig til forfremmelse til tillidsniveau 3. X er indstillingens værdi (0 eller mere)."
     min_trust_to_create_topic: "Det mindste tillidsniveau der skal til for at oprette et nyt emne."
-    title_fancy_entities: "Omdan almindelige ASCII-tegn i emnetitler til fancy HTML-entities, i stil med SmartyPants http://daringfireball.net/projects/smartypants/"
     desktop_category_page_style: "Visuel stil for siden /categories."
     category_colors: "En liste med hexadecimal farveværdier som er tilladte for kategorier."
     category_style: "Visuel stil for kategoribadges."
@@ -963,8 +932,6 @@ da:
   frequent_poster: "Hyppig forfatter"
   redirected_to_top_reasons:
     new_user: "Velkommen til fællesskabet! Dette er de seneste mest populære emner."
-  change_owner:
-    deleted_user: "en slettet bruger"
   topic_statuses:
     archived_enabled: "Dette emne er nu arkiveret. Det er frosset fast og kan ikke ændres på nogen måde."
     archived_disabled: "Dette emne er nu ikke længere arkiveret. Det er ikke længere frosset fast, og kan ændres."
@@ -1367,10 +1334,8 @@ da:
     recent_topics: "Nye"
     see_more: "Flere"
     search_title: "Søg på denne side"
-    search_google: "Google"
   terms_of_service:
     title: "Vilkår"
-    signup_form_message: 'Jeg har læst og accepterer  <a href="/tos" target="_blank">vilkårene</a>.'
   deleted: 'slettet'
   upload:
     unauthorized: "Beklager, filen, som du forsøger at uploade er ikke autoriseret (autoriserede filendelser: %{authorized_extensions})."
@@ -1551,7 +1516,6 @@ da:
             placeholder: "name@example.com"
           contact_url:
             label: "Hjemmeside"
-            placeholder: "http://www.eksempel.com/kontakt"
       corporate:
         title: "Organisation"
         fields:

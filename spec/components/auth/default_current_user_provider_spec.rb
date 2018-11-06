@@ -32,7 +32,11 @@ describe Auth::DefaultCurrentUserProvider do
     it "finds a user for a correct per-user api key" do
       user = Fabricate(:user)
       ApiKey.create!(key: "hello", user_id: user.id, created_by_id: -1)
-      expect(provider("/?api_key=hello").current_user.id).to eq(user.id)
+      good_provider = provider("/?api_key=hello")
+      expect(good_provider.current_user.id).to eq(user.id)
+      expect(good_provider.is_api?).to eq(true)
+      expect(good_provider.is_user_api?).to eq(false)
+      expect(good_provider.should_update_last_seen?).to eq(false)
 
       user.update_columns(active: false)
 
@@ -368,6 +372,26 @@ describe Auth::DefaultCurrentUserProvider do
       )
     end
 
+    it "can clear old duplicate keys correctly" do
+      dupe = UserApiKey.create!(
+        application_name: 'my app',
+        client_id: '12345',
+        scopes: ['read'],
+        key: SecureRandom.hex,
+        user_id: user.id
+      )
+
+      params = {
+        "REQUEST_METHOD" => "GET",
+        "HTTP_USER_API_KEY" => api_key.key,
+        "HTTP_USER_API_CLIENT_ID" => dupe.client_id,
+      }
+
+      good_provider = provider("/", params)
+      expect(good_provider.current_user.id).to eq(user.id)
+      expect(UserApiKey.find_by(id: dupe.id)).to eq(nil)
+    end
+
     it "allows user API access correctly" do
       params = {
         "REQUEST_METHOD" => "GET",
@@ -379,6 +403,7 @@ describe Auth::DefaultCurrentUserProvider do
       expect(good_provider.current_user.id).to eq(user.id)
       expect(good_provider.is_api?).to eq(false)
       expect(good_provider.is_user_api?).to eq(true)
+      expect(good_provider.should_update_last_seen?).to eq(false)
 
       expect {
         provider("/", params.merge("REQUEST_METHOD" => "POST")).current_user

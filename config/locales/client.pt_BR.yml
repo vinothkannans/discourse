@@ -195,7 +195,7 @@ pt_BR:
     guidelines: "Orientações"
     privacy_policy: "Política de Privacidade"
     privacy: "Privacidade"
-    terms_of_service: "Termos do Serviço"
+    tos: "Termos do Serviço"
     mobile_view: "VIsualização Mobile"
     desktop_view: "Visualização Desktop"
     you: "Você"
@@ -243,12 +243,8 @@ pt_BR:
         bookmark: "Clique para adicionar o primeiro post deste tópico aos favoritos"
         unbookmark: "Clique para remover todos os favoritos neste tópico"
     bookmarks:
-      not_logged_in: "desculpe, você precisa estar logado para favoritar mensagens"
       created: "você favoritou essa resposta"
-      not_bookmarked: "você já leu esta mensagem; clique para favoritar."
-      last_read: "este é a última resposta que você leu; clique para favoritar."
       remove: "Remover favorito"
-      confirm_clear: "Tem certeza que deseja apagar todos os atalhos deste tópico?"
     drafts:
       resume: "Resuma"
       remove: "Remova"
@@ -256,14 +252,14 @@ pt_BR:
       new_private_message: "Novo rascunho de mensagem privada"
       topic_reply: "Resposta preliminar"
     topic_count_latest:
-      one: "Veja {{conta}} tópicos novos ou atualizados"
-      other: "Veja {{conta}} tópicos novos ou atualizados"
+      one: "Veja {{count}} tópicos novos ou atualizados"
+      other: "Veja {{count}} tópicos novos ou atualizados"
     topic_count_unread:
-      one: "Veja {{conta}} tópicos não lidos."
-      other: "Veja {{conta}} tópicos não lidos."
+      one: "Veja {{count}} tópicos não lidos."
+      other: "Veja {{count}} tópicos não lidos."
     topic_count_new:
-      one: "Veja {{conta}} novos tópicos."
-      other: "Veja {{conta}} novos tópicos."
+      one: "Veja {{count}} novos tópicos."
+      other: "Veja {{count}} novos tópicos."
     preview: "pré-visualização"
     cancel: "cancelar"
     save: "Salvar mudanças"
@@ -271,7 +267,6 @@ pt_BR:
     saved: "Salvo!"
     upload: "Enviar"
     uploading: "Enviando..."
-    uploading_filename: "Enviando {{filename}}"
     uploaded: "Enviado!"
     pasting: "Colando..."
     enable: "Habilitar"
@@ -415,7 +410,6 @@ pt_BR:
         all: "Todos os grupos"
         empty: "Não há grupos visíveis."
         filter: "Filtrar por tipo de grupo"
-        owner_groups: "Grupos em que sou administrador"
         close_groups: "Grupos fechados"
         automatic_groups: "Grupos Automáticos"
         automatic: "Automático"
@@ -519,7 +513,6 @@ pt_BR:
       topic_stat_sentence:
         one: "%{count} novo tópico nos últimos %{unit}."
         other: "%{count} novos tópicos nos últimos %{unit}."
-      more: " (%{count} mais) ..."
     ip_lookup:
       title: Pesquisa do endereço de IP
       hostname: Nome do host
@@ -535,7 +528,6 @@ pt_BR:
       topics_entered: "tópicos em que entrou"
       post_count: "# mensagens"
       confirm_delete_other_accounts: "Você tem certeza que deseja apagar essas contas?"
-      powered_by: "distribuído por <a href='https://ipinfo.io'>ipinfo.io</a>"
     user_fields:
       none: "(selecione uma opção)"
     user:
@@ -619,7 +611,6 @@ pt_BR:
       watched_first_post_tags: "Observando a primeira mensagem"
       watched_first_post_tags_instructions: "Você será notificado sobre a primeira postagem em cada novo tópico com estas etiquetas."
       muted_categories: "Silenciado"
-      muted_categories_instructions: "Você não será notificado sobre novos tópicos nessas categorias, e não aparecerão no Recentes"
       no_category_access: "Como moderador, você tem acesso limitado à categoria, a economia está desativada."
       delete_account: "Excluir Minha Conta"
       delete_account_confirm: "Tem certeza de que deseja excluir permanentemente a sua conta? Essa ação não pode ser desfeita!"
@@ -692,15 +683,10 @@ pt_BR:
       second_factor:
         title: "Autenticação de dois fatores"
         disable: "Desabilitar autenticação de dois fatores"
-        enable: "Habilitar <a href>autenticação de dois fatores</a> para segurança avançada da conta"
         confirm_password_description: "Por favor, confirme sua senha para continuar"
         label: "Código"
-        enable_description: |
-          Digitalize este código QR em um aplicativo compatível (<a href="https://play.google.com/store/apps/details?id=com.google.android.apps.authenticator2" target="_blank">Android</a> – <a href="https://itunes.apple.com/us/app/google-authenticator/id388497605?mt=8" target="_blank"> iOS</a> – <a href="https://www.microsoft.com/en-us/store/p/authenticator/9wzdncrfj3rj" target='_blank'>Windows Phone</a>) e insira seu código de autenticação.
         disable_description: "Por favor, insira o código de autenticação do seu aplicativo"
         show_key_description: "Entre manualmente"
-        extended_description: |
-          A autenticação de dois fatores adiciona segurança extra à sua conta, exigindo um token único além da sua senha. Os tokens podem ser gerados em <a href="https://play.google.com/store/apps/details?id=com.google.android.apps.authenticator2" target='_blank'>Android</a>, <a href="https://itunes.apple.com/us/app/google-authenticator/id388497605?mt=8">iOS</a>, e <a href="https://www.microsoft.com/en-us/store/p/authenticator/9wzdncrfj3rj" target='_blank'>Windows Phone</a> dispositivos.
         oauth_enabled_warning: "Tenha em atenção que os logins sociais serão desativados quando a autenticação de dois fatores estiver ativada na sua conta."
       change_about:
         title: "Modificar Sobre Mim"
@@ -720,7 +706,6 @@ pt_BR:
         title: "Alterar sua imagem de perfil"
         gravatar: "<a href='//gravatar.com/emails' target='_blank'>Gravatar</a>, baseado em"
         gravatar_title: "Alterar seu avatar no site do Gravatar"
-        gravatar_failed: "Não foi possível buscar o Gravatar. Existe um associado a esse endereço de e-mail?"
         refresh_gravatar_title: "Atualize seu Gravatar"
         letter_based: "Sistema concedeu imagem de perfil."
         uploaded_avatar: "Foto pessoal"
@@ -796,7 +781,6 @@ pt_BR:
         always: "sempre"
         never: "nunca"
       email_digests:
-        title: "Mande-me um email com o sumário dos tópicos e respostas populares quando eu não visitar o fórum"
         every_30_minutes: "a cada 30 minutos"
         every_hour: "a cada hora"
         daily: "diariamente"
@@ -971,9 +955,6 @@ pt_BR:
       enabled: "Este site está em modo de leitura apenas. Por favor continue a navegar, no entanto, respostas, curtidas e outras ações estão desativadas por enquanto."
       login_disabled: "O login é desativado enquanto o site está em modo de somente leitura."
       logout_disabled: "O logout é desativado enquanto o site está em modo de somente leitura."
-    too_few_topics_and_posts_notice: "Vamos <a href='http://blog.discourse.org/2014/08/building-a-discourse-community/'>começar essa discussão!</a> Existem atualmente <strong>%{currentTopics} / %{requiredTopics}</strong> tópicos e <strong>%{currentPosts} / %{requiredPosts}</strong> mensagens. Novos visitantes precisam de algumas conversas para ler e responder."
-    too_few_topics_notice: "Vamos <a href='http://blog.discourse.org/2014/08/building-a-discourse-community/'>começar essa discussão!</a> Existem atualmente <strong>%{currentTopics} / %{requiredTopics}</strong> tópicos. Novos visitantes precisam de algumas conversas para ler e responder."
-    too_few_posts_notice: "Vamos <a href='http://blog.discourse.org/2014/08/building-a-discourse-community/'>começar essa discussão!</a> Existem atualmente <strong>%{currentPosts} / %{requiredPosts}</strong> mensagens. Novos visitantes precisam de algumas conversas para ler e responder."
     logs_error_rate_notice:
       reached: "<b>%{relativeAge}</b> – <a href='%{url}' target='_blank'>%{rate}</a> alcançou a configuração limite do site de %{siteSettingRate}."
       exceeded: "<b>%{relativeAge}</b> – <a href='%{url}' target='_blank'>%{rate}</a> excedeu a configuração limite do site de %{siteSettingRate}."
@@ -1007,8 +988,6 @@ pt_BR:
       hide_session: "Lembre-me amanhã"
       hide_forever: "não obrigado"
       hidden_for_session: "OK, Eu vou perguntar amanhã. Você pode também sempre usar o 'Registre-se' para criar uma conta."
-      intro: "Ei você! :heart_eyes: Parece que você está gostando da discussão, mas ainda não criou uma conta."
-      value_prop: "Quando você cria uma conta, nós lembramos exatamente o que você leu, assim você sempre volta exatamente aonde estava. Você também recebe notificações, aqui e por e-mail, quando novas mensagens são feitas. E você pode curtir tópicos para compartilhar o amor. :heartbeat:"
     summary:
       enabled_description: "Você está vendo um sumário deste tópico: os posts mais interessantes conforme determinados pela comunidade."
       description: "Existem <b>{{replyCount}}</b> respostas."
@@ -1022,7 +1001,6 @@ pt_BR:
       disable: "Mostrar Posts Deletados"
     private_message_info:
       title: "Mensagem"
-      invite: "Convidar outros..."
       leave_message: "Você quer mesmo deixar esta mensagem?"
       remove_allowed_user: "Tem a certeza que deseja remover {{name}} desta mensagem?"
       remove_allowed_group: "Tem a certeza que deseja remover {{name}} desta mensagem?"
@@ -1261,7 +1239,6 @@ pt_BR:
       link_description: "digite a descrição do link aqui"
       link_dialog_title: "Inserir link"
       link_optional_text: "título opcional"
-      link_url_placeholder: "http://exemplo.com"
       quote_title: "Bloco de citação"
       quote_text: "Bloco de citação"
       code_title: "Texto pré-formatado"
@@ -1796,15 +1773,9 @@ pt_BR:
         action: "unificar as mensagens selecionadas"
         error: "Houve um erro ao unificar as mensagens selecionadas."
       change_owner:
-        title: "Trocar Autor das Mensagens"
         action: "trocar autor"
         error: "Houve um erro ao alterar o autor dessas mensagens."
-        label: "Novo Autor das Mensagens"
         placeholder: "novo autor"
-        instructions:
-          one: "Por favor, escolha o novo dono do post por  <b>{{old_user}}</b>."
-          other: "Por favor, escolha o novo autor dessas {{count}} mensagens que eram de <b>{{old_user}}</b>."
-        instructions_warn: "Observe que quaisquer notificações sobre essa postagem não serão transferidas para o novo usuário retroativamente."
       change_timestamp:
         title: "Alterar o timestamp ..."
         action: "alterar horário"
@@ -1875,7 +1846,6 @@ pt_BR:
         upload: "Desculpe, houve um erro ao enviar esse arquivo. Por favor, tente outra vez."
         file_too_large: "Desculpe, o arquivo que você está tentando enviar é muito grande (o tamanho máximo permitido é {{max_size_kb}}kb). Que tal enviar o seu arquivo grande para um serviço de hospedagem na nuvem e depois compartilhar o link?"
         too_many_uploads: "Desculpe, você pode enviar apenas um arquivos por vez."
-        too_many_dragged_and_dropped_files: "Desculpe, você só pode subir até 10 arquivos de cada vez."
         upload_not_authorized: "Desculpe, o arquivo que você está tentando enviar não é permitido (extensões permitidas: {{authorized_extensions}})."
         image_upload_not_allowed_for_new_user: "Desculpe, novos usuário não podem enviar imagens."
         attachment_upload_not_allowed_for_new_user: "Desculpe, usuários novos não podem enviar anexos."
@@ -2328,7 +2298,6 @@ pt_BR:
         this_week: "Semana"
         today: "Hoje"
         other_periods: "Veja o topo"
-    browser_update: 'Infelizmente, <a href="http://www.discourse.org/faq/#browser">seu navegador é muito antigo para ser utilizado neste site</a>. Por favor <a href="http://browsehappy.com">atualize seu navegador</a>.'
     permission_types:
       full: "Criar / Responder / Ver"
       create_post: "Responder / Ver"
@@ -2511,8 +2480,6 @@ pt_BR:
           bookmarks: "Não há mais tópicos nos favoritos."
           search: "Não existem mais resultados."
     invite:
-      custom_message: "Faça seu convite um pouco mais pessoal escrevendo um"
-      custom_message_link: "mensagem personalizada"
       custom_message_placeholder: "Insira a sua mensagem personalizada"
       custom_message_template_forum: "Ei, você devia entrar neste fórum!"
       custom_message_template_topic: "Ei, eu acho que você vai gostar deste tópico!"
@@ -2920,7 +2887,6 @@ pt_BR:
         import: "Importar"
         delete: "Apagar"
         delete_confirm: "Apagar este tema?"
-        about: "Modificar o CSS e HTML do cabeçalho do site. Adicione uma customização para começar."
         color: "Cor"
         opacity: "Opacidade"
         copy: "Copiar"
@@ -2965,7 +2931,6 @@ pt_BR:
             no_overwrite: "Nome da variável inválido. Não deve sobrescrever uma variável existente."
             must_be_unique: "Nome da variável inválido. Deve ser único."
           upload: "Upload"
-          child_themes_check: "O tema inclui outros temas infantis"
           css_html: "CSS / HTML personalizado"
           edit_css_html: "Editar CSS/HTML"
           edit_css_html_help: "Você não editou nenhum CSS ou HTML"
@@ -2976,7 +2941,6 @@ pt_BR:
           public_key: "Conceda o seguinte acesso de chave pública ao repo:"
           about_theme: "Sobre o Tema"
           license: "Licença"
-          component_of: "O tema é um componente de:"
           update_to_latest: "Atualize para o mais recente"
           check_for_updates: "Verificar Atualizações"
           updating: "Atualizando..."
@@ -3148,7 +3112,6 @@ pt_BR:
           filter: "Filtro:"
           title: "Ações do Staff"
           clear_filters: "Mostrar Tudo"
-          staff_user: "Usuário do Staff"
           target_user: "Usuário Destino"
           subject: "Assunto"
           when: "Quando"

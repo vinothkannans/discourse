@@ -31,7 +31,11 @@ describe CategoriesController do
       SiteSetting.categories_topics = 5
       SiteSetting.categories_topics.times { Fabricate(:topic) }
       get "/categories"
-      expect(response.body).to include(%{"more_topics_url":"/latest"})
+
+      expect(response.body).to have_tag("div#data-preloaded") do |element|
+        json = JSON.parse(element.current_scope.attribute('data-preloaded').value)
+        expect(json['topic_list_latest']).to include(%{"more_topics_url":"/latest"})
+      end
     end
   end
 
@@ -98,6 +102,18 @@ describe CategoriesController do
           }
 
           expect(response.status).to eq(422)
+        end
+
+        it "returns errors with invalid group" do
+          category = Fabricate(:category, user: admin)
+          readonly = CategoryGroup.permission_types[:readonly]
+
+          post "/categories.json", params: {
+            name: category.name, color: "ff0", text_color: "fff", permissions: { "invalid_group" => readonly }
+          }
+
+          expect(response.status).to eq(422)
+          expect(JSON.parse(response.body)['errors']).to be_present
         end
       end
 

@@ -33,14 +33,14 @@ export function success() {
 }
 
 const loggedIn = () => !!Discourse.User.current();
-
 const helpers = { response, success, parsePostData };
+export let fixturesByUrl;
 
 export default function() {
   const server = new Pretender(function() {
     storePretender.call(this, helpers);
     flagPretender.call(this, helpers);
-    const fixturesByUrl = fixturePretender.call(this, helpers);
+    fixturesByUrl = fixturePretender.call(this, helpers);
 
     this.get("/admin/plugins", () => response({ plugins: [] }));
 
@@ -348,6 +348,10 @@ export default function() {
 
     this.get("groups", () => {
       return response(200, fixturesByUrl["/groups.json"]);
+    });
+
+    this.get("/groups.json", () => {
+      return response(200, fixturesByUrl["/groups.json?username=eviltrout"]);
     });
 
     this.get("groups/search.json", () => {

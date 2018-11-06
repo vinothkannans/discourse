@@ -1,8 +1,7 @@
 require 'rails_helper'
 
 describe Theme do
-
-  before do
+  after do
     Theme.clear_cache!
   end
 
@@ -23,7 +22,7 @@ describe Theme do
   end
 
   let(:theme) { Fabricate(:theme, user: user) }
-  let(:child) { Fabricate(:theme, user: user) }
+  let(:child) { Fabricate(:theme, user: user, component: true) }
   it 'can properly clean up color schemes' do
     scheme = ColorScheme.create!(theme_id: theme.id, name: 'test')
     scheme2 = ColorScheme.create!(theme_id: theme.id, name: 'test2')
@@ -76,7 +75,6 @@ describe Theme do
     grandchild = Fabricate(:theme, user: user)
     grandparent = Fabricate(:theme, user: user)
 
-    theme.add_child_theme!(child)
     expect do
       child.add_child_theme!(grandchild)
     end.to raise_error(Discourse::InvalidParameters, I18n.t("themes.errors.no_multilevels_components"))
@@ -87,16 +85,20 @@ describe Theme do
   end
 
   it "doesn't allow a child to be user selectable" do
-    theme.add_child_theme!(child)
     child.update(user_selectable: true)
     expect(child.errors.full_messages).to contain_exactly(I18n.t("themes.errors.component_no_user_selectable"))
   end
 
   it "doesn't allow a child to be set as the default theme" do
-    theme.add_child_theme!(child)
     expect do
       child.set_default!
     end.to raise_error(Discourse::InvalidParameters, I18n.t("themes.errors.component_no_default"))
+  end
+
+  it "doesn't allow a component to have color scheme" do
+    scheme = ColorScheme.create!(name: "test")
+    child.update(color_scheme: scheme)
+    expect(child.errors.full_messages).to contain_exactly(I18n.t("themes.errors.component_no_color_scheme"))
   end
 
   it 'should correct bad html in body_tag_baked and head_tag_baked' do
@@ -118,10 +120,12 @@ HTML
     theme.set_field(target: :common, name: "header", value: with_template)
     theme.save!
 
+    field = theme.theme_fields.find_by(target_id: Theme.targets[:common], name: 'header')
     baked = Theme.lookup_field(theme.id, :mobile, "header")
 
-    expect(baked).to match(/HTMLBars/)
-    expect(baked).to match(/raw-handlebars/)
+    expect(baked).to include(field.javascript_cache.url)
+    expect(field.javascript_cache.content).to include('HTMLBars')
+    expect(field.javascript_cache.content).to include('raw-handlebars')
   end
 
   it 'should create body_tag_baked on demand if needed' do
@@ -146,14 +150,49 @@ HTML
     expect(field).to match(/<b>theme2test<\/b>/)
   end
 
-  describe ".transform_ids" do
-    it "adds the child themes of the parent" do
-      child = Fabricate(:theme)
-      child2 = Fabricate(:theme)
-      sorted = [child.id, child2.id].sort
+  describe "#switch_to_component!" do
+    it "correctly converts a theme to component" do
+      theme.add_child_theme!(child)
+      scheme = ColorScheme.create!(name: 'test')
+      theme.update!(color_scheme_id: scheme.id, user_selectable: true)
+      theme.set_default!
 
+      theme.switch_to_component!
+      theme.reload
+
+      expect(theme.component).to eq(true)
+      expect(theme.user_selectable).to eq(false)
+      expect(theme.default?).to eq(false)
+      expect(theme.color_scheme_id).to eq(nil)
+      expect(ChildTheme.where(parent_theme: theme).exists?).to eq(false)
+    end
+  end
+
+  describe "#switch_to_theme!" do
+    it "correctly converts a component to theme" do
+      theme.add_child_theme!(child)
+
+      child.switch_to_theme!
+      theme.reload
+      child.reload
+
+      expect(child.component).to eq(false)
+      expect(ChildTheme.where(child_theme: child).exists?).to eq(false)
+    end
+  end
+
+  describe ".transform_ids" do
+    let!(:child) { Fabricate(:theme, component: true) }
+    let!(:child2) { Fabricate(:theme, component: true) }
+
+    before do
       theme.add_child_theme!(child)
       theme.add_child_theme!(child2)
+    end
+
+    it "adds the child themes of the parent" do
+      sorted = [child.id, child2.id].sort
+
       expect(Theme.transform_ids([theme.id])).to eq([theme.id, *sorted])
 
       fake_id = [child.id, child2.id, theme.id].min - 5
@@ -164,12 +203,6 @@ HTML
     end
 
     it "doesn't insert children when extend is false" do
-      child = Fabricate(:theme)
-      child2 = Fabricate(:theme)
-
-      theme.add_child_theme!(child)
-      theme.add_child_theme!(child2)
-
       fake_id = theme.id + 1
       fake_id2 = fake_id + 2
       fake_id3 = fake_id2 + 3
@@ -183,7 +216,7 @@ HTML
   context "plugin api" do
     def transpile(html)
       f = ThemeField.create!(target_id: Theme.targets[:mobile], theme_id: 1, name: "after_header", value: html)
-      f.value_baked
+      return f.value_baked, f.javascript_cache
     end
 
     it "transpiles ES6 code" do
@@ -193,10 +226,10 @@ HTML
         </script>
 HTML
 
-      transpiled = transpile(html)
-      expect(transpiled).to match(/\<script\>/)
-      expect(transpiled).to match(/var x = 1;/)
-      expect(transpiled).to match(/_registerPluginCode\('0.1'/)
+      baked, javascript_cache = transpile(html)
+      expect(baked).to include(javascript_cache.url)
+      expect(javascript_cache.content).to include('var x = 1;')
+      expect(javascript_cache.content).to include("_registerPluginCode('0.1'")
     end
 
     it "converts errors to a script type that is not evaluated" do
@@ -207,9 +240,10 @@ HTML
         </script>
 HTML
 
-      transpiled = transpile(html)
-      expect(transpiled).to match(/text\/discourse-js-error/)
-      expect(transpiled).to match(/read-only/)
+      baked, javascript_cache = transpile(html)
+      expect(baked).to include(javascript_cache.url)
+      expect(javascript_cache.content).to include('Theme Transpilation Error')
+      expect(javascript_cache.content).to include('read-only')
     end
   end
 
@@ -219,6 +253,7 @@ HTML
       theme.set_field(target: :common, name: :scss, value: 'body {color: $magic; }')
       theme.set_field(target: :common, name: :magic, value: 'red', type: :theme_var)
       theme.set_field(target: :common, name: :not_red, value: 'red', type: :theme_var)
+      theme.component = true
       theme.save
 
       parent_theme = Fabricate(:theme)
@@ -287,33 +322,37 @@ HTML
 
     it "allows values to be used in JS" do
       theme.set_field(target: :settings, name: :yaml, value: "name: bob")
-      theme.set_field(target: :common, name: :after_header, value: '<script type="text/discourse-plugin" version="1.0">alert(settings.name); let a = ()=>{};</script>')
+      theme_field = theme.set_field(target: :common, name: :after_header, value: '<script type="text/discourse-plugin" version="1.0">alert(settings.name); let a = ()=>{};</script>')
       theme.save!
 
       transpiled = <<~HTML
-      <script>if ('Discourse' in window) {
+      if ('Discourse' in window) {
         Discourse._registerPluginCode('1.0', function (api) {
           var settings = { "name": "bob" };
           alert(settings.name);var a = function a() {};
         });
-      }</script>
+      }
       HTML
 
-      expect(Theme.lookup_field(theme.id, :desktop, :after_header)).to eq(transpiled.strip)
+      theme_field.reload
+      expect(Theme.lookup_field(theme.id, :desktop, :after_header)).to include(theme_field.javascript_cache.url)
+      expect(theme_field.javascript_cache.content).to eq(transpiled.strip)
 
       setting = theme.settings.find { |s| s.name == :name }
       setting.value = 'bill'
 
       transpiled = <<~HTML
-      <script>if ('Discourse' in window) {
+      if ('Discourse' in window) {
         Discourse._registerPluginCode('1.0', function (api) {
           var settings = { "name": "bill" };
           alert(settings.name);var a = function a() {};
         });
-      }</script>
+      }
       HTML
-      expect(Theme.lookup_field(theme.id, :desktop, :after_header)).to eq(transpiled.strip)
 
+      theme_field.reload
+      expect(Theme.lookup_field(theme.id, :desktop, :after_header)).to include(theme_field.javascript_cache.url)
+      expect(theme_field.javascript_cache.content).to eq(transpiled.strip)
     end
 
   end
@@ -376,6 +415,30 @@ HTML
 
   def cached_settings(id)
     Theme.find_by(id: id).included_settings.to_json
+  end
+
+  it 'clears color scheme cache correctly' do
+    Theme.destroy_all
+
+    cs = Fabricate(:color_scheme, name: 'Fancy', color_scheme_colors: [
+      Fabricate(:color_scheme_color, name: 'header_primary',  hex: 'F0F0F0'),
+      Fabricate(:color_scheme_color, name: 'header_background', hex: '1E1E1E'),
+      Fabricate(:color_scheme_color, name: 'tertiary', hex: '858585')
+    ])
+
+    theme = Fabricate(:theme,
+      user_selectable: true,
+      user: Fabricate(:admin),
+      color_scheme_id: cs.id
+    )
+
+    theme.set_default!
+
+    expect(ColorScheme.hex_for_name('header_primary')).to eq('F0F0F0')
+
+    Theme.clear_default!
+
+    expect(ColorScheme.hex_for_name('header_primary')).to eq('333333')
   end
 
   it 'handles settings cache correctly' do

@@ -5,7 +5,10 @@ QUnit.test("list the tags", async assert => {
   await visit("/tags");
 
   assert.ok($("body.tags-page").length, "has the body class");
-  assert.ok(exists(".tag-eviltrout"), "shows the evil trout tag");
+  assert.ok(
+    $('*[data-tag-name="eviltrout"]').length,
+    "shows the eviltrout tag"
+  );
 });
 
 acceptance("Tags listed by group", {
@@ -29,7 +32,7 @@ QUnit.test("list the tags in groups", async assert => {
               id: 2,
               name: "Ford Cars",
               tags: [
-                { id: "escort", text: "escort", count: 1, pm_count: 0 },
+                { id: "Escort", text: "Escort", count: 1, pm_count: 0 },
                 { id: "focus", text: "focus", count: 3, pm_count: 0 }
               ]
             },
@@ -61,22 +64,31 @@ QUnit.test("list the tags in groups", async assert => {
     4,
     "shows separate lists for the 3 groups and the ungrouped tags"
   );
-  assert.ok(
-    _.isEqual(
-      _.map($(".tag-list h3"), i => {
+  assert.deepEqual(
+    $(".tag-list h3")
+      .toArray()
+      .map(i => {
         return $(i).text();
       }),
-      ["Ford Cars", "Honda Cars", "Makes", "Other Tags"]
-    ),
+    ["Ford Cars", "Honda Cars", "Makes", "Other Tags"],
     "shown in given order and with tags that are not in a group"
   );
-  assert.ok(
-    _.isEqual(
-      _.map($(".tag-list:first .discourse-tag"), i => {
+  assert.deepEqual(
+    $(".tag-list:first .discourse-tag")
+      .toArray()
+      .map(i => {
         return $(i).text();
       }),
-      ["focus", "escort"]
-    ),
+    ["focus", "Escort"],
     "shows the tags in default sort (by count)"
+  );
+  assert.deepEqual(
+    $(".tag-list:first .discourse-tag")
+      .toArray()
+      .map(i => {
+        return $(i).attr("href");
+      }),
+    ["/tags/focus", "/tags/escort"],
+    "always uses lowercase URLs for mixed case tags"
   );
 });

@@ -5,8 +5,10 @@ import {
 } from "ember-addons/ember-computed-decorators";
 
 export default Ember.Controller.extend({
-  maximized: false,
   section: null,
+  currentTarget: 0,
+  maximized: false,
+  previewUrl: url("model.id", "/admin/themes/%@/preview"),
 
   editRouteName: "adminCustomizeThemes.edit",
 
@@ -53,11 +55,6 @@ export default Ember.Controller.extend({
     return this.shouldShow("mobile");
   },
 
-  @computed("onlyOverridden", "model.remote_theme")
-  showSettings() {
-    return false;
-  },
-
   @observes("onlyOverridden")
   onlyOverriddenChanged() {
     if (this.get("onlyOverridden")) {
@@ -90,8 +87,6 @@ export default Ember.Controller.extend({
     }
     return this.get("model").hasEdited(target);
   },
-
-  currentTarget: 0,
 
   setTargetName: function(name) {
     const target = this.get("targets").find(t => t.name === name);
@@ -157,21 +152,20 @@ export default Ember.Controller.extend({
     });
   },
 
-  previewUrl: url("model.id", "/admin/themes/%@/preview"),
+  @computed("maximized")
+  maximizeIcon(maximized) {
+    return maximized ? "compress" : "expand";
+  },
 
-  maximizeIcon: function() {
-    return this.get("maximized") ? "compress" : "expand";
-  }.property("maximized"),
+  @computed("model.isSaving")
+  saveButtonText(isSaving) {
+    return isSaving ? I18n.t("saving") : I18n.t("admin.customize.save");
+  },
 
-  saveButtonText: function() {
-    return this.get("model.isSaving")
-      ? I18n.t("saving")
-      : I18n.t("admin.customize.save");
-  }.property("model.isSaving"),
-
-  saveDisabled: function() {
-    return !this.get("model.changed") || this.get("model.isSaving");
-  }.property("model.changed", "model.isSaving"),
+  @computed("model.changed", "model.isSaving")
+  saveDisabled(changed, isSaving) {
+    return !changed || isSaving;
+  },
 
   actions: {
     save() {

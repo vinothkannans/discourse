@@ -193,7 +193,7 @@ ur:
     guidelines: "ہدایات"
     privacy_policy: "نجی معلومات کی حفاظت پالیسی"
     privacy: "جی معلومات کی حفاظت"
-    terms_of_service: "سروس کی شرائط"
+    tos: "سروس کی شرائط"
     mobile_view: "موبائل وِیو"
     desktop_view: "ڈیسک ٹاپ وِیو"
     you: "آپ "
@@ -239,12 +239,8 @@ ur:
         bookmark: "اِس ٹاپک کی پہلی پوسٹ بُک مارک کرنے کے لئے کلک کریں"
         unbookmark: "اِس ٹاپک کے تمام بُک مارک ہٹانے کے لئے کلک کریں"
     bookmarks:
-      not_logged_in: "معذرت، پوسٹ بُک مارک کرنے کے لئے آپ کا لاگڈ ان ہونا ضروری ہے"
       created: "آپ نے یہ پوسٹ بُک مارک کرلی ہے"
-      not_bookmarked: "آپ یہ پوسٹ پڑھ چکے ہیں؛ بُک مارک کرنے کے لئے کلک کریں"
-      last_read: "یہ آخری پوسٹ آپ نے پڑھی ہے؛ اِسے بُک مارک کرنے کے لئے کلک کریں"
       remove: "بُک مارک ہٹائیں"
-      confirm_clear: "کیا آپ کو یقین ہے کہ آپ اِس ٹاپک سے تمام بُک مارکس ہٹانا چاہتے ہیں؟"
     topic_count_latest:
       one: "{{count}} نیا یا اَپ ڈیٹ کردہ ٹاپک دیکھیں۔"
       other: "{{count}} نئے یا اَپ ڈیٹ کردہ ٹاپک دیکھیں۔"
@@ -261,7 +257,6 @@ ur:
     saved: "محفوظ کر لیا گیا ہے!"
     upload: "اَپ لوڈ"
     uploading: "اَپ لوڈ کیا جا رہا ہے..."
-    uploading_filename: "{{filename}} اَپ لوڈ کیا جا رہا ہے..."
     uploaded: "اَپ لوڈ کیا جا چکا ہے!"
     pasting: "پیسٹ کیا جا رہا ہے..."
     enable: "فعال کریں"
@@ -394,7 +389,6 @@ ur:
         all: "تمام گروپس"
         empty: "کوئی نظر آنے والے گروپ موجود نہیں ہیں۔"
         filter: "گروپ قِسم کے حساب سے فِلٹر کریں"
-        owner_groups: "گروپس جن کا میں مالک ہوں"
         close_groups: "بند گروپس"
         automatic_groups: "خودکار گروپس"
         automatic: "خود کار طریقے سے"
@@ -511,7 +505,6 @@ ur:
       topics_entered: " داخل ہوئے ٹاپک"
       post_count: "# پوسٹ"
       confirm_delete_other_accounts: "کیا آپ واقعی یہ اکاؤنٹس حذف کرنا چاہتے ہیں؟"
-      powered_by: "<a href='https://ipinfo.io'>ipinfo.io</a> کے مرہونِ مِنَّت"
     user_fields:
       none: "(ایک آپشن منتخب کریں)"
     user:
@@ -592,7 +585,6 @@ ur:
       watched_first_post_tags: "پہلی پوسٹ پر نظر رکھی ہوئی ہے"
       watched_first_post_tags_instructions: "آپ کو اِن ٹیگ والے ہر نئے ٹاپک کی پہلی پوسٹ کے بارے میں مطلع کیا جائے گا۔"
       muted_categories: "خاموش کِیا ہوا"
-      muted_categories_instructions: "آپ کو اِن زمرہ جات میں موجود نئے ٹاپکس کی کسی بھی چیز کے بارے میں مطلع نہیں کیا جائے گا، اور یہ تازہ ترین میں بھی نظر نہیں آئیں گے۔"
       no_category_access: "ایک ماڈریٹر کے طور پر آپ کو زمرہ پر محدود رسائی حاصل ہے، محفوظ کرنا غیر فعال ہے۔"
       delete_account: "میرا اکاؤنٹ حذف کریں"
       delete_account_confirm: "کیا آپ واقعی مستقل طور پر اپنا اکاؤنٹ حذف کرنا چاہتے ہیں؟ اس عمل کو کالعدم نہیں کیا جا سکتا!"
@@ -653,12 +645,8 @@ ur:
         disable: "دو فیکٹر توثیق غیر فعال کریں"
         confirm_password_description: "جاری رکھنے کیلئے براہ کرم اپنے پاسوَرڈ کی تصدیق کریں"
         label: "کَوڈ"
-        enable_description: |
-          اِس QR کَوڈ کو کسی قابل اَیپ (<a href="https://play.google.com/store/apps/details?id=com.google.android.apps.authenticator2" target="_blank">اینڈرائڈ</a> – <a href="https://itunes.apple.com/us/app/google-authenticator/id388497605?mt=8" target="_blank">iOS</a>– <a href="https://www.microsoft.com/en-us/store/p/authenticator/9wzdncrfj3rj" target='_blank'>وِنڈَوز فون</a>) میں اسکَین کریں اور اپنا توثیقی کَوڈ جمع کریں۔
         disable_description: "براہ مہربانی اپنی اَیپ میں سے توثیقی کَوڈ درج کریں"
         show_key_description: "دستی طور پر درج کریں"
-        extended_description: |
-          دو فیکٹر توثیق پاسوَرڈ کے ساتھ ساتھ ایک دفعہ کے ٹَوکن کو مانگ کر آپ کے اکاؤنٹ کیلئے اضافی سیکورٹی شامل کرتا ہے۔ ٹَوکن <a href="https://play.google.com/store/apps/details?id=com.google.android.apps.authenticator2" target='_blank'>اینڈرائڈ</a>، <a href="https://itunes.apple.com/us/app/google-authenticator/id388497605?mt=8">iOS</a>، اور <a href="https://www.microsoft.com/en-us/store/p/authenticator/9wzdncrfj3rj" target='_blank'>وِنڈَوز فون</a> ڈیوائسوں پر تخلیق کیے جا سکتے ہیں۔
         oauth_enabled_warning: "براہ مہربانی نوٹ کریں کہ ایک بار جب آپ کے اکاؤنٹ پر دو فیکٹر توثیق فعال ہو جائے تو سَوشَل لاگ اِن غیر فعال ہوجائیں گے۔"
       change_about:
         title: "\"میرے بارے میں\" تبدیل کریں"
@@ -677,7 +665,6 @@ ur:
         title: "اپنے پروفائل کی تصویر تبدیل کریں"
         gravatar: "<a href='//gravatar.com/emails' target='_blank'>گَرِیوَّٹار</a>، کی بنیاد پر"
         gravatar_title: "گَرِیوَّٹار کی ویب سائٹ پر اپنے اوتار کو تبدیل کریں"
-        gravatar_failed: "گَرَیوَٹار درآمد نہیں کرایا جاسکا۔ کیا اس ای میل ایڈریس کے ساتھ ایک منسلک ہے؟ "
         refresh_gravatar_title: "اپنے گَرِیوَّٹار کو رِیفریش کریں"
         letter_based: "سسٹم تفویض کردہ پروفائل تصویر"
         uploaded_avatar: "اپنی مرضی کی تصویر"
@@ -745,7 +732,6 @@ ur:
         always: "ہمیشہ"
         never: "کبھی نہیں "
       email_digests:
-        title: "جب میں یہاں کا دورا نہ کروں، مجھے مقبول ٹاپک اور جوابات کا ایک اِی میل خلاصہ بھیجیں"
         every_30_minutes: "ہر 30 منٹ"
         every_hour: "گھنٹہ وار"
         daily: "روزانہ "
@@ -917,9 +903,6 @@ ur:
       enabled: "یہ سائٹ صرف پڑھنے کے مَوڈ میں ہے۔ براہِ مہربانی براؤز کرتے رہئیے، لیکن جواب دینا، لائکس دینا، اور دیگر اعمال ابھی کے لئے غیر فعال ہیں۔"
       login_disabled: "جب تک سائٹ صرف پڑھنے کے مَوڈ میں ہے لاگ اِن غیر فعال رہے گا۔"
       logout_disabled: "جب تک سائٹ صرف پڑھنے کے مَوڈ میں ہے لاگ آؤٹ غیر فعال رہے گا۔"
-    too_few_topics_and_posts_notice: "چلیں <a href='http://blog.discourse.org/2014/08/building-a-discourse-community/'>اِس بحث کو شروع کریں!</a> اِس وقت اَبھی <strong>%{currentTopics}/%{requiredTopics}</strong> ٹاپکس اور <strong>%{currentPosts}/%{requiredPosts}</strong> پوسٹس ہیں۔ نئے زائرین کو پڑھنے اور اُن کا جواب دینے کیلئے کچھ مکالمات کی ضرورت ہے۔"
-    too_few_topics_notice: "چلیں <a href='http://blog.discourse.org/2014/08/building-a-discourse-community/'>اِس بحث کو شروع کریں!</a> اِس وقت اَبھی <strong>%{currentTopics}/%{requiredTopics}</strong> ٹاپکس ہیں۔ نئے زائرین کو پڑھنے اور اُن کا جواب دینے کیلئے کچھ مکالمات کی ضرورت ہے۔"
-    too_few_posts_notice: "چلیں <a href='http://blog.discourse.org/2014/08/building-a-discourse-community/'>اِس بحث کو شروع کریں!</a> اِس وقت اَبھی <strong>%{currentPosts}/%{requiredPosts}</strong> پوسٹس ہیں۔ نئے زائرین کو پڑھنے اور اُن کا جواب دینے کیلئے کچھ مکالمات کی ضرورت ہے۔"
     logs_error_rate_notice:
       reached: "<b>%{relativeAge}</b> – <a href='%{url}' target='_blank'>%{rate}</a> سائٹ سیٹِنگ لِمٹ %{siteSettingRate} تک پہنچ گئی۔"
       exceeded: "<b>%{relativeAge}</b> – <a href='%{url}' target='_blank'>%{rate}</a> سائٹ سیٹِنگ لِمٹ %{siteSettingRate} سے تجاوز کر گئی۔"
@@ -953,8 +936,6 @@ ur:
       hide_session: "مجھے کل یاد دلائیں"
       hide_forever: "نہیں شکریہ"
       hidden_for_session: "ٹھیک ہے، میں تم سے کَل پوچھوں گا۔ آپ جب چاہیں، اکاؤنٹ بنانے کے لئے 'لاگ اِن' بھی استعمال کر سکتے ہیں."
-      intro: "خوش آمدید! :heart_eyes: ایسا لگتا ہے آپ بحث سے لطف اندوز ہو رہے ہیں، لیکن آپ  نے اکاؤنٹ کے لئے سائن اَپ نہیں کیا ہوا۔"
-      value_prop: "جب آپ ایک اکاؤنٹ بناتے ہیں، ہم بالکل یاد رکھتے ہیں کہ آپ نے کیا پڑھا ہے، تاکہ جہاں سے آپ نے پڑھنا چھوڑا ہو بلکل وہاں ہی پر آپ کو ہمیشہ واپس پہنچایا جا سکے۔ جب بھی کوئی نئی پوسٹ ہوتی ہے آپ کو یہاں اور اِی میل پر اطلاع بھی دے دی جاتی ہے۔ اور آپ محبت کا بانٹںے کے لئے پوسٹ لائک کر سکتے ہیں۔ :heartbeat:"
     summary:
       enabled_description: "آپ اس ٹاپک کا خلاصہ ملاحظہ کررہے ہیں: سب سے دلچسپ پوسٹ کمیونٹی کی طرف سے متعین کی جاتی ہیں۔"
       description: "<b>{{replyCount}}<b/> جوابات موجود ہیں۔"
@@ -968,7 +949,6 @@ ur:
       disable: "حذف شدہ پوسٹس کو ظاہر کریں"
     private_message_info:
       title: "پیغام"
-      invite: "دوسروں کو مدعو کریں..."
       leave_message: "کیا آپ واقعی یہ پیغام بھیجنا چاہتے ہیں؟"
       remove_allowed_user: "کیا آپ واقعی اِس پیغام سے {{name}} ہٹانا چاہتے ہیں؟"
       remove_allowed_group: "کیا آپ واقعی اِس پیغام سے {{name}} ہٹانا چاہتے ہیں؟"
@@ -1186,7 +1166,6 @@ ur:
       link_description: "یہاں لِنک کی تفصیل درج کریں"
       link_dialog_title: "ہائپرلِنک ڈالیں"
       link_optional_text: "اختیاری عنوان"
-      link_url_placeholder: "http://example.com"
       quote_title: "بلاک کوٹ"
       quote_text: "بلاک کوٹ"
       code_title: "پہلے سے فارمیٹ کیا گیا ٹَیکسٹ"
@@ -1708,14 +1687,9 @@ ur:
         action: "منتخب کردہ پوسٹس کو ضم کریں"
         error: "منتخب کردہ پوسٹس کو ضم کرنے میں ایک خرابی کا سامنا کرنا پڑا۔"
       change_owner:
-        title: "پوسٹس کے مالک کو تبدیل کریں"
         action: "پوسٹس کے مالک کو تبدیل کریں"
         error: "پوسٹس کے مالک کو تبدیل کرنے میں ایک خرابی کا سامنا کرنا پڑا۔"
-        label: "پوسٹس کا نیا مالک"
         placeholder: "نئے مالک کا صارف نام"
-        instructions:
-          one: "براہ مہربانی، <b>{{old_user}}</b> کی پوسٹ کے نئے مالک کو منتخب کریں۔"
-          other: "براہ مہربانی، <b>{{old_user}}</b> کی {{count}} پوسٹس کے نئے مالک کو منتخب کریں۔"
       change_timestamp:
         title: "ٹائمسٹیمپ تبدیل کریں..."
         action: "ٹائمسٹیمپ تبدیل کریں"
@@ -1786,7 +1760,6 @@ ur:
         upload: "معذرت، یہ فائل اَپ لوڈ کرنے میں ایک خرابی کا سامنا کرنا پڑا۔  براہ مہربانی دوبارہ کوشش کریں۔"
         file_too_large: "معذرت، یہ فائل بہت بڑی ہے (زیادہ سے زیادہ سائز {{max_size_kb}}kb) ہے۔ کیوں نہ آپ اپنی بڑی فائل ایک کلاؤڈ شیئرنگ سروس پر اَپ لوڈ کریں اور اس کا لنک شیئر کریں؟"
         too_many_uploads: "معذرت، آپ ایک وقت میں صرف ایک ہی فائل اَپ لوڈ کر سکتے ہیں۔"
-        too_many_dragged_and_dropped_files: "معذرت، آپ ایک وقت میں صرف 10 فائلیں ہی اَپ لوڈ کر سکتے ہیں۔"
         upload_not_authorized: "معذرت، جو فائل آپ اَپ لوڈ کرنے کے کوشش کر رہے ہیں اُس کی اجازت نہیں ہے (اجازت یافتہ ایکسٹینشنز: {{authorized_extensions}})۔"
         image_upload_not_allowed_for_new_user: "معذرت، نئے صارفین تصاویر اَپ لوڈ نہیں کر سکتے۔"
         attachment_upload_not_allowed_for_new_user: "معذرت، نئے صارفین اٹیچمنٹس اَپ لوڈ نہیں کر سکتے۔"
@@ -2229,7 +2202,6 @@ ur:
         this_week: "ہفتہ"
         today: "آج"
         other_periods: "سب سے اوپر دیکھیں"
-    browser_update: 'بدقسمتی سے، <a href="http://www.discourse.org/faq/#browser"> آپ کا براؤزر اِس سائٹ کے لئے کام کرنے کے لئے بہت پرانا ہے</a>۔ براہ مہربانی <a href="http://browsehappy.com">اپنے براؤزر کو اَپ گریڈ</a> کریں۔'
     permission_types:
       full: "بنائیں / جواب دیں / ملاحظہ کریں"
       create_post: "جواب دیں / ملاحظہ کریں"
@@ -2409,8 +2381,6 @@ ur:
           bookmarks: "مزید کوئی بک مارک کیے ہوئے ٹاپک موجود نہیں۔"
           search: "سرچ کے مزید کوئی نتائج نہیں۔"
     invite:
-      custom_message: "اپنے دعوت نامہ کو ذرا سا مذید ذاتی بنانے کیلئے لکھیں"
-      custom_message_link: "اپنی مرضی کے پیغام"
       custom_message_placeholder: "اپنی مرضی کے پیغام درج کریں"
       custom_message_template_forum: "ارے، آپ کو اس فورم میں شامل ہونا چاہیے!"
       custom_message_template_topic: "ارے، میں نے سوچا کہ آپ اِس ٹاپک سے لطف اندوز ہوں گے!"
@@ -2741,7 +2711,6 @@ ur:
         import: "اِمپورٹ"
         delete: "حذف کریں"
         delete_confirm: "اس تِھیم کو حذف کریں؟"
-        about: "سائٹ پر CSS سٹائل شیٹس اور HTML ہیڈرز میں ترمیم کریں۔ شروع کرنے کیلئے ایک اِصلاح شامل کریں۔"
         color: "رنگ"
         opacity: "دھندلاپن"
         copy: "کاپی"
@@ -2782,7 +2751,6 @@ ur:
           variable_name: "SCSS وار نام:"
           variable_name_invalid: "غلط وَیری اَیبل نام۔ صرف حرف و نمبر کی اجازت ہے۔ ایک حرف کے ساتھ شروع ہونا لاذمی ہے۔ منفرد ہونا لاذمی ہے۔"
           upload: "اَپ لوڈ"
-          child_themes_check: "تِھیم میں دوسری ماتحت تِھیمز شامل ہیں"
           css_html: "اپنی مرضی کے مطابق CSS/HTML"
           edit_css_html: "CSS/HTML ترمیم کریں"
           edit_css_html_help: "آپ نے کوئی بھی CSS یا HTML ترمیم نہیں کیا ہے"
@@ -2793,7 +2761,6 @@ ur:
           public_key: "رِیپَوزِٹَری کو درج ذیل پبلک کلید ایکسَیس فراہم کریں:"
           about_theme: "تِھیم کے بارے میں"
           license: "لائسنس"
-          component_of: "تِھیم ایک جزو ہے:"
           update_to_latest: "تازہ ترین ورژن تک اِپ ڈَیٹ کریں"
           check_for_updates: "اپ ڈیٹ کے لیے چیک کریں"
           updating: "اَپ ڈَیٹ کیا جا رہا ہے..."
@@ -2965,7 +2932,6 @@ ur:
           filter: "فِلٹر:"
           title: "سٹاف عوامل"
           clear_filters: "سب کچھ دکھائیں"
-          staff_user: "سٹاف یوزر"
           target_user: "ہدف صارف"
           subject: "موضوع"
           when: "کب"

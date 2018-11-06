@@ -3,7 +3,7 @@ module Discourse
   unless defined? ::Discourse::VERSION
     module VERSION #:nodoc:
       MAJOR = 2
-      MINOR = 1
+      MINOR = 2
       TINY  = 0
       PRE   = 'beta4'
 

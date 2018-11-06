@@ -124,7 +124,7 @@ class UserAvatarsController < ApplicationController
         optimized_path = Discourse.store.path_for(optimized)
         image = optimized_path if File.exists?(optimized_path)
       else
-        return proxy_avatar(Discourse.store.cdn_url(optimized.url))
+        return proxy_avatar(Discourse.store.cdn_url(optimized.url), upload.created_at)
       end
     end
 
@@ -141,7 +141,7 @@ class UserAvatarsController < ApplicationController
   end
 
   PROXY_PATH = Rails.root + "tmp/avatar_proxy"
-  def proxy_avatar(url)
+  def proxy_avatar(url, last_modified)
 
     if url[0..1] == "//"
       url = (SiteSetting.force_https ? "https:" : "http:") + url
@@ -163,8 +163,7 @@ class UserAvatarsController < ApplicationController
       FileUtils.mv tmp.path, path
     end
 
-    # putting a bogus date cause download is not retaining the data
-    response.headers["Last-Modified"] = DateTime.parse("1-1-2000").httpdate
+    response.headers["Last-Modified"] = last_modified.httpdate
     response.headers["Content-Length"] = File.size(path).to_s
     immutable_for(1.year)
     send_file path, disposition: nil
@@ -174,7 +173,7 @@ class UserAvatarsController < ApplicationController
   def render_blank
     path = Rails.root + "public/images/avatar.png"
     expires_in 10.minutes, public: true
-    response.headers["Last-Modified"] = DateTime.parse("1-1-2000").httpdate
+    response.headers["Last-Modified"] = Time.new('1990-01-01').httpdate
     response.headers["Content-Length"] = File.size(path).to_s
     send_file path, disposition: nil
   end
@@ -184,45 +183,10 @@ class UserAvatarsController < ApplicationController
   # consider removal of hacks some time in 2019
 
   def get_optimized_image(upload, size)
-    if (!upload.extension || upload.extension.length == 0)
-      fix_extension(upload)
-    end
+    return if !upload
 
-    begin
-      try_optimize(upload, size, true)
-    rescue
-      if fix_extension(upload)
-        try_optimize(upload, size, false)
-        # TODO decide if we want to detach faulty avatar here?
-      else
-        nil
-      end
-    end
-  end
-
-  def fix_extension(upload)
-    # this is relatively cheap
-    original_path = Discourse.store.path_for(upload)
-    if original_path.blank?
-      external_copy = Discourse.store.download(upload) rescue nil
-      original_path = external_copy.try(:path)
-    end
-
-    image_info = FastImage.new(original_path) rescue nil
-    if image_info && image_info.type.to_s != upload.extension
-      upload.update_columns(extension: image_info.type.to_s)
-      true
-    end
-  end
-
-  def try_optimize(upload, size, raise_on_error)
-    OptimizedImage.create_for(
-      upload,
-      size,
-      size,
-      allow_animation: SiteSetting.allow_animated_avatars,
-      raise_on_error: raise_on_error
-    )
+    upload.get_optimized_image(size, size, allow_animation: SiteSetting.allow_animated_avatars)
+    # TODO decide if we want to detach here
   end
 
 end

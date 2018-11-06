@@ -1,4 +1,5 @@
 require 'rails_helper'
+require 'discourse_ip_info'
 
 describe UserAuthToken do
 
@@ -248,6 +249,25 @@ describe UserAuthToken do
       user_auth_token_id: token.id
     ).count).to eq(1)
 
+  end
+
+  it "calls before_destroy" do
+    SiteSetting.verbose_auth_token_logging = true
+
+    user = Fabricate(:user)
+
+    token = UserAuthToken.generate!(user_id: user.id,
+                                    user_agent: "some user agent",
+                                    client_ip: "1.1.2.3")
+
+    expect(user.user_auth_token_logs.count).to eq(1)
+
+    token.destroy
+
+    expect(user.user_auth_token_logs.count).to eq(2)
+    expect(user.user_auth_token_logs.last.action).to eq("destroy")
+    expect(user.user_auth_token_logs.last.user_agent).to eq("some user agent")
+    expect(user.user_auth_token_logs.last.client_ip).to eq("1.1.2.3")
   end
 
   it "will not mark token unseen when prev and current are the same" do

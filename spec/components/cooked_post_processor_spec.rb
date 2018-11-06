@@ -4,18 +4,29 @@ require "cooked_post_processor"
 describe CookedPostProcessor do
 
   context ".post_process" do
+    let(:upload) do
+      Fabricate(:upload,
+        url: '/uploads/default/original/1X/1/1234567890123456.jpg'
+      )
+    end
 
-    let(:post) { build(:post) }
+    let(:post) do
+      Fabricate(:post, raw: <<~RAW)
+      <img src="#{upload.url}">
+      RAW
+    end
+
     let(:cpp) { CookedPostProcessor.new(post) }
     let(:post_process) { sequence("post_process") }
 
     it "post process in sequence" do
       cpp.expects(:post_process_oneboxes).in_sequence(post_process)
       cpp.expects(:post_process_images).in_sequence(post_process)
-      cpp.expects(:keep_reverse_index_up_to_date).in_sequence(post_process)
       cpp.expects(:optimize_urls).in_sequence(post_process)
       cpp.expects(:pull_hotlinked_images).in_sequence(post_process)
       cpp.post_process
+
+      expect(PostUpload.exists?(post: post, upload: upload)).to eq(true)
     end
 
   end
@@ -40,53 +51,73 @@ describe CookedPostProcessor do
     end
   end
 
-  context ".keep_reverse_index_up_to_date" do
-    let(:video_upload) { Fabricate(:upload, url: '/uploads/default/original/1X/1/1234567890123456.mp4') }
-    let(:image_upload) { Fabricate(:upload, url: '/uploads/default/original/1X/1/1234567890123456.jpg') }
-    let(:audio_upload) { Fabricate(:upload, url: '/uploads/default/original/1X/1/1234567890123456.ogg') }
-    let(:attachment_upload) { Fabricate(:upload, url: '/uploads/default/original/1X/1/1234567890123456.csv') }
-
-    let(:raw) do
-      <<~RAW
-      <a href="#{attachment_upload.url}">Link</a>
-      <img src="#{image_upload.url}">
-
-      <video width="100%" height="100%" controls>
-        <source src="http://myforum.com#{video_upload.url}">
-        <a href="http://myforum.com#{video_upload.url}">http://myforum.com#{video_upload.url}</a>
-      </video>
-
-      <audio controls>
-        <source src="http://myforum.com#{audio_upload.url}">
-        <a href="http://myforum.com#{audio_upload.url}">http://myforum.com#{audio_upload.url}</a>
-      </audio>
-      RAW
-    end
-
-    let(:post) { Fabricate(:post, raw: raw) }
-    let(:cpp) { CookedPostProcessor.new(post) }
-
-    it "finds all the uploads in the post" do
-      cpp.keep_reverse_index_up_to_date
-
-      expect(PostUpload.where(post: post).map(&:upload_id).sort).to eq(
-        [video_upload.id, image_upload.id, audio_upload.id, attachment_upload.id].sort
-      )
-    end
-
-    it "cleans the reverse index up for the current post" do
-      cpp.keep_reverse_index_up_to_date
-
-      post_uploads_ids = post.post_uploads.pluck(:id)
-
-      cpp.keep_reverse_index_up_to_date
-
-      expect(post.reload.post_uploads.pluck(:id)).to_not eq(post_uploads_ids)
-    end
-
-  end
-
   context ".post_process_images" do
+
+    before do
+      SiteSetting.responsive_post_image_sizes = ""
+    end
+
+    context "responsive images" do
+
+      before { SiteSetting.responsive_post_image_sizes = "1|1.5|3" }
+
+      it "includes responsive images on demand" do
+        upload = Fabricate(:upload, width: 2000, height: 1500, filesize: 10000)
+        post = Fabricate(:post, raw: "hello <img src='#{upload.url}'>")
+
+        # fake some optimized images
+        OptimizedImage.create!(
+          url: 'http://a.b.c/666x500.jpg',
+          width: 666,
+          height: 500,
+          upload_id: upload.id,
+          sha1: SecureRandom.hex,
+          extension: '.jpg',
+          filesize: 500
+        )
+
+        # fake 3x optimized image, we lose 2 pixels here over original due to rounding on downsize
+        OptimizedImage.create!(
+          url: 'http://a.b.c/1998x1500.jpg',
+          width: 1998,
+          height: 1500,
+          upload_id: upload.id,
+          sha1: SecureRandom.hex,
+          extension: '.jpg',
+          filesize: 800
+        )
+
+        cpp = CookedPostProcessor.new(post)
+
+        cpp.add_to_size_cache(upload.url, 2000, 1500)
+        cpp.post_process_images
+
+        # 1.5x is skipped cause we have a missing thumb
+        expect(cpp.html).to include('srcset="http://a.b.c/666x500.jpg, http://a.b.c/1998x1500.jpg 3x"')
+      end
+
+      it "doesn't include response images for cropped images" do
+        upload = Fabricate(:upload, width: 200, height: 4000, filesize: 12345)
+        post = Fabricate(:post, raw: "hello <img src='#{upload.url}'>")
+
+        # fake some optimized images
+        OptimizedImage.create!(
+          url: 'http://a.b.c/200x500.jpg',
+          width: 200,
+          height: 500,
+          upload_id: upload.id,
+          sha1: SecureRandom.hex,
+          extension: '.jpg',
+          filesize: 500
+        )
+
+        cpp = CookedPostProcessor.new(post)
+        cpp.add_to_size_cache(upload.url, 200, 4000)
+        cpp.post_process_images
+
+        expect(cpp.html).to_not include('srcset="')
+      end
+    end
 
     shared_examples "leave dimensions alone" do
       it "doesn't use them" do
@@ -166,6 +197,22 @@ describe CookedPostProcessor do
 <span class=\"filename\">logo.png</span><span class=\"informations\">1750x2000 1.21 KB</span><span class=\"expand\"></span>
 </div></a></div></p>"
         expect(cpp).to be_dirty
+      end
+
+      describe 'when image is inside onebox' do
+        let(:url) { 'https://image.com/my-avatar' }
+        let(:post) { Fabricate(:post, raw: url) }
+
+        before do
+          Oneboxer.stubs(:onebox).with(url, anything).returns("<img class='onebox' src='/uploads/default/original/1X/1234567890123456.jpg' />")
+        end
+
+        it 'should not add lightbox' do
+          cpp.post_process_oneboxes
+          cpp.post_process_images
+
+          expect(cpp.html).to match_html("<p><img class=\"onebox\" src=\"/uploads/default/original/1X/1234567890123456.jpg\" width=\"690\"\ height=\"788\"></p>")
+        end
       end
 
       describe 'when image is an svg' do
@@ -530,6 +577,24 @@ describe CookedPostProcessor do
       cpp.post_process_oneboxes
 
       expect(cpp.doc.to_s).to eq("<p><img class=\"onebox\" src=\"#{upload.url}\" width=\"\" height=\"\"></p>")
+    end
+
+    it "replaces large image placeholder" do
+      url = 'https://image.com/my-avatar'
+      image_url = 'https://image.com/avatar.png'
+
+      Oneboxer.stubs(:onebox).with(url, anything).returns("<img class='onebox' src='#{image_url}' />")
+
+      post = Fabricate(:post, raw: url)
+
+      post.custom_fields[Post::LARGE_IMAGES] = "[\"//image.com/avatar.png\"]"
+      post.save_custom_fields
+
+      cpp = CookedPostProcessor.new(post, invalidate_oneboxes: true)
+      cpp.post_process_oneboxes
+      cpp.post_process_images
+
+      expect(cpp.doc.to_s).to match(/<div class="large-image-placeholder">/)
     end
   end
 

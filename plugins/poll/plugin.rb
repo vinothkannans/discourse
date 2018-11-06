@@ -245,6 +245,7 @@ after_initialize do
 
       post = Post.find_by(id: post_id)
       raise Discourse::InvalidParameters.new("post_id is invalid") if !post
+      raise Discourse::InvalidParameters.new("no poll exists for this post_id") unless post.custom_fields[DiscoursePoll::POLLS_CUSTOM_FIELD]
 
       poll = post.custom_fields[DiscoursePoll::POLLS_CUSTOM_FIELD][poll_name]
       raise Discourse::InvalidParameters.new("poll_name is invalid") if !poll
@@ -280,7 +281,8 @@ after_initialize do
         User.where(id: user_ids).each do |user|
           user_hash = UserNameSerializer.new(user).serializable_hash
 
-          poll_votes[user.id.to_s][poll_name].each do |option_id|
+          # protect against poorly denormalized data
+          poll_votes&.dig(user.id.to_s, poll_name)&.each do |option_id|
             if (params[:option_id])
               next unless option_id == params[:option_id].to_s
             end
@@ -412,6 +414,7 @@ after_initialize do
     polls = post_custom_fields[DiscoursePoll::POLLS_CUSTOM_FIELD].dup
 
     polls.each do |_, poll|
+      next if !poll
       poll["options"].each do |option|
         option.delete("voter_ids")
       end

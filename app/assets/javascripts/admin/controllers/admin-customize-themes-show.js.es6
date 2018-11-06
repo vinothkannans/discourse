@@ -1,64 +1,46 @@
-import {
-  default as computed,
-  observes
-} from "ember-addons/ember-computed-decorators";
+import { default as computed } from "ember-addons/ember-computed-decorators";
 import { url } from "discourse/lib/computed";
 import { popupAjaxError } from "discourse/lib/ajax-error";
 import showModal from "discourse/lib/show-modal";
 import ThemeSettings from "admin/models/theme-settings";
+import { THEMES, COMPONENTS } from "admin/models/theme";
 
 const THEME_UPLOAD_VAR = 2;
 
 export default Ember.Controller.extend({
+  downloadUrl: url("model.id", "/admin/themes/%@"),
+  previewUrl: url("model.id", "/admin/themes/%@/preview"),
+  addButtonDisabled: Em.computed.empty("selectedChildThemeId"),
   editRouteName: "adminCustomizeThemes.edit",
 
-  @observes("allowChildThemes")
-  setSelectedThemeId() {
-    const available = this.get("selectableChildThemes");
-    if (
-      !this.get("selectedChildThemeId") &&
-      available &&
-      available.length > 0
-    ) {
-      this.set("selectedChildThemeId", available[0].get("id"));
-    }
-  },
-
-  @computed("model", "allThemes")
+  @computed("model", "allThemes", "model.component")
   parentThemes(model, allThemes) {
-    let parents = allThemes.filter(theme =>
+    if (!model.get("component")) {
+      return null;
+    }
+    const parents = allThemes.filter(theme =>
       _.contains(theme.get("childThemes"), model)
     );
     return parents.length === 0 ? null : parents;
   },
 
-  @computed("model.theme_fields.@each")
-  hasEditedFields(fields) {
-    return fields.any(f => !Em.isBlank(f.value));
-  },
-
-  @computed("model.theme_fields.@each")
-  editedDescriptions(fields) {
-    let descriptions = [];
-    let description = target => {
-      let current = fields.filter(
-        field => field.target === target && !Em.isBlank(field.value)
-      );
-      if (current.length > 0) {
-        let text = I18n.t("admin.customize.theme." + target);
-        let localized = current.map(f =>
-          I18n.t("admin.customize.theme." + f.name + ".text")
-        );
-        return text + ": " + localized.join(" , ");
-      }
-    };
+  @computed("model.editedFields")
+  editedFieldsFormatted() {
+    const descriptions = [];
     ["common", "desktop", "mobile"].forEach(target => {
-      descriptions.push(description(target));
+      const fields = this.editedFieldsForTarget(target);
+      if (fields.length < 1) {
+        return;
+      }
+      let resultString = I18n.t("admin.customize.theme." + target);
+      const formattedFields = fields
+        .map(f => I18n.t("admin.customize.theme." + f.name + ".text"))
+        .join(" , ");
+      resultString += `: ${formattedFields}`;
+      descriptions.push(resultString);
     });
-    return descriptions.reject(d => Em.isBlank(d));
+    return descriptions;
   },
-
-  previewUrl: url("model.id", "/admin/themes/%@/preview"),
 
   @computed("colorSchemeId", "model.color_scheme_id")
   colorSchemeChanged(colorSchemeId, existingId) {
@@ -66,47 +48,41 @@ export default Ember.Controller.extend({
     return colorSchemeId !== existingId;
   },
 
-  @computed(
-    "availableChildThemes",
-    "model.childThemes.@each",
-    "model",
-    "allowChildThemes"
-  )
-  selectableChildThemes(available, childThemes, model, allowChildThemes) {
-    if (!allowChildThemes && (!childThemes || childThemes.length === 0)) {
-      return null;
+  @computed("availableChildThemes", "model.childThemes.@each", "model")
+  selectableChildThemes(available, childThemes) {
+    if (available) {
+      const themes = !childThemes
+        ? available
+        : available.filter(theme => childThemes.indexOf(theme) === -1);
+      return themes.length === 0 ? null : themes;
     }
-
-    let themes = [];
-    available.forEach(t => {
-      if (
-        (!childThemes || childThemes.indexOf(t) === -1) &&
-        Em.isEmpty(t.get("childThemes")) &&
-        !t.get("user_selectable") &&
-        !t.get("default")
-      ) {
-        themes.push(t);
-      }
-    });
-    return themes.length === 0 ? null : themes;
   },
 
-  @computed("allThemes", "allThemes.length", "model", "parentThemes")
-  availableChildThemes(allThemes, count) {
-    if (count === 1 || this.get("parentThemes")) {
-      return null;
+  @computed("allThemes", "model.component", "model")
+  availableChildThemes(allThemes) {
+    if (!this.get("model.component")) {
+      const themeId = this.get("model.id");
+      return allThemes.filter(
+        theme => theme.get("id") !== themeId && theme.get("component")
+      );
     }
+  },
 
-    let excludeIds = [this.get("model.id")];
+  @computed("model.component")
+  convertKey(component) {
+    const type = component ? "component" : "theme";
+    return `admin.customize.theme.convert_${type}`;
+  },
 
-    let themes = [];
-    allThemes.forEach(theme => {
-      if (excludeIds.indexOf(theme.get("id")) === -1) {
-        themes.push(theme);
-      }
-    });
+  @computed("model.component")
+  convertIcon(component) {
+    return component ? "cube" : "";
+  },
 
-    return themes;
+  @computed("model.component")
+  convertTooltip(component) {
+    const type = component ? "component" : "theme";
+    return `admin.customize.theme.convert_${type}_tooltip`;
   },
 
   @computed("model.settings")
@@ -119,8 +95,65 @@ export default Ember.Controller.extend({
     return settings.length > 0;
   },
 
-  downloadUrl: url("model.id", "/admin/themes/%@"),
+  @computed("model.remoteError", "updatingRemote")
+  showRemoteError(errorMessage, updating) {
+    return errorMessage && !updating;
+  },
 
+  editedFieldsForTarget(target) {
+    return this.get("model.editedFields").filter(
+      field => field.target === target
+    );
+  },
+
+  commitSwitchType() {
+    const model = this.get("model");
+    const newValue = !model.get("component");
+    model.set("component", newValue);
+
+    if (newValue) {
+      this.set("parentController.currentTab", COMPONENTS);
+    } else {
+      this.set("parentController.currentTab", THEMES);
+    }
+
+    model
+      .saveChanges("component")
+      .then(() => {
+        this.set("colorSchemeId", null);
+
+        model.setProperties({
+          default: false,
+          color_scheme_id: null,
+          user_selectable: false,
+          child_themes: [],
+          childThemes: []
+        });
+
+        this.get("parentController.model.content").forEach(theme => {
+          const children = _.toArray(theme.get("childThemes"));
+          const rawChildren = _.toArray(theme.get("child_themes") || []);
+          const index = children ? children.indexOf(model) : -1;
+          if (index > -1) {
+            children.splice(index, 1);
+            rawChildren.splice(index, 1);
+            theme.setProperties({
+              childThemes: children,
+              child_themes: rawChildren
+            });
+          }
+        });
+      })
+      .catch(popupAjaxError);
+  },
+  transitionToEditRoute() {
+    this.transitionToRoute(
+      this.get("editRouteName"),
+      this.get("model.id"),
+      "common",
+      "scss"
+    );
+  },
   actions: {
     updateToLatest() {
       this.set("updatingRemote", true);
@@ -177,25 +210,17 @@ export default Ember.Controller.extend({
     },
 
     editTheme() {
-      let edit = () =>
-        this.transitionToRoute(
-          this.get("editRouteName"),
-          this.get("model.id"),
-          "common",
-          "scss"
-        );
-
       if (this.get("model.remote_theme")) {
         bootbox.confirm(
           I18n.t("admin.customize.theme.edit_confirm"),
           result => {
             if (result) {
-              edit();
+              this.transitionToEditRoute();
             }
           }
         );
       } else {
-        edit();
+        this.transitionToEditRoute();
       }
     },
 
@@ -254,6 +279,29 @@ export default Ember.Controller.extend({
           }
         }
       );
+    },
+
+    switchType() {
+      const relatives = this.get("model.component")
+        ? this.get("parentThemes")
+        : this.get("model.childThemes");
+      if (relatives && relatives.length > 0) {
+        const names = relatives.map(relative => relative.get("name"));
+        bootbox.confirm(
+          I18n.t(`${this.get("convertKey")}_alert`, {
+            relatives: names.join(", ")
+          }),
+          I18n.t("no_value"),
+          I18n.t("yes_value"),
+          result => {
+            if (result) {
+              this.commitSwitchType();
+            }
+          }
+        );
+      } else {
+        this.commitSwitchType();
+      }
     }
   }
 });

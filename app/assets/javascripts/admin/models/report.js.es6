@@ -8,7 +8,7 @@ import { renderAvatar } from "discourse/helpers/user-avatar";
 
 // Change this line each time report format change
 // and you want to ensure cache is reset
-export const SCHEMA_VERSION = 2;
+export const SCHEMA_VERSION = 3;
 
 const Report = Discourse.Model.extend({
   average: false,
@@ -285,7 +285,7 @@ const Report = Discourse.Model.extend({
             value,
             type,
             property: mainProperty,
-            formatedValue: value ? escapeExpression(value) : "-"
+            formatedValue: value ? escapeExpression(value) : "—"
           };
         }
       };
@@ -304,7 +304,7 @@ const Report = Discourse.Model.extend({
         avatar_template: row[properties.avatar]
       });
 
-      const href = `/admin/users/${userId}/${username}`;
+      const href = Discourse.getURL(`/admin/users/${userId}/${username}`);
 
       const avatarImg = renderAvatar(user, {
         imageSize: "tiny",
@@ -318,7 +318,7 @@ const Report = Discourse.Model.extend({
 
     return {
       value: username,
-      formatedValue: username ? formatedValue(username) : "-"
+      formatedValue: username ? formatedValue(username) : "—"
     };
   },
 
@@ -327,13 +327,13 @@ const Report = Discourse.Model.extend({
 
     const formatedValue = () => {
       const topicId = row[properties.id];
-      const href = `/t/-/${topicId}`;
+      const href = Discourse.getURL(`/t/-/${topicId}`);
       return `<a href='${href}'>${topicTitle}</a>`;
     };
 
     return {
       value: topicTitle,
-      formatedValue: topicTitle ? formatedValue() : "-"
+      formatedValue: topicTitle ? formatedValue() : "—"
     };
   },
 
@@ -341,7 +341,7 @@ const Report = Discourse.Model.extend({
     const postTitle = row[properties.truncated_raw];
     const postNumber = row[properties.number];
     const topicId = row[properties.topic_id];
-    const href = `/t/-/${topicId}/${postNumber}`;
+    const href = Discourse.getURL(`/t/-/${topicId}/${postNumber}`);
 
     return {
       property: properties.title,
@@ -360,7 +360,7 @@ const Report = Discourse.Model.extend({
   _percentLabel(value) {
     return {
       value,
-      formatedValue: value ? `${value}%` : "-"
+      formatedValue: value ? `${value}%` : "—"
     };
   },
 
@@ -373,14 +373,14 @@ const Report = Discourse.Model.extend({
 
     return {
       value,
-      formatedValue: value ? formatedValue() : "-"
+      formatedValue: value ? formatedValue() : "—"
     };
   },
 
   _dateLabel(value, date) {
     return {
       value,
-      formatedValue: value ? date.format("LL") : "-"
+      formatedValue: value ? date.format("LL") : "—"
     };
   },
 
@@ -389,13 +389,13 @@ const Report = Discourse.Model.extend({
 
     return {
       value,
-      formatedValue: value ? escaped : "-"
+      formatedValue: value ? escaped : "—"
     };
   },
 
   _linkLabel(properties, row) {
     const property = properties[0];
-    const value = row[property];
+    const value = Discourse.getURL(row[property]);
     const formatedValue = (href, anchor) => {
       return `<a href="${escapeExpression(href)}">${escapeExpression(
         anchor
@@ -404,7 +404,7 @@ const Report = Discourse.Model.extend({
 
     return {
       value,
-      formatedValue: value ? formatedValue(value, row[properties[1]]) : "-"
+      formatedValue: value ? formatedValue(value, row[properties[1]]) : "—"
     };
   },
 
@@ -439,7 +439,7 @@ const Report = Discourse.Model.extend({
       case "high-trending-down":
         return higherIsBetter ? "angle-double-down" : "angle-double-up";
       default:
-        return null;
+        return "minus";
     }
   }
 });

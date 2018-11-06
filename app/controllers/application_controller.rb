@@ -129,6 +129,14 @@ class ApplicationController < ActionController::Base
     )
   end
 
+  rescue_from ActiveRecord::RecordInvalid do |e|
+    if request.format && request.format.json?
+      render_json_error e, type: :record_invalid, status: 422
+    else
+      raise e
+    end
+  end
+
   # If they hit the rate limiter
   rescue_from RateLimiter::LimitExceeded do |e|
     render_rate_limit_error(e)
@@ -145,6 +153,14 @@ class ApplicationController < ActionController::Base
       rescue_discourse_actions(:not_logged_in, 403, include_ember: true)
     else
       rescue_discourse_actions(:not_found, 404)
+    end
+  end
+
+  rescue_from ArgumentError do |e|
+    if e.message == "string contains null byte"
+      raise Discourse::InvalidParameters, e.message
+    else
+      raise e
     end
   end
 
@@ -203,6 +219,10 @@ class ApplicationController < ActionController::Base
     render_json_error I18n.t('read_only_mode_enabled'), type: :read_only, status: 503
   end
 
+  rescue_from ActionController::ParameterMissing do |e|
+    render_json_error e.message, status: 400
+  end
+
   def redirect_with_client_support(url, options)
     if request.xhr?
       response.headers['Discourse-Xhr-Redirect'] = 'true'
@@ -222,7 +242,9 @@ class ApplicationController < ActionController::Base
       url = opts[:original_path] || request.fullpath
       permalink = Permalink.find_by_url(url)
 
-      if permalink.present?
+      # there are some cases where we have a permalink but no url
+      # cause category / topic was deleted
+      if permalink.present? && permalink.target_url
         # permalink present, redirect to that URL
         redirect_with_client_support permalink.target_url, status: :moved_permanently
         return
@@ -234,7 +256,11 @@ class ApplicationController < ActionController::Base
     if show_json_errors
       # HACK: do not use render_json_error for topics#show
       if request.params[:controller] == 'topics' && request.params[:action] == 'show'
-        return render status: status_code, layout: false, plain: (status_code == 404 || status_code == 410) ? build_not_found_page(status_code) : message
+        return render(
+          status: status_code,
+          layout: false,
+          plain: (status_code == 404 || status_code == 410) ? build_not_found_page(status_code) : message
+        )
       end
 
       render_json_error message, type: type, status: status_code
@@ -363,7 +389,8 @@ class ApplicationController < ActionController::Base
     theme_ids = []
 
     if preview_theme_id = request[:preview_theme_id]&.to_i
-      theme_ids << preview_theme_id
+      ids = [preview_theme_id]
+      theme_ids = ids if guardian.allow_themes?(ids, include_preview: true)
     end
 
     user_option = current_user&.user_option
@@ -376,10 +403,9 @@ class ApplicationController < ActionController::Base
       end
     end
 
-    theme_ids = user_option&.theme_ids || [] if theme_ids.blank?
-
-    unless guardian.allow_themes?(theme_ids)
-      theme_ids = []
+    if theme_ids.blank?
+      ids = user_option&.theme_ids || []
+      theme_ids = ids if guardian.allow_themes?(ids)
     end
 
     if theme_ids.blank? && SiteSetting.default_theme_id != -1
@@ -390,7 +416,7 @@ class ApplicationController < ActionController::Base
   end
 
   def guardian
-    @guardian ||= Guardian.new(current_user)
+    @guardian ||= Guardian.new(current_user, request)
   end
 
   def current_homepage
@@ -432,7 +458,7 @@ class ApplicationController < ActionController::Base
   end
 
   def can_cache_content?
-    current_user.blank? && flash[:authentication_data].blank?
+    current_user.blank? && cookies[:authentication_data].blank?
   end
 
   # Our custom cache method

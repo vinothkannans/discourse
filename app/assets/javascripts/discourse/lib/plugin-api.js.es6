@@ -1,6 +1,7 @@
 import { iconNode } from "discourse-common/lib/icon-library";
 import { addDecorator } from "discourse/widgets/post-cooked";
 import ComposerEditor from "discourse/components/composer-editor";
+import DiscourseBanner from "discourse/components/discourse-banner";
 import { addButton } from "discourse/widgets/post-menu";
 import { includeAttributes } from "discourse/lib/transform-post";
 import { addToolbarCallback } from "discourse/components/d-editor";
@@ -35,9 +36,10 @@ import { registerCustomAvatarHelper } from "discourse/helpers/user-avatar";
 import { disableNameSuppression } from "discourse/widgets/poster-name";
 import { registerCustomPostMessageCallback as registerCustomPostMessageCallback1 } from "discourse/controllers/topic";
 import Sharing from "discourse/lib/sharing";
+import { addComposerUploadHandler } from "discourse/components/composer-editor";
 
 // If you add any methods to the API ensure you bump up this number
-const PLUGIN_API_VERSION = "0.8.23";
+const PLUGIN_API_VERSION = "0.8.25";
 
 class PluginApi {
   constructor(version, container) {
@@ -174,6 +176,7 @@ class PluginApi {
 
     if (!opts.onlyStream) {
       decorate(ComposerEditor, "previewRefreshed", callback);
+      decorate(DiscourseBanner, "didInsertElement", callback);
       decorate(
         this.container.factoryFor("component:user-stream").class,
         "didInsertElement",
@@ -752,6 +755,22 @@ class PluginApi {
   addSharingSource(options) {
     Sharing.addSharingId(options.id);
     Sharing.addSource(options);
+  }
+
+  /**
+   *
+   * Registers a function to handle uploads for specified file types
+   * The normal uploading functionality will be bypassed
+   * This only for uploads of individual files
+   *
+   * Example:
+   *
+   * addComposerUploadHandler(["mp4", "mov"], (file) => {
+   *    console.log("Handling upload for", file.name);
+   * })
+   */
+  addComposerUploadHandler(extensions, method) {
+    addComposerUploadHandler(extensions, method);
   }
 }
 

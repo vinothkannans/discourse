@@ -36,6 +36,9 @@ const bindings = {
   "command+up": { handler: "goToFirstPost", anonymous: true },
   j: { handler: "selectDown", anonymous: true },
   k: { handler: "selectUp", anonymous: true },
+  // we use this odd routing here vs a postAction: cause like
+  // has an animation so the widget handles that
+  // TODO: teach controller how to trigger the widget animation
   l: { click: ".topic-post.selected button.toggle-like" },
   "m m": { handler: "setTrackingToMuted" }, // mark topic as muted
   "m r": { handler: "setTrackingToRegular" }, // mark topic as regular
@@ -62,6 +65,7 @@ const bindings = {
   "shift+s": { click: "#topic-footer-buttons button.share", anonymous: true }, // share topic
   "shift+u": { handler: "goToUnreadPost" },
   "shift+z shift+z": { handler: "logout" },
+  "shift+f11": { handler: "fullscreenComposer" },
   t: { postAction: "replyAsNewTopic" },
   u: { handler: "goBack", anonymous: true },
   "x r": {
@@ -209,6 +213,13 @@ export default {
     }
   },
 
+  fullscreenComposer() {
+    const composer = this.container.lookup("controller:composer");
+    if (composer.get("model")) {
+      composer.toggleFullscreen();
+    }
+  },
+
   pinUnpinTopic() {
     this.container.lookup("controller:topic").togglePinnedState();
   },
@@ -297,7 +308,7 @@ export default {
   sendToSelectedPost(action) {
     const container = this.container;
     // TODO: We should keep track of the post without a CSS class
-    const selectedPostId = parseInt(
+    let selectedPostId = parseInt(
       $(".topic-post.selected article.boxed").data("post-id"),
       10
     );

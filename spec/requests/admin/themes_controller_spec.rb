@@ -169,7 +169,7 @@ describe Admin::ThemesController do
       theme.set_field(target: :common, name: :scss, value: '.body{color: black;}')
       theme.save
 
-      child_theme = Fabricate(:theme)
+      child_theme = Fabricate(:theme, component: true)
 
       upload = Fabricate(:upload)
 
@@ -200,8 +200,7 @@ describe Admin::ThemesController do
     end
 
     it 'returns the right error message' do
-      parent = Fabricate(:theme)
-      parent.add_child_theme!(theme)
+      theme.update!(component: true)
 
       put "/admin/themes/#{theme.id}.json", params: {
         theme: { default: true }
@@ -209,6 +208,24 @@ describe Admin::ThemesController do
 
       expect(response.status).to eq(400)
       expect(JSON.parse(response.body)["errors"].first).to include(I18n.t("themes.errors.component_no_default"))
+    end
+  end
+
+  describe '#destroy' do
+    let(:theme) { Fabricate(:theme) }
+
+    it "deletes the field's javascript cache" do
+      theme.set_field(target: :common, name: :header, value: '<script>console.log("test")</script>')
+      theme.save!
+
+      javascript_cache = theme.theme_fields.find_by(target_id: Theme.targets[:common], name: :header).javascript_cache
+      expect(javascript_cache).to_not eq(nil)
+
+      delete "/admin/themes/#{theme.id}.json"
+
+      expect(response.status).to eq(204)
+      expect { theme.reload }.to raise_error(ActiveRecord::RecordNotFound)
+      expect { javascript_cache.reload }.to raise_error(ActiveRecord::RecordNotFound)
     end
   end
 end

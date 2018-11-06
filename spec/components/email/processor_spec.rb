@@ -2,44 +2,40 @@ require "rails_helper"
 require "email/processor"
 
 describe Email::Processor do
+  after do
+    $redis.flushall
+  end
 
   let(:from) { "foo@bar.com" }
 
   context "when reply via email is too short" do
-    let(:mail) { file_from_fixtures("email_reply_3.eml", "emails").read }
+    let(:mail) { file_from_fixtures("chinese_reply.eml", "emails").read }
     let(:post) { Fabricate(:post) }
-    let!(:user) { Fabricate(:user, email: "three@foo.com") }
-    let!(:email_log) do
-      Fabricate(:email_log,
-        message_id: "35@foo.bar.mail", # don't change, based on fixture file "email_reply_3.eml"
-        email_type: "user_posted",
-        post_id: post.id,
-        to_address: "asdas@dasdfd.com"
+    let(:user) { Fabricate(:user, email: 'discourse@bar.com') }
+
+    let!(:post_reply_key) do
+      Fabricate(:post_reply_key,
+        user: user,
+        post: post,
+        reply_key: '4f97315cc828096c9cb34c6f1a0d6fe8'
       )
     end
 
     before do
+      SiteSetting.email_in = true
+      SiteSetting.reply_by_email_address = "reply+%{reply_key}@bar.com"
       SiteSetting.min_post_length = 1000
-      SiteSetting.find_related_post_with_key = false
     end
 
     it "rejects reply and sends an email with custom error message" do
-      begin
-        receiver = Email::Receiver.new(mail)
-        receiver.process!
-      rescue Email::Receiver::TooShortPost => e
-        error = e
-      end
-
-      expect(error.class).to eq(Email::Receiver::TooShortPost)
       processor = Email::Processor.new(mail)
       processor.process!
 
-      rejection_raw = processor.send(:handle_failure, mail, error).body.raw_source
+      rejection_raw = ActionMailer::Base.deliveries.first.body.raw_source
 
       count = SiteSetting.min_post_length
-      destination = receiver.mail.to
-      former_title = receiver.mail.subject
+      destination = processor.receiver.mail.to
+      former_title = processor.receiver.mail.subject
 
       expect(rejection_raw.gsub(/\r/, "")).to eq(
         I18n.t("system_messages.email_reject_post_too_short.text_body_template",
@@ -107,14 +103,27 @@ describe Email::Processor do
     let(:mail2) { "From: #{from}\nTo: foo@foo.com\nSubject: BAR BAR\n\nBar bar bar bar?" }
 
     it "sends a rejection email on an unrecognized error" do
-      Email::Processor.any_instance.stubs(:can_send_rejection_email?).returns(true)
-      Email::Receiver.any_instance.stubs(:process_internal).raises("boom")
-      Rails.logger.expects(:error)
+      begin
+        @orig_logger = Rails.logger
+        Rails.logger = @fake_logger = FakeLogger.new
 
-      Email::Processor.process!(mail)
-      expect(IncomingEmail.last.error).to             eq("boom")
-      expect(IncomingEmail.last.rejection_message).to be_present
-      expect(EmailLog.last.email_type).to             eq("email_reject_unrecognized_error")
+        Email::Processor.any_instance.stubs(:can_send_rejection_email?).returns(true)
+        Email::Receiver.any_instance.stubs(:process_internal).raises("boom")
+
+        Email::Processor.process!(mail)
+
+        errors = Rails.logger.errors
+        expect(errors.size).to eq(1)
+        expect(errors.first).to include("boom")
+
+        incoming_email = IncomingEmail.last
+        expect(incoming_email.error).to eq("boom")
+        expect(incoming_email.rejection_message).to be_present
+
+        expect(EmailLog.last.email_type).to eq("email_reject_unrecognized_error")
+      ensure
+        Rails.logger = @orig_logger
+      end
     end
 
     it "sends more than one rejection email per day" do
@@ -163,6 +172,29 @@ describe Email::Processor do
       EMAIL
 
       expect { Email::Processor.process!(email) }.to_not change { EmailLog.count }
+    end
+  end
+
+  describe 'when replying to a post that is too old' do
+    let(:mail) { file_from_fixtures("old_destination.eml", "emails").read }
+
+    it 'rejects the email with the right response' do
+      SiteSetting.disallow_reply_by_email_after_days = 2
+
+      topic = Fabricate(:topic, id: 424242)
+      post  = Fabricate(:post, topic: topic, id: 123456, created_at: 3.days.ago)
+
+      processor = Email::Processor.new(mail)
+      processor.process!
+
+      rejection_raw = ActionMailer::Base.deliveries.first.body.to_s
+
+      expect(rejection_raw).to eq(I18n.t("system_messages.email_reject_old_destination.text_body_template",
+        destination: '["reply+4f97315cc828096c9cb34c6f1a0d6fe8@bar.com"]',
+        former_title: 'Some Old Post',
+        short_url: "#{Discourse.base_url}/p/#{post.id}",
+        number_of_days: 2
+      ))
     end
   end
 end

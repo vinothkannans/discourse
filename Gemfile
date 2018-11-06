@@ -34,7 +34,7 @@ gem 'redis-namespace'
 
 gem 'active_model_serializers', '~> 0.8.3'
 
-gem 'onebox', '1.8.57'
+gem 'onebox', '1.8.65'
 
 gem 'http_accept_language', '~>2.0.5', require: false
 
@@ -194,3 +194,5 @@ end
 
 gem 'webpush', require: false
 gem 'tiny_tds'
+gem 'colored2', require: false
+gem 'maxminddb'

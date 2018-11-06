@@ -19,6 +19,7 @@ class User < ActiveRecord::Base
   include Roleable
   include HasCustomFields
   include SecondFactorManager
+  include HasDestroyedWebHook
 
   has_many :posts
   has_many :notifications, dependent: :destroy
@@ -47,11 +48,13 @@ class User < ActiveRecord::Base
   has_many :email_change_requests, dependent: :destroy
   has_many :directory_items, dependent: :delete_all
   has_many :user_auth_tokens, dependent: :destroy
+  has_many :user_auth_token_logs, dependent: :destroy
 
   has_many :group_users, dependent: :destroy
   has_many :groups, through: :group_users
   has_many :secure_categories, through: :groups, source: :categories
 
+  has_many :user_uploads, dependent: :destroy
   has_many :user_emails, dependent: :destroy
 
   has_one :primary_email, -> { where(primary: true)  }, class_name: 'UserEmail', dependent: :destroy
@@ -107,6 +110,8 @@ class User < ActiveRecord::Base
 
   before_save :update_username_lower
   before_save :ensure_password_is_hashed
+  before_save :match_title_to_primary_group_changes
+  before_save :check_if_title_is_badged_granted
 
   after_save :expire_tokens_if_password_changed
   after_save :clear_global_notice_if_needed
@@ -221,6 +226,24 @@ class User < ActiveRecord::Base
     end
   end
 
+  def self.plugin_editable_user_custom_fields
+    @plugin_editable_user_custom_fields ||= {}
+  end
+
+  def self.register_plugin_editable_user_custom_field(custom_field_name, plugin)
+    plugin_editable_user_custom_fields[custom_field_name] = plugin
+  end
+
+  def self.editable_user_custom_fields
+    fields = []
+
+    plugin_editable_user_custom_fields.each do |k, v|
+      fields << k if v.enabled?
+    end
+
+    fields.uniq
+  end
+
   def self.plugin_staff_user_custom_fields
     @plugin_staff_user_custom_fields ||= {}
   end
@@ -229,8 +252,20 @@ class User < ActiveRecord::Base
     plugin_staff_user_custom_fields[custom_field_name] = plugin
   end
 
+  def self.plugin_public_user_custom_fields
+    @plugin_public_user_custom_fields ||= {}
+  end
+
+  def self.register_plugin_public_custom_field(custom_field_name, plugin)
+    plugin_public_user_custom_fields[custom_field_name] = plugin
+  end
+
   def self.whitelisted_user_custom_fields(guardian)
     fields = []
+
+    plugin_public_user_custom_fields.each do |k, v|
+      fields << k if v.enabled?
+    end
 
     if SiteSetting.public_user_custom_fields.present?
       fields += SiteSetting.public_user_custom_fields.split('|')
@@ -399,24 +434,41 @@ class User < ActiveRecord::Base
     @unread_pms ||= unread_notifications_of_type(Notification.types[:private_message])
   end
 
+  # PERF: This safeguard is in place to avoid situations where
+  # a user with enormous amounts of unread data can issue extremely
+  # expensive queries
+  MAX_UNREAD_NOTIFICATIONS = 99
+
+  def self.max_unread_notifications
+    @max_unread_notifications ||= MAX_UNREAD_NOTIFICATIONS
+  end
+
+  def self.max_unread_notifications=(val)
+    @max_unread_notifications = val
+  end
+
   def unread_notifications
     @unread_notifications ||= begin
       # perf critical, much more efficient than AR
       sql = <<~SQL
-          SELECT COUNT(*)
-            FROM notifications n
-       LEFT JOIN topics t ON t.id = n.topic_id
-           WHERE t.deleted_at IS NULL
-             AND n.notification_type <> :pm
-             AND n.user_id = :user_id
-             AND n.id > :seen_notification_id
-             AND NOT read
+        SELECT COUNT(*) FROM (
+          SELECT 1 FROM
+          notifications n
+          LEFT JOIN topics t ON t.id = n.topic_id
+           WHERE t.deleted_at IS NULL AND
+            n.notification_type <> :pm AND
+            n.user_id = :user_id AND
+            n.id > :seen_notification_id AND
+            NOT read
+          LIMIT :limit
+        ) AS X
       SQL
 
       DB.query_single(sql,
         user_id: id,
         seen_notification_id: seen_notification_id,
-        pm:  Notification.types[:private_message]
+        pm:  Notification.types[:private_message],
+        limit: User.max_unread_notifications
     )[0].to_i
     end
   end
@@ -486,7 +538,6 @@ class User < ActiveRecord::Base
     payload = {
       unread_notifications: unread_notifications,
       unread_private_messages: unread_private_messages,
-      total_unread_notifications: total_unread_notifications,
       read_first_notification: read_first_notification?,
       last_notification: json,
       recent: recent,
@@ -924,6 +975,8 @@ class User < ActiveRecord::Base
   end
 
   def on_tl3_grace_period?
+    return true if SiteSetting.tl3_promotion_min_duration.to_i.days.ago.year < 2013
+
     UserHistory.for(self, :auto_trust_level_change)
       .where('created_at >= ?', SiteSetting.tl3_promotion_min_duration.to_i.days.ago)
       .where(previous_value: TrustLevel[2].to_s)
@@ -965,23 +1018,18 @@ class User < ActiveRecord::Base
     result
   end
 
+  USER_FIELD_PREFIX ||= "user_field_"
+
   def user_fields
     return @user_fields if @user_fields
     user_field_ids = UserField.pluck(:id)
     if user_field_ids.present?
       @user_fields = {}
       user_field_ids.each do |fid|
-        @user_fields[fid.to_s] = custom_fields["user_field_#{fid}"]
+        @user_fields[fid.to_s] = custom_fields["#{USER_FIELD_PREFIX}#{fid}"]
       end
     end
     @user_fields
-  end
-
-  def title=(val)
-    write_attribute(:title, val)
-    if !new_record? && user_profile
-      user_profile.update_column(:badge_granted_title, false)
-    end
   end
 
   def number_of_deleted_posts
@@ -1098,6 +1146,19 @@ class User < ActiveRecord::Base
 
   def mature_staged?
     from_staged? && self.created_at && self.created_at < 1.day.ago
+  end
+
+  def next_best_title
+    group_titles_query = groups.where("groups.title <> ''")
+    group_titles_query = group_titles_query.order("groups.id = #{primary_group_id} DESC") if primary_group_id
+    group_titles_query = group_titles_query.order("groups.primary_group DESC").limit(1)
+
+    if next_best_group_title = group_titles_query.pluck(:title).first
+      return next_best_group_title
+    end
+
+    next_best_badge_title = badges.where(allow_title: true).limit(1).pluck(:name).first
+    next_best_badge_title ? Badge.display_name(next_best_badge_title) : nil
   end
 
   protected
@@ -1252,7 +1313,22 @@ class User < ActiveRecord::Base
     end
   end
 
+  def match_title_to_primary_group_changes
+    return unless primary_group_id_changed?
+
+    if title == Group.where(id: primary_group_id_was).pluck(:title).first
+      self.title = primary_group&.title
+    end
+  end
+
   private
+
+  def check_if_title_is_badged_granted
+    if title_changed? && !new_record? && user_profile
+      badge_granted_title = title.present? && badges.where(allow_title: true, name: title).exists?
+      user_profile.update_column(:badge_granted_title, badge_granted_title)
+    end
+  end
 
   def previous_visit_at_update_required?(timestamp)
     seen_before? && (last_seen_at < (timestamp - SiteSetting.previous_visit_timeout_hours.hours))
@@ -1281,6 +1357,20 @@ class User < ActiveRecord::Base
     end
 
     true
+  end
+
+  def self.ensure_consistency!
+    DB.exec <<~SQL
+      UPDATE users
+      SET uploaded_avatar_id = NULL
+      WHERE uploaded_avatar_id IN (
+        SELECT u1.uploaded_avatar_id FROM users u1
+        LEFT JOIN uploads up
+          ON u1.uploaded_avatar_id = up.id
+        WHERE u1.uploaded_avatar_id IS NOT NULL AND
+          up.id IS NULL
+      )
+    SQL
   end
 
 end

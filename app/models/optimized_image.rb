@@ -24,18 +24,37 @@ class OptimizedImage < ActiveRecord::Base
     return unless width > 0 && height > 0
     return if upload.try(:sha1).blank?
 
+    # no extension so try to guess it
+    if (!upload.extension)
+      upload.fix_image_extension
+    end
+
+    if !upload.extension.match?(IM_DECODERS)
+      if !opts[:raise_on_error]
+        # nothing to do ... bad extension, not an image
+        return
+      else
+        raise InvalidAccess
+      end
+    end
+
+    # prefer to look up the thumbnail without grabbing any locks
+    thumbnail = find_by(upload_id: upload.id, width: width, height: height)
+
+    # correct bad thumbnail if needed
+    if thumbnail && thumbnail.url.blank?
+      thumbnail.destroy!
+      thumbnail = nil
+    end
+
+    return thumbnail if thumbnail
+
     lock(upload.id, width, height) do
-      # do we already have that thumbnail?
+      # may have been generated since we got the lock
       thumbnail = find_by(upload_id: upload.id, width: width, height: height)
 
-      # make sure we have an url
-      if thumbnail && thumbnail.url.blank?
-        thumbnail.destroy
-        thumbnail = nil
-      end
-
       # return the previous thumbnail if any
-      return thumbnail unless thumbnail.nil?
+      return thumbnail if thumbnail
 
       # create the thumbnail otherwise
       original_path = Discourse.store.path_for(upload)
@@ -67,6 +86,7 @@ class OptimizedImage < ActiveRecord::Base
         end
 
         if resized
+
           thumbnail = OptimizedImage.create!(
             upload_id: upload.id,
             sha1: Upload.generate_digest(temp_path),
@@ -74,6 +94,7 @@ class OptimizedImage < ActiveRecord::Base
             width: width,
             height: height,
             url: "",
+            filesize: File.size(temp_path)
           )
           # store the optimized image and update its url
           File.open(temp_path) do |file|
@@ -109,6 +130,32 @@ class OptimizedImage < ActiveRecord::Base
     !(url =~ /^(https?:)?\/\//)
   end
 
+  def calculate_filesize
+    path =
+      if local?
+        Discourse.store.path_for(self)
+      else
+        Discourse.store.download(self).path
+      end
+    File.size(path)
+  end
+
+  def filesize
+    if size = read_attribute(:filesize)
+      size
+    else
+      # we may have a bad optimized image so just skip for now
+      # and do not break here
+      size = calculate_filesize rescue nil
+
+      write_attribute(:filesize, size)
+      if !new_record?
+        update_columns(filesize: size)
+      end
+      size
+    end
+  end
+
   def self.safe_path?(path)
     # this matches instructions which call #to_s
     path = path.to_s
@@ -125,9 +172,9 @@ class OptimizedImage < ActiveRecord::Base
 
   IM_DECODERS ||= /\A(jpe?g|png|tiff?|bmp|ico|gif)\z/i
 
-  def self.prepend_decoder!(path, ext_path = nil)
-    extension = File.extname(ext_path || path)[1..-1]
-    raise Discourse::InvalidAccess unless extension.present? && extension[IM_DECODERS]
+  def self.prepend_decoder!(path, ext_path = nil, opts = nil)
+    extension = File.extname((opts && opts[:filename]) || ext_path || path)[1..-1]
+    raise Discourse::InvalidAccess if !extension || !extension.match?(IM_DECODERS)
     "#{extension}:#{path}"
   end
 
@@ -139,8 +186,8 @@ class OptimizedImage < ActiveRecord::Base
     ensure_safe_paths!(from, to)
 
     # note FROM my not be named correctly
-    from = prepend_decoder!(from, to)
-    to = prepend_decoder!(to, to)
+    from = prepend_decoder!(from, to, opts)
+    to = prepend_decoder!(to, to, opts)
 
     # NOTE: ORDER is important!
     %W{
@@ -176,8 +223,8 @@ class OptimizedImage < ActiveRecord::Base
   def self.crop_instructions(from, to, dimensions, opts = {})
     ensure_safe_paths!(from, to)
 
-    from = prepend_decoder!(from, to)
-    to = prepend_decoder!(to, to)
+    from = prepend_decoder!(from, to, opts)
+    to = prepend_decoder!(to, to, opts)
 
     %W{
       convert
@@ -211,8 +258,8 @@ class OptimizedImage < ActiveRecord::Base
   def self.downsize_instructions(from, to, dimensions, opts = {})
     ensure_safe_paths!(from, to)
 
-    from = prepend_decoder!(from, to)
-    to = prepend_decoder!(to, to)
+    from = prepend_decoder!(from, to, opts)
+    to = prepend_decoder!(to, to, opts)
 
     %W{
       convert
@@ -352,6 +399,7 @@ end
 #  height    :integer          not null
 #  upload_id :integer          not null
 #  url       :string           not null
+#  filesize  :integer
 #
 # Indexes
 #

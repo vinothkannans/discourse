@@ -20,7 +20,7 @@ class Theme < ActiveRecord::Base
   has_many :color_schemes
   belongs_to :remote_theme
 
-  validate :user_selectable_validation
+  validate :component_validations
 
   scope :user_selectable, ->() {
     where('user_selectable OR id = ?', SiteSetting.default_theme_id)
@@ -51,6 +51,7 @@ class Theme < ActiveRecord::Base
 
     remove_from_cache!
     clear_cached_settings!
+    ColorScheme.hex_cache.clear
   end
 
   after_destroy do
@@ -72,6 +73,7 @@ class Theme < ActiveRecord::Base
     end
 
     Theme.expire_site_cache!
+    ColorScheme.hex_cache.clear
   end
 
   after_commit ->(theme) do
@@ -107,6 +109,7 @@ class Theme < ActiveRecord::Base
     Site.clear_anon_cache!
     clear_cache!
     ApplicationSerializer.expire_cache_fragment!("user_themes")
+    ColorScheme.hex_cache.clear
   end
 
   def self.clear_default!
@@ -128,7 +131,7 @@ class Theme < ActiveRecord::Base
   end
 
   def set_default!
-    if component?
+    if component
       raise Discourse::InvalidParameters.new(
         I18n.t("themes.errors.component_no_default")
       )
@@ -141,13 +144,36 @@ class Theme < ActiveRecord::Base
     SiteSetting.default_theme_id == id
   end
 
-  def component?
-    ChildTheme.exists?(child_theme_id: id)
+  def component_validations
+    return unless component
+
+    errors.add(:base, I18n.t("themes.errors.component_no_color_scheme")) if color_scheme_id.present?
+    errors.add(:base, I18n.t("themes.errors.component_no_user_selectable")) if user_selectable
+    errors.add(:base, I18n.t("themes.errors.component_no_default")) if default?
   end
 
-  def user_selectable_validation
-    if component? && user_selectable
-      errors.add(:base, I18n.t("themes.errors.component_no_user_selectable"))
+  def switch_to_component!
+    return if component
+
+    Theme.transaction do
+      self.component = true
+
+      self.color_scheme_id = nil
+      self.user_selectable = false
+      Theme.clear_default! if default?
+
+      ChildTheme.where("parent_theme_id = ?", id).destroy_all
+      self.save!
+    end
+  end
+
+  def switch_to_theme!
+    return unless component
+
+    Theme.transaction do
+      self.component = false
+      ChildTheme.where("child_theme_id = ?", id).destroy_all
+      self.save!
     end
   end
 
@@ -377,6 +403,7 @@ end
 #  hidden           :boolean          default(FALSE), not null
 #  color_scheme_id  :integer
 #  remote_theme_id  :integer
+#  component        :boolean          default(FALSE), not null
 #
 # Indexes
 #

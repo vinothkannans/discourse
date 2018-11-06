@@ -11,8 +11,8 @@ class FileHelper
     )
   end
 
-  def self.is_image?(filename)
-    filename =~ images_regexp
+  def self.is_supported_image?(filename)
+    filename =~ supported_images_regexp
   end
 
   class FakeIO
@@ -25,7 +25,8 @@ class FileHelper
                     follow_redirect: false,
                     read_timeout: 5,
                     skip_rate_limit: false,
-                    verbose: false)
+                    verbose: false,
+                    retain_on_max_file_size_exceeded: false)
 
     url = "https:" + url if url.start_with?("//")
     raise Discourse::InvalidParameters.new(:url) unless url =~ /^https?:\/\//
@@ -47,7 +48,7 @@ class FileHelper
             # attempt error API compatibility
             io = FakeIO.new
             io.status = [response.code, ""]
-            raise OpenURI::HTTPError.new("#{response.code} Error", io)
+            raise OpenURI::HTTPError.new("#{response.code} Error: #{response.body}", io)
           else
             log(:error, "FinalDestination did not work for: #{url}") if verbose
             throw :done
@@ -67,7 +68,14 @@ class FileHelper
 
       tmp.write(chunk)
 
-      throw :done if tmp.size > max_file_size
+      if tmp.size > max_file_size
+        unless retain_on_max_file_size_exceeded
+          tmp.close
+          tmp = nil
+        end
+
+        throw :done
+      end
     end
 
     tmp&.rewind
@@ -92,14 +100,12 @@ class FileHelper
     ).optimize_image!(filename)
   end
 
-  private
-
-  def self.images
-    @@images ||= Set.new %w{jpg jpeg png gif tif tiff bmp svg webp ico}
+  def self.supported_images
+    @@supported_images ||= Set.new %w{jpg jpeg png gif svg ico}
   end
 
-  def self.images_regexp
-    @@images_regexp ||= /\.(#{images.to_a.join("|")})$/i
+  def self.supported_images_regexp
+    @@supported_images_regexp ||= /\.(#{supported_images.to_a.join("|")})$/i
   end
 
 end

@@ -33,9 +33,11 @@ class Guardian
   end
 
   attr_accessor :can_see_emails
+  attr_reader :request
 
-  def initialize(user = nil)
+  def initialize(user = nil, request = nil)
     @user = user.presence || AnonymousUser.new
+    @request = request
   end
 
   def user
@@ -272,6 +274,7 @@ class Guardian
 
     if object.is_a?(Topic) && object.private_message?
       return false unless SiteSetting.enable_personal_messages?
+      return false if object.reached_recipients_limit? && !is_staff?
     end
 
     if object.is_a?(Topic) && object.category
@@ -334,15 +337,20 @@ class Guardian
     (!is_silenced? || target.staff?)
   end
 
-  def cand_send_private_messages_to_email?
+  def can_send_private_messages_to_email?
     # Staged users must be enabled to create a temporary user.
     SiteSetting.enable_staged_users &&
     # User is authenticated
     authenticated? &&
     # User is trusted enough
-    @user.has_trust_level?(SiteSetting.min_trust_to_send_email_messages) &&
-    # PMs to email addresses are enabled
-    (is_staff? || SiteSetting.enable_personal_email_messages)
+    (is_staff? ||
+      (
+        # TODO: 2019 evaluate if we need this flexibility
+        # perhaps we enable this unconditionally to TL4?
+        @user.has_trust_level?(SiteSetting.min_trust_to_send_email_messages) &&
+        SiteSetting.enable_personal_email_messages
+      )
+    )
   end
 
   def can_see_emails?
@@ -351,17 +359,18 @@ class Guardian
 
   def can_export_entity?(entity)
     return false unless @user
-    return true if is_staff?
+    return true if is_admin?
+    return entity != 'user_list' if is_moderator?
 
     # Regular users can only export their archives
     return false unless entity == "user_archive"
     UserExport.where(user_id: @user.id, created_at: (Time.zone.now.beginning_of_day..Time.zone.now.end_of_day)).count == 0
   end
 
-  def allow_themes?(theme_ids)
+  def allow_themes?(theme_ids, include_preview: false)
     return true if theme_ids.blank?
 
-    if is_staff? && (theme_ids - Theme.theme_ids).blank?
+    if include_preview && is_staff? && (theme_ids - Theme.theme_ids).blank?
       return true
     end
 
@@ -370,6 +379,12 @@ class Guardian
 
     Theme.user_theme_ids.include?(parent) &&
       (components - Theme.components_for(parent)).empty?
+  end
+
+  def auth_token
+    if cookie = request&.cookies[Auth::DefaultCurrentUserProvider::TOKEN_COOKIE]
+      UserAuthToken.hash_token(cookie)
+    end
   end
 
   private

@@ -111,16 +111,20 @@ span.relative-date {
 }
 
 label {
-  display: block;
+  display: flex;
   margin-bottom: 5px;
+  align-items: flex-start;
 }
 
 input {
   &[type="radio"],
   &[type="checkbox"] {
-    margin: 3px 0;
-    line-height: $line-height-medium;
+    margin-top: 0.17em;
+    margin-right: 0.43em;
+    margin-left: 0.1em;
+    line-height: $line-height-small;
     cursor: pointer;
+    flex-shrink: 0; // Adding for safety, Safari will shrink checkboxes
   }
   &[type="submit"],
   &[type="reset"],
@@ -192,15 +196,63 @@ input {
     padding: $input-padding;
     margin-bottom: 9px;
     font-size: $font-0;
-    line-height: $line-height-large;
+    line-height: $line-height-small;
     color: $primary;
     background-color: $secondary;
     border: 1px solid $primary-medium;
     border-radius: 0;
+    box-sizing: border-box;
+    min-height: 30px;
     &:focus {
       border-color: $tertiary;
       box-shadow: shadow("focus");
       outline: 0;
+    }
+  }
+}
+
+.input {
+  &-prepend,
+  &-append {
+    margin-bottom: 5px;
+    input[class*="span"] {
+      display: inline-block;
+    }
+    input,
+    select {
+      position: relative;
+      margin-bottom: 0;
+      vertical-align: middle;
+      border-radius: 0;
+      &:focus {
+        z-index: z("base") + 1;
+      }
+    }
+    .add-on {
+      display: inline-flex;
+      align-items: center;
+      width: auto;
+      padding: 0 0.5em;
+      height: 28px;
+      background-color: $primary-low;
+      border: 1px solid $primary-medium;
+    }
+    .add-on,
+    .btn {
+      &:first-child {
+        margin-right: -1px;
+      }
+      &:last-child {
+        margin-left: -1px;
+        border-radius: 0 3px 3px 0;
+      }
+    }
+  }
+
+  &-prepend {
+    .add-on,
+    .btn {
+      margin-right: -1px;
     }
   }
 }
@@ -471,10 +523,26 @@ select {
   .input-append {
     display: inline-block;
     margin-bottom: 0;
+    flex: 0 0 auto;
   }
 
   .control-group {
     @include clearfix;
+
+    .table {
+      width: 100%;
+
+      th,
+      td {
+        padding: 10px;
+        text-align: center;
+      }
+    }
+
+    &.highlighted {
+      animation: background-fade-highlight 2.5s ease-out;
+      background-color: dark-light-choose($highlight-low, $highlight);
+    }
   }
 
   .control-label {
@@ -543,4 +611,60 @@ select {
 
 .inline {
   display: inline;
+}
+
+.pref-auth-tokens {
+  .row {
+    border-bottom: 1px solid #ddd;
+    margin: 5px 0px;
+    padding-bottom: 5px;
+
+    &:last-child {
+      border-bottom: 0;
+    }
+  }
+
+  .auth-token-icon {
+    font-size: 2.25em;
+    float: left;
+    margin-right: 10px;
+  }
+
+  .auth-token-first {
+    font-size: 1.1em;
+
+    .auth-token-device {
+      font-weight: bold;
+    }
+  }
+
+  .auth-token-second {
+    color: $primary-medium;
+
+    .active {
+      color: $success;
+      font-weight: bold;
+    }
+  }
+
+  .auth-token-dropdown {
+    float: right;
+
+    .btn,
+    .btn:hover {
+      background: transparent;
+
+      .d-icon {
+        color: $primary;
+      }
+    }
+  }
+
+  .dropdown-menu {
+    width: 120px;
+
+    & .icon {
+      margin-top: auto;
+    }
+  }
 }

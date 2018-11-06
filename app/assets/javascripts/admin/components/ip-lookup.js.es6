@@ -1,18 +1,9 @@
 import { ajax } from "discourse/lib/ajax";
 import AdminUser from "admin/models/admin-user";
+import copyText from "discourse/lib/copy-text";
 
 export default Ember.Component.extend({
   classNames: ["ip-lookup"],
-
-  city: function() {
-    return [
-      this.get("location.city"),
-      this.get("location.region"),
-      this.get("location.country")
-    ]
-      .filter(Boolean)
-      .join(", ");
-  }.property("location.{city,region,country}"),
 
   otherAccountsToDelete: function() {
     // can only delete up to 50 accounts at a time
@@ -60,6 +51,36 @@ export default Ember.Component.extend({
 
     hide: function() {
       this.set("show", false);
+    },
+
+    copy: function() {
+      let text = `IP: ${this.get("ip")}\n`;
+      const location = this.get("location");
+      if (location) {
+        if (location.hostname) {
+          text += `${I18n.t("ip_lookup.hostname")}: ${location.hostname}\n`;
+        }
+
+        text += I18n.t("ip_lookup.location");
+        if (location.location) {
+          text += `: ${location.location}\n`;
+        } else {
+          text += `: ${I18n.t("ip_lookup.location_not_found")}\n`;
+        }
+
+        if (location.organization) {
+          text += I18n.t("ip_lookup.organisation");
+          text += `: ${location.organization}\n`;
+        }
+      }
+      const copyRange = $('<p id="copy-range"></p>');
+      copyRange.html(text.trim().replace(/\n/g, "<br>"));
+      $(document.body).append(copyRange);
+      if (copyText(text, copyRange[0])) {
+        this.set("copied", true);
+        Ember.run.later(() => this.set("copied", false), 2000);
+      }
+      copyRange.remove();
     },
 
     deleteOtherAccounts: function() {

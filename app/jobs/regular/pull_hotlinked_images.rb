@@ -20,6 +20,7 @@ module Jobs
         downloaded = FileHelper.download(
           src,
           max_file_size: @max_size,
+          retain_on_max_file_size_exceeded: true,
           tmp_file_name: "discourse-hotlinked",
           follow_redirect: true
         )
@@ -129,7 +130,7 @@ module Jobs
         changes = { raw: raw, edit_reason: I18n.t("upload.edit_reason") }
         post.revise(Discourse.system_user, changes, bypass_bump: true)
       elsif has_downloaded_image || has_new_large_image || has_new_broken_image
-        post.trigger_post_process(true)
+        post.trigger_post_process(bypass_bump: true)
       end
     end
 

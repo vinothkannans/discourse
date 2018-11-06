@@ -9,6 +9,7 @@ require_dependency 'topic_query_sql'
 require_dependency 'avatar_lookup'
 
 class TopicQuery
+  PG_MAX_INT ||= 2147483647
 
   def self.validators
     @validators ||= begin
@@ -17,8 +18,8 @@ class TopicQuery
         Integer === x || (String === x && x.match?(/^-?[0-9]+$/))
       end
 
-      zero_or_more = lambda do |x|
-        int.call(x) && x.to_i >= 0
+      zero_up_to_max_int = lambda do |x|
+        int.call(x) && x.to_i.between?(0, PG_MAX_INT)
       end
 
       array_int_or_int = lambda do |x|
@@ -28,8 +29,9 @@ class TopicQuery
       end
 
       {
-        max_posts: zero_or_more,
-        min_posts: zero_or_more,
+        max_posts: zero_up_to_max_int,
+        min_posts: zero_up_to_max_int,
+        page: zero_up_to_max_int,
         exclude_category_ids: array_int_or_int
       }
     end
@@ -146,20 +148,37 @@ class TopicQuery
     pm_params =
       if topic.private_message?
 
-        group_ids = topic.topic_allowed_groups
+        my_group_ids = topic.topic_allowed_groups
           .joins("
             LEFT JOIN group_users gu
             ON topic_allowed_groups.group_id = gu.group_id
-            AND user_id = #{@user.id.to_i}
+            AND gu.user_id = #{@user.id.to_i}
           ")
           .where("gu.group_id IS NOT NULL")
           .pluck(:group_id)
 
+        target_group_ids = topic.topic_allowed_groups.pluck(:group_id)
+
+        target_users = topic
+          .topic_allowed_users
+
+        if my_group_ids.present?
+
+          # strip out users in groups you already belong to
+          target_users = target_users
+            .joins("LEFT JOIN group_users gu ON gu.user_id = topic_allowed_users.user_id AND gu.group_id IN (#{sanitize_sql_array(my_group_ids)})")
+            .where('gu.group_id IS NULL')
+        end
+
+        target_user_ids = target_users
+          .where('NOT topic_allowed_users.user_id = ?', @user.id)
+          .pluck(:user_id)
+
         {
           topic: topic,
-          my_group_ids: group_ids,
-          target_group_ids: topic.topic_allowed_groups.pluck(:group_id),
-          target_user_ids: topic.topic_allowed_users.pluck(:user_id) - [@user.id]
+          my_group_ids: my_group_ids,
+          target_group_ids: target_group_ids,
+          target_user_ids: target_user_ids
         }
       end
 
@@ -175,24 +194,25 @@ class TopicQuery
           pm_params.merge(count: builder.results_left)
         )) unless builder.full?
 
+        if pm_params[:my_group_ids].present?
+          builder.add_results(related_messages_group(
+            pm_params.merge(count: [3, builder.results_left].max,
+                            exclude: builder.excluded_topic_ids)
+          ), :ultra_high)
+        else
+          builder.add_results(related_messages_user(
+            pm_params.merge(count: [3, builder.results_left].max,
+                            exclude: builder.excluded_topic_ids)
+          ), :ultra_high)
+        end
+
       else
         builder.add_results(unread_results(topic: topic, per_page: builder.results_left), :high)
         builder.add_results(new_results(topic: topic, per_page: builder.category_results_left)) unless builder.full?
       end
     end
 
-    if topic.private_message?
-
-      builder.add_results(related_messages_group(
-        pm_params.merge(count: [3, builder.results_left].max,
-                        exclude: builder.excluded_topic_ids)
-      )) if pm_params[:my_group_ids].present?
-
-      builder.add_results(related_messages_user(
-        pm_params.merge(count: [3, builder.results_left].max,
-                        exclude: builder.excluded_topic_ids)
-      ))
-    else
+    if !topic.private_message?
       builder.add_results(random_suggested(topic, builder.results_left, builder.excluded_topic_ids)) unless builder.full?
     end
 
@@ -628,11 +648,13 @@ class TopicQuery
       result = result.preload(:tags)
 
       if @options[:tags] && @options[:tags].size > 0
+        @options[:tags] = @options[:tags].split unless @options[:tags].respond_to?('each')
+        @options[:tags].each { |t| t.downcase! if t.is_a? String }
 
         if @options[:match_all_tags]
           # ALL of the given tags:
           tags_count = @options[:tags].length
-          @options[:tags] = Tag.where(name: @options[:tags]).pluck(:id) unless @options[:tags][0].is_a?(Integer)
+          @options[:tags] = Tag.where_name(@options[:tags]).pluck(:id) unless @options[:tags][0].is_a?(Integer)
 
           if tags_count == @options[:tags].length
             @options[:tags].each_with_index do |tag, index|
@@ -648,7 +670,7 @@ class TopicQuery
           if @options[:tags][0].is_a?(Integer)
             result = result.where("tags.id in (?)", @options[:tags])
           else
-            result = result.where("tags.name in (?)", @options[:tags])
+            result = result.where("lower(tags.name) in (?)", @options[:tags])
           end
         end
       elsif @options[:no_tags]
@@ -824,16 +846,19 @@ class TopicQuery
   end
 
   def new_messages(params)
-    TopicQuery.new_filter(messages_for_groups_or_user(params[:my_group_ids]), Time.at(SiteSetting.min_new_topics_time).to_datetime)
+    query = TopicQuery
+      .new_filter(messages_for_groups_or_user(params[:my_group_ids]), Time.at(SiteSetting.min_new_topics_time).to_datetime)
       .limit(params[:count])
+    query
   end
 
   def unread_messages(params)
-    TopicQuery.unread_filter(
+    query = TopicQuery.unread_filter(
       messages_for_groups_or_user(params[:my_group_ids]),
       @user&.id,
       staff: @user&.staff?)
       .limit(params[:count])
+    query
   end
 
   def related_messages_user(params)

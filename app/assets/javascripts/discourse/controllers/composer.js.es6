@@ -203,12 +203,17 @@ export default Ember.Controller.extend({
 
   canUnlistTopic: Em.computed.and("model.creatingTopic", "isStaffUser"),
 
-  @computed("model.action", "isStaffUser")
-  canWhisper(action, isStaffUser) {
+  @computed("canWhisper", "model.whisper")
+  showWhisperToggle(canWhisper, isWhisper) {
+    return canWhisper && !isWhisper;
+  },
+
+  @computed("isStaffUser", "model.action")
+  canWhisper(isStaffUser, action) {
     return (
-      isStaffUser &&
       this.siteSettings.enable_whispers &&
-      action === Composer.REPLY
+      isStaffUser &&
+      Composer.REPLY === action
     );
   },
 
@@ -226,7 +231,7 @@ export default Ember.Controller.extend({
 
   @computed("model.composeState", "model.creatingTopic")
   popupMenuOptions(composeState) {
-    if (composeState === "open") {
+    if (composeState === "open" || composeState === "fullscreen") {
       let options = [];
 
       options.push(
@@ -246,7 +251,7 @@ export default Ember.Controller.extend({
             action: "toggleWhisper",
             icon: "eye-slash",
             label: "composer.toggle_whisper",
-            condition: "canWhisper"
+            condition: "showWhisperToggle"
           };
         })
       );
@@ -381,13 +386,21 @@ export default Ember.Controller.extend({
       ) {
         this.close();
       } else {
-        if (this.get("model.composeState") === Composer.OPEN) {
+        if (
+          this.get("model.composeState") === Composer.OPEN ||
+          this.get("model.composeState") === Composer.FULLSCREEN
+        ) {
           this.shrink();
         } else {
           this.cancelComposer();
         }
       }
 
+      return false;
+    },
+
+    fullscreenComposer() {
+      this.toggleFullscreen();
       return false;
     },
 
@@ -452,7 +465,7 @@ export default Ember.Controller.extend({
         return;
       }
 
-      if (this.get("model.viewOpen")) {
+      if (this.get("model.viewOpen") || this.get("model.viewFullscreen")) {
         this.shrink();
       }
     },
@@ -942,7 +955,20 @@ export default Ember.Controller.extend({
     this.set("model.composeState", Composer.DRAFT);
   },
 
+  toggleFullscreen() {
+    this._saveDraft();
+    if (this.get("model.composeState") === Composer.FULLSCREEN) {
+      this.set("model.composeState", Composer.OPEN);
+    } else {
+      this.set("model.composeState", Composer.FULLSCREEN);
+    }
+  },
+
   close() {
+    // the 'fullscreen-composer' class is added to remove scrollbars from the
+    // document while in fullscreen mode. If the composer is closed for any reason
+    // this class should be removed
+    $("html").removeClass("fullscreen-composer");
     this.setProperties({ model: null, lastValidatedAt: null });
   },
 

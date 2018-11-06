@@ -8,6 +8,7 @@ class Category < ActiveRecord::Base
   include HasCustomFields
   include CategoryHashtag
   include AnonCacheInvalidator
+  include HasDestroyedWebHook
 
   REQUIRE_TOPIC_APPROVAL = 'require_topic_approval'
   REQUIRE_REPLY_APPROVAL = 'require_reply_approval'
@@ -49,6 +50,8 @@ class Category < ActiveRecord::Base
   validate :email_in_validator
 
   validate :ensure_slug
+
+  validates :auto_close_hours, numericality: { greater_than: 0, less_than_or_equal_to: 87600 }, allow_nil: true
 
   after_create :create_category_definition
 
@@ -624,7 +627,7 @@ end
 #
 #  id                                :integer          not null, primary key
 #  name                              :string(50)       not null
-#  color                             :string(6)        default("AB9364"), not null
+#  color                             :string(6)        default("0088CC"), not null
 #  topic_id                          :integer
 #  topic_count                       :integer          default(0), not null
 #  created_at                        :datetime         not null

@@ -76,6 +76,7 @@ Discourse::Application.routes.draw do
     end
 
     get "reports" => "reports#index"
+    get "reports/bulk" => "reports#bulk"
     get "reports/:type" => "reports#show"
 
     resources :groups, constraints: AdminConstraint.new do
@@ -279,6 +280,7 @@ Discourse::Application.routes.draw do
         put "readonly" => "backups#readonly"
         get "upload" => "backups#check_backup_chunk"
         post "upload" => "backups#upload_backup_chunk"
+        get "upload_url" => "backups#create_upload_url"
       end
     end
 
@@ -289,9 +291,6 @@ Discourse::Application.routes.draw do
         post "preview" => "badges#preview"
       end
     end
-
-    get "memory_stats" => "diagnostics#memory_stats", constraints: AdminConstraint.new
-    get "dump_heap" => "diagnostics#dump_heap", constraints: AdminConstraint.new
   end # admin namespace
 
   get "email_preferences" => "email#preferences_redirect", :as => "email_preferences_redirect"
@@ -412,6 +411,7 @@ Discourse::Application.routes.draw do
     put "#{root_path}/:username/preferences/avatar/pick" => "users#pick_avatar", constraints: { username: RouteFormat.username }
     put "#{root_path}/:username/preferences/avatar/select" => "users#select_avatar", constraints: { username: RouteFormat.username }
     post "#{root_path}/:username/preferences/revoke-account" => "users#revoke_account", constraints: { username: RouteFormat.username }
+    post "#{root_path}/:username/preferences/revoke-auth-token" => "users#revoke_auth_token", constraints: { username: RouteFormat.username }
     get "#{root_path}/:username/staff-info" => "users#staff_info", constraints: { username: RouteFormat.username }
     get "#{root_path}/:username/summary" => "users#summary", constraints: { username: RouteFormat.username }
     get "#{root_path}/:username/invited" => "users#invited", constraints: { username: RouteFormat.username }
@@ -421,6 +421,7 @@ Discourse::Application.routes.draw do
     get "#{root_path}/:username/summary" => "users#show", constraints: { username: RouteFormat.username }
     get "#{root_path}/:username/activity/topics.rss" => "list#user_topics_feed", format: :rss, constraints: { username: RouteFormat.username }
     get "#{root_path}/:username/activity.rss" => "posts#user_posts_feed", format: :rss, constraints: { username: RouteFormat.username }
+    get "#{root_path}/:username/activity.json" => "posts#user_posts_feed", format: :json, constraints: { username: RouteFormat.username }
     get "#{root_path}/:username/activity" => "users#show", constraints: { username: RouteFormat.username }
     get "#{root_path}/:username/activity/:filter" => "users#show", constraints: { username: RouteFormat.username }
     get "#{root_path}/:username/badges" => "users#badges", constraints: { username: RouteFormat.username }
@@ -432,6 +433,7 @@ Discourse::Application.routes.draw do
     get "#{root_path}/:username/flagged-posts" => "users#show", constraints: { username: RouteFormat.username }
     get "#{root_path}/:username/deleted-posts" => "users#show", constraints: { username: RouteFormat.username }
     get "#{root_path}/:username/topic-tracking-state" => "users#topic_tracking_state", constraints: { username: RouteFormat.username }
+    get "#{root_path}/:username/profile-hidden" => "users#profile_hidden"
   end
 
   get "user-badges/:username.json" => "user_badges#username", constraints: { username: RouteFormat.username }, defaults: { format: :json }
@@ -448,6 +450,7 @@ Discourse::Application.routes.draw do
 
   get "stylesheets/:name.css.map" => "stylesheets#show_source_map", constraints: { name: /[-a-z0-9_]+/ }
   get "stylesheets/:name.css" => "stylesheets#show", constraints: { name: /[-a-z0-9_]+/ }
+  get "theme-javascripts/:digest.js" => "theme_javascripts#show", constraints: { digest: /\h{40}/ }
 
   post "uploads" => "uploads#create"
   post "uploads/lookup-urls" => "uploads#lookup_urls"
@@ -772,6 +775,7 @@ Discourse::Application.routes.draw do
     get '/filter/search' => 'tags#search'
     get '/check' => 'tags#check_hashtag'
     get '/personal_messages/:username' => 'tags#personal_messages'
+    post '/upload' => 'tags#upload'
     constraints(tag_id: /[^\/]+?/, format: /json|rss/) do
       get '/:tag_id.rss' => 'tags#tag_feed'
       get '/:tag_id' => 'tags#show', as: 'tag_show'
@@ -791,7 +795,7 @@ Discourse::Application.routes.draw do
     end
   end
 
-  resources :tag_groups, except: [:new, :edit] do
+  resources :tag_groups, constraints: StaffConstraint.new, except: [:new, :edit] do
     collection do
       get '/filter/search' => 'tag_groups#search'
     end
@@ -823,6 +827,8 @@ Discourse::Application.routes.draw do
 
   post "/push_notifications/subscribe" => "push_notification#subscribe"
   post "/push_notifications/unsubscribe" => "push_notification#unsubscribe"
+
+  resources :csp_reports, only: [:create]
 
   get "*url", to: 'permalinks#show', constraints: PermalinkConstraint.new
 

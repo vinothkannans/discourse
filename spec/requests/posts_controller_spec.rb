@@ -295,6 +295,13 @@ describe PostsController do
         expect(post.raw).to eq("edited body")
       end
 
+      it 'checks for an edit conflict' do
+        update_params[:post][:raw_old] = 'old body'
+        put "/posts/#{post.id}.json", params: update_params
+
+        expect(response.status).to eq(409)
+      end
+
       it "raises an error when the post parameter is missing" do
         update_params.delete(:post)
         put "/posts/#{post.id}.json", params: update_params
@@ -1166,6 +1173,25 @@ describe PostsController do
       end
     end
 
+    context "when post is hidden" do
+      before {
+        post.hidden = true
+        post.save
+      }
+
+      it "throws an exception for users" do
+        sign_in(Fabricate(:user))
+        get "/posts/#{post.id}/revisions/#{post_revision.number}.json"
+        expect(response.status).to eq(404)
+      end
+
+      it "works for admins" do
+        sign_in(Fabricate(:admin))
+        get "/posts/#{post.id}/revisions/#{post_revision.number}.json"
+        expect(response.status).to eq(200)
+      end
+    end
+
     context "when edit history is visible to everyone" do
 
       before { SiteSetting.edit_history_visible_to_public = true }
@@ -1459,6 +1485,20 @@ describe PostsController do
 
       expect(body).to_not include(private_post.url)
       expect(body).to include(public_post.url)
+    end
+
+    it 'returns public posts as JSON' do
+      public_post
+      private_post
+
+      get "/u/#{user.username}/activity.json"
+
+      expect(response.status).to eq(200)
+
+      body = response.body
+
+      expect(body).to_not include(private_post.topic.slug)
+      expect(body).to include(public_post.topic.slug)
     end
   end
 

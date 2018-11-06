@@ -17,9 +17,12 @@ describe OptimizedImage do
             5
           )
 
-          expect(File.read(tmp_path)).to eq(
-            File.read("#{Rails.root}/spec/fixtures/images/cropped.png")
-          )
+          fixture_path = "#{Rails.root}/spec/fixtures/images/cropped.png"
+          fixture_hex = Digest::MD5.hexdigest(File.read(fixture_path))
+
+          cropped_hex = Digest::MD5.hexdigest(File.read(tmp_path))
+
+          expect(cropped_hex).to eq(fixture_hex)
         ensure
           File.delete(tmp_path) if File.exists?(tmp_path)
         end
@@ -27,23 +30,65 @@ describe OptimizedImage do
     end
 
     describe '.resize' do
-      it 'should work correctly' do
-        tmp_path = "/tmp/resized.png"
+      it 'should work correctly when extension is bad' do
+
+        original_path = Dir::Tmpname.create(['origin', '.bin']) { nil }
 
         begin
+          FileUtils.cp "#{Rails.root}/spec/fixtures/images/logo.png", original_path
+
+          # we use "filename" to get the correct extension here, it is more important
+          # then any other param
+
+          orig_size = File.size(original_path)
+
           OptimizedImage.resize(
-            "#{Rails.root}/spec/fixtures/images/logo.png",
-            tmp_path,
+            original_path,
+            original_path,
             5,
-            5
+            5,
+            filename: "test.png"
           )
 
-          expect(File.read(tmp_path)).to eq(
-            File.read("#{Rails.root}/spec/fixtures/images/resized.png")
-          )
+          new_size = File.size(original_path)
+          expect(orig_size).to be > new_size
+          expect(new_size).not_to eq(0)
+
         ensure
-          File.delete(tmp_path) if File.exists?(tmp_path)
+          File.delete(original_path) if File.exists?(original_path)
         end
+      end
+
+      it 'should work correctly' do
+
+        file = File.open("#{Rails.root}/spec/fixtures/images/resized.png")
+        upload = UploadCreator.new(file, "test.bin").create_for(-1)
+
+        expect(upload.filesize).to eq(199)
+
+        expect(upload.width).to eq(5)
+        expect(upload.height).to eq(5)
+
+        upload.create_thumbnail!(10, 10)
+        thumb = upload.thumbnail(10, 10)
+
+        expect(thumb.width).to eq(10)
+        expect(thumb.height).to eq(10)
+
+        # very image magic specific so fudge here
+        expect(thumb.filesize).to be > 200
+
+        # this size is based off original upload
+        # it is the size we render, by default, in the post
+        expect(upload.thumbnail_width).to eq(5)
+        expect(upload.thumbnail_height).to eq(5)
+
+        # lets ensure we can rebuild the filesize
+        thumb.update_columns(filesize: nil)
+        thumb = OptimizedImage.find(thumb.id)
+
+        # attempts to auto correct
+        expect(thumb.filesize).to be > 200
       end
 
       describe 'when an svg with a href is masked as a png' do
@@ -78,9 +123,12 @@ describe OptimizedImage do
             "100x100\>"
           )
 
-          expect(File.read(tmp_path)).to eq(
-            File.read("#{Rails.root}/spec/fixtures/images/downsized.png")
-          )
+          fixture_path = "#{Rails.root}/spec/fixtures/images/downsized.png"
+          fixture_hex = Digest::MD5.hexdigest(File.read(fixture_path))
+
+          downsized_hex = Digest::MD5.hexdigest(File.read(tmp_path))
+
+          expect(downsized_hex).to eq(fixture_hex)
         ensure
           File.delete(tmp_path) if File.exists?(tmp_path)
         end

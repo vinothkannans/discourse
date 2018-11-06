@@ -797,6 +797,10 @@ describe PrettyText do
       expect(PrettyText.cook("hello 👩🏾‍🎓")).to eq("<p>hello <img src=\"/images/emoji/twitter/woman_student/5.png?v=#{Emoji::EMOJI_VERSION}\" title=\":woman_student:t5:\" class=\"emoji\" alt=\":woman_student:t5:\"></p>")
       expect(PrettyText.cook("hello 🤷‍♀️")).to eq("<p>hello <img src=\"/images/emoji/twitter/woman_shrugging.png?v=#{Emoji::EMOJI_VERSION}\" title=\":woman_shrugging:\" class=\"emoji\" alt=\":woman_shrugging:\"></p>")
     end
+
+    it "correctly strips VARIATION SELECTOR-16 character (ufe0f) from some emojis" do
+      expect(PrettyText.cook("❤️💣")).to match(/<img src[^>]+bomb[^>]+>/)
+    end
   end
 
   describe "custom emoji" do
@@ -1195,6 +1199,25 @@ HTML
 
       expect(PrettyText.cook(raw)).to eq(cooked.strip)
     end
+
+    it "invalidates the onebox url" do
+      topic = Fabricate(:topic)
+      url = topic.url
+      raw = "Hello #{url}"
+
+      PrettyText.cook(raw)
+
+      topic.title = "Updated: #{topic.title}"
+      topic.save
+
+      cooked = <<~HTML
+        <p>Hello <a href="#{url}">#{topic.title}</a></p>
+      HTML
+
+      expect(PrettyText.cook(raw)).not_to eq(cooked.strip)
+      expect(PrettyText.cook(raw, invalidate_oneboxes: true)).to eq(cooked.strip)
+      expect(PrettyText.cook(raw)).to eq(cooked.strip)
+    end
   end
 
   describe "image decoding" do
@@ -1209,6 +1232,8 @@ HTML
 
       - test
           - ![upload](#{upload.short_url})
+
+      ![upload](#{upload.short_url.gsub!(".png", "")})
       RAW
 
       cooked = <<~HTML
@@ -1224,6 +1249,7 @@ HTML
         </ul>
         </li>
         </ul>
+        <p><img src="#{upload.url}" alt="upload"></p>
       HTML
 
       expect(PrettyText.cook(raw)).to eq(cooked.strip)

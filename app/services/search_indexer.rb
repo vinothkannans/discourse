@@ -11,8 +11,8 @@ class SearchIndexer
     @disabled = false
   end
 
-  def self.scrub_html_for_search(html)
-    HtmlScrubber.scrub(html)
+  def self.scrub_html_for_search(html, strip_diacritics: SiteSetting.search_ignore_accents)
+    HtmlScrubber.scrub(html, strip_diacritics: strip_diacritics)
   end
 
   def self.inject_extra_terms(raw)
@@ -105,7 +105,7 @@ class SearchIndexer
   end
 
   def self.update_tags_index(tag_id, name)
-    update_index(table: 'tag', id: tag_id, raw_data: [name])
+    update_index(table: 'tag', id: tag_id, raw_data: [name.downcase])
   end
 
   def self.queue_post_reindex(topic_id)
@@ -121,7 +121,8 @@ class SearchIndexer
   def self.index(obj, force: false)
     return if @disabled
 
-    category_name, tag_names = nil
+    category_name = nil
+    tag_names = nil
     topic = nil
 
     if Topic === obj
@@ -148,8 +149,7 @@ class SearchIndexer
 
     if Topic === obj && (obj.saved_change_to_title? || force)
       if obj.posts
-        post = obj.posts.find_by(post_number: 1)
-        if post
+        if post = obj.posts.find_by(post_number: 1)
           SearchIndexer.update_posts_index(post.id, obj.title, category_name, tag_names, post.cooked)
           SearchIndexer.update_topics_index(obj.id, obj.title, post.cooked)
         end
@@ -166,47 +166,37 @@ class SearchIndexer
   end
 
   class HtmlScrubber < Nokogiri::XML::SAX::Document
+
     attr_reader :scrubbed
 
-    def initialize
+    def initialize(strip_diacritics: false)
       @scrubbed = +""
+      @strip_diacritics = strip_diacritics
     end
 
-    def self.scrub(html)
-      me = new
-      parser = Nokogiri::HTML::SAX::Parser.new(me)
-      begin
-        copy = +"<div>"
-        copy << html unless html.nil?
-        copy << "</div>"
-        parser.parse(html) unless html.nil?
-      end
-      me.scrubbed
+    def self.scrub(html, strip_diacritics: false)
+      return +"" if html.blank?
+
+      me = new(strip_diacritics: strip_diacritics)
+      Nokogiri::HTML::SAX::Parser.new(me).parse("<div>#{html}</div>")
+      me.scrubbed.squish
     end
 
-    def start_element(name, attributes = [])
+    ATTRIBUTES ||= %w{alt title href data-youtube-title}
+
+    def start_element(_, attributes = [])
       attributes = Hash[*attributes.flatten]
-      if attributes["alt"]
-        scrubbed << " "
-        scrubbed << attributes["alt"]
-        scrubbed << " "
-      end
-      if attributes["title"]
-        scrubbed << " "
-        scrubbed << attributes["title"]
-        scrubbed << " "
-      end
-      if attributes["data-youtube-title"]
-        scrubbed << " "
-        scrubbed << attributes["data-youtube-title"]
-        scrubbed << " "
+
+      ATTRIBUTES.each do |name|
+        if attributes[name].present?
+          characters(attributes[name]) unless name == "href" && UrlHelper.is_local(attributes[name])
+        end
       end
     end
 
-    def characters(string)
-      scrubbed << " "
-      scrubbed << string
-      scrubbed << " "
+    def characters(str)
+      str = Search.strip_diacritics(str) if @strip_diacritics
+      scrubbed << " #{str} "
     end
   end
 end

@@ -2,6 +2,8 @@ require_dependency 'markdown_linker'
 require_dependency 'email/message_builder'
 require_dependency 'age_words'
 require_dependency 'rtl'
+require_dependency 'discourse_ip_info'
+require_dependency 'browser_detection'
 
 class UserNotifications < ActionMailer::Base
   include UserNotificationsHelper
@@ -20,10 +22,34 @@ class UserNotifications < ActionMailer::Base
   end
 
   def signup_after_approval(user, opts = {})
+    locale = user_locale(user)
+    tips = I18n.t('system_messages.usage_tips.text_body_template',
+                  base_url: Discourse.base_url,
+                  locale: locale)
+
     build_email(user.email,
                 template: 'user_notifications.signup_after_approval',
-                locale: user_locale(user),
-                new_user_tips: I18n.t('system_messages.usage_tips.text_body_template', base_url: Discourse.base_url, locale: locale))
+                locale: locale,
+                new_user_tips: tips)
+  end
+
+  def suspicious_login(user, opts = {})
+    ipinfo = DiscourseIpInfo.get(opts[:client_ip])
+    location = [ipinfo[:city], ipinfo[:region], ipinfo[:country]].reject(&:blank?).join(", ")
+    browser = BrowserDetection.browser(opts[:user_agent])
+    device = BrowserDetection.device(opts[:user_agent])
+    os = BrowserDetection.os(opts[:user_agent])
+
+    build_email(
+      user.email,
+      template: "user_notifications.suspicious_login",
+      locale: user_locale(user),
+      client_ip: opts[:client_ip],
+      location: location.present? ? location : I18n.t('staff_action_logs.unknown'),
+      browser: I18n.t("user_auth_tokens.browser.#{browser}"),
+      device: I18n.t("user_auth_tokens.device.#{device}"),
+      os: I18n.t("user_auth_tokens.os.#{os}")
+    )
   end
 
   def notify_old_email(user, opts = {})
@@ -320,7 +346,7 @@ class UserNotifications < ActionMailer::Base
   protected
 
   def user_locale(user)
-    (user.locale.present? && I18n.available_locales.include?(user.locale.to_sym)) ? user.locale : nil
+    user.effective_locale
   end
 
   def email_post_markdown(post, add_posted_by = false)

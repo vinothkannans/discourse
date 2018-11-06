@@ -109,6 +109,14 @@ QUnit.test("ensures an authorized upload", assert => {
   );
 });
 
+QUnit.test("skipping validation works", assert => {
+  const files = [{ name: "backup.tar.gz" }];
+  sandbox.stub(bootbox, "alert");
+
+  assert.not(validUpload(files, { skipValidation: false }));
+  assert.ok(validUpload(files, { skipValidation: true }));
+});
+
 QUnit.test("staff can upload anything in PM", assert => {
   const files = [{ name: "some.docx" }];
   Discourse.SiteSettings.authorized_extensions = "jpeg";
@@ -161,8 +169,8 @@ var testUploadMarkdown = function(filename) {
   return getUploadMarkdown({
     original_filename: filename,
     filesize: 42,
-    width: 100,
-    height: 200,
+    thumbnail_width: 100,
+    thumbnail_height: 200,
     url: "/uploads/123/abcdef.ext"
   });
 };

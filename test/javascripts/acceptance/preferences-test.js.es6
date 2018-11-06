@@ -1,4 +1,6 @@
 import { acceptance } from "helpers/qunit-helpers";
+import User from "discourse/models/user";
+
 acceptance("User Preferences", {
   loggedIn: true,
   pretend(server, helper) {
@@ -23,6 +25,23 @@ acceptance("User Preferences", {
       return helper.response({
         success: true
       });
+    });
+
+    server.put("/u/eviltrout/preferences/email", () => {
+      return helper.response({
+        success: true
+      });
+    });
+
+    server.post("/user_avatar/eviltrout/refresh_gravatar.json", () => {
+      return helper.response({
+        gravatar_upload_id: 6543,
+        gravatar_avatar_template: "something"
+      });
+    });
+
+    server.get("/u/eviltrout/activity.json", () => {
+      return helper.response({});
     });
   }
 });
@@ -110,6 +129,20 @@ QUnit.test("email", async assert => {
   );
 });
 
+QUnit.test("email field always shows up", async assert => {
+  await visit("/u/eviltrout/preferences/email");
+
+  assert.ok(exists("#change-email"), "it has the input element");
+
+  await fillIn("#change-email", "eviltrout@discourse.org");
+  await click(".user-preferences button.btn-primary");
+
+  await visit("/u/eviltrout/preferences");
+  await visit("/u/eviltrout/preferences/email");
+
+  assert.ok(exists("#change-email"), "it has the input element");
+});
+
 QUnit.test("connected accounts", async assert => {
   await visit("/u/eviltrout/preferences/account");
 
@@ -172,6 +205,14 @@ QUnit.test("default avatar selector", async assert => {
 
   await click(".pref-avatar .btn");
   assert.ok(exists(".avatar-choice", "opens the avatar selection modal"));
+
+  await click(".avatar-selector-refresh-gravatar");
+
+  assert.equal(
+    User.currentProp("gravatar_avatar_upload_id"),
+    6543,
+    "it should set the gravatar_avatar_upload_id property"
+  );
 });
 
 acceptance("Avatar selector when selectable avatars is enabled", {
@@ -210,4 +251,39 @@ QUnit.test("visit my preferences", async assert => {
     "defaults to account tab"
   );
   assert.ok(exists(".user-preferences"), "it shows the preferences");
+});
+
+QUnit.test("recently connected devices", async assert => {
+  await visit("/u/eviltrout/preferences");
+
+  assert.equal(
+    find(".pref-auth-tokens > a:first")
+      .text()
+      .trim(),
+    I18n.t("user.auth_tokens.show_all", { count: 3 }),
+    "it should display two tokens"
+  );
+  assert.ok(
+    find(".pref-auth-tokens .auth-token").length === 2,
+    "it should display two tokens"
+  );
+
+  await click(".pref-auth-tokens > a:first");
+
+  assert.ok(
+    find(".pref-auth-tokens .auth-token").length === 3,
+    "it should display three tokens"
+  );
+
+  await click(".auth-token-dropdown:first button");
+  await click("li[data-value='notYou']");
+
+  assert.ok(find(".d-modal:visible").length === 1, "modal should appear");
+
+  await click(".modal-footer .btn-primary");
+
+  assert.ok(
+    find(".pref-password.highlighted").length === 1,
+    "it should highlight password preferences"
+  );
 });

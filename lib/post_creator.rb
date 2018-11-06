@@ -173,6 +173,7 @@ class PostCreator
         update_topic_auto_close
         update_user_counts
         create_embedded_topic
+        link_post_uploads
 
         ensure_in_allowed_users if guardian.is_staff?
         unarchive_message
@@ -325,13 +326,17 @@ class PostCreator
   end
 
   def transaction(&blk)
-    Post.transaction do
-      if new_topic?
+    if new_topic?
+      Post.transaction do
         blk.call
-      else
-        # we need to ensure post_number is monotonically increasing with no gaps
-        # so we serialize creation to avoid needing rollbacks
-        DistributedMutex.synchronize("topic_id_#{@opts[:topic_id]}", &blk)
+      end
+    else
+      # we need to ensure post_number is monotonically increasing with no gaps
+      # so we serialize creation to avoid needing rollbacks
+      DistributedMutex.synchronize("topic_id_#{@opts[:topic_id]}") do
+        Post.transaction do
+          blk.call
+        end
       end
     end
   end
@@ -343,6 +348,10 @@ class PostCreator
     return unless @opts[:embed_url].present?
     embed = TopicEmbed.new(topic_id: @post.topic_id, post_id: @post.id, embed_url: @opts[:embed_url])
     rollback_from_errors!(embed) unless embed.save
+  end
+
+  def link_post_uploads
+    @post.link_post_uploads
   end
 
   def handle_spam
@@ -531,6 +540,7 @@ class PostCreator
     if @user.staged
       TopicUser.auto_notification_for_staging(@user.id, @topic.id, TopicUser.notification_reasons[:auto_watch])
     else
+      return if @topic.private_message?
       notification_level = @user.user_option.notification_level_when_replying || NotificationLevels.topic_levels[:tracking]
       TopicUser.auto_notification(@user.id, @topic.id, TopicUser.notification_reasons[:created_post], notification_level)
     end

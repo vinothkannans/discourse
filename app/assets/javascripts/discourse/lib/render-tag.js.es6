@@ -1,7 +1,8 @@
 export default function renderTag(tag, params) {
   params = params || {};
-  tag = Handlebars.Utils.escapeExpression(tag);
-  const classes = ["tag-" + tag, "discourse-tag"];
+  const visibleName = Handlebars.Utils.escapeExpression(tag);
+  tag = visibleName.toLowerCase();
+  const classes = ["discourse-tag"];
   const tagName = params.tagName || "a";
   let path;
   if (tagName === "a" && !params.noHref) {
@@ -24,10 +25,12 @@ export default function renderTag(tag, params) {
     "<" +
     tagName +
     href +
+    " data-tag-name=" +
+    tag +
     " class='" +
     classes.join(" ") +
     "'>" +
-    tag +
+    visibleName +
     "</" +
     tagName +
     ">";

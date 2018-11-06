@@ -257,7 +257,10 @@ def migrate_to_s3
     end
 
     # remap the URL
+    DbHelper.remap(UrlHelper.absolute(from), Discourse.store.cdn_url(to))
+    DbHelper.remap(UrlHelper.absolute_without_cdn(from), Discourse.store.cdn_url(to))
     DbHelper.remap(from, to)
+    upload.optimized_images.destroy_all
 
     putc "."
   end
@@ -714,4 +717,18 @@ end
 task "uploads:fix_incorrect_extensions" => :environment do
   require_dependency "upload_fixer"
   UploadFixer.fix_all_extensions
+end
+
+task "uploads:recover" => :environment do
+  require_dependency "upload_recovery"
+
+  dry_run = ENV["DRY_RUN"].present?
+
+  if ENV["RAILS_DB"]
+    UploadRecovery.new(dry_run: dry_run).recover
+  else
+    RailsMultisite::ConnectionManagement.each_connection do |db|
+      UploadRecovery.new(dry_run: dry_run).recover
+    end
+  end
 end

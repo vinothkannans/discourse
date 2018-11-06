@@ -15,8 +15,54 @@ RSpec.describe ApplicationController do
     end
   end
 
+  describe 'invalid request params' do
+    before do
+      @old_logger = Rails.logger
+      @logs = StringIO.new
+      Rails.logger = Logger.new(@logs)
+    end
+
+    after do
+      Rails.logger = @old_logger
+    end
+
+    it 'should not raise a 500 (nor should it log a warning) for bad params' do
+      bad_str = "d\xDE".force_encoding('utf-8')
+      expect(bad_str.valid_encoding?).to eq(false)
+
+      get "/latest.json", params: { test: bad_str }
+
+      expect(response.status).to eq(400)
+      expect(@logs.string).not_to include('exception app middleware')
+
+      expect(JSON.parse(response.body)).to eq(
+        "status" => 400,
+        "error" => "Bad Request"
+      )
+    end
+  end
+
+  describe 'missing required param' do
+    it 'should return a 400' do
+      get "/search/query.json", params: { trem: "misspelled term" }
+
+      expect(response.status).to eq(400)
+      expect(JSON.parse(response.body)).to eq(
+        "errors" => ["param is missing or the value is empty: term"]
+      )
+    end
+  end
+
   describe 'build_not_found_page' do
     describe 'topic not found' do
+
+      it 'should not redirect to permalink if topic/category does not exist' do
+        topic = create_post.topic
+        Permalink.create!(url: topic.relative_url, topic_id: topic.id + 1)
+        topic.trash!
+        get topic.relative_url
+        expect(response.status).to eq(410)
+      end
 
       it 'should return permalink for deleted topics' do
         topic = create_post.topic
@@ -84,6 +130,7 @@ RSpec.describe ApplicationController do
   describe "#handle_theme" do
     let(:theme) { Fabricate(:theme, user_selectable: true) }
     let(:theme2) { Fabricate(:theme, user_selectable: true) }
+    let(:non_selectable_theme) { Fabricate(:theme, user_selectable: false) }
     let(:user) { Fabricate(:user) }
     let(:admin) { Fabricate(:admin) }
 
@@ -114,7 +161,7 @@ RSpec.describe ApplicationController do
       expect(response.status).to eq(200)
       expect(controller.theme_ids).to eq([theme2.id])
 
-      theme2.update!(user_selectable: false)
+      theme2.update!(user_selectable: false, component: true)
       theme.add_child_theme!(theme2)
       cookies['theme_ids'] = "#{theme.id},#{theme2.id}|#{user.user_option.theme_key_seq}"
 
@@ -140,6 +187,15 @@ RSpec.describe ApplicationController do
       get "/", params: { preview_theme_id: theme2.id }
       expect(response.status).to eq(200)
       expect(controller.theme_ids).to eq([theme2.id])
+
+      get "/", params: { preview_theme_id: non_selectable_theme.id }
+      expect(controller.theme_ids).to eq([non_selectable_theme.id])
+    end
+
+    it "does not allow non privileged user to preview themes" do
+      sign_in(user)
+      get "/", params: { preview_theme_id: non_selectable_theme.id }
+      expect(controller.theme_ids).to eq([SiteSetting.default_theme_id])
     end
 
     it "cookie can fail back to user if out of sync" do
@@ -149,6 +205,71 @@ RSpec.describe ApplicationController do
       get "/"
       expect(response.status).to eq(200)
       expect(controller.theme_ids).to eq([theme.id])
+    end
+  end
+
+  describe 'Content Security Policy' do
+    it 'is enabled by SiteSettings' do
+      SiteSetting.content_security_policy = false
+      SiteSetting.content_security_policy_report_only = false
+
+      get '/'
+
+      expect(response.headers).to_not include('Content-Security-Policy')
+      expect(response.headers).to_not include('Content-Security-Policy-Report-Only')
+
+      SiteSetting.content_security_policy = true
+      SiteSetting.content_security_policy_report_only = true
+
+      get '/'
+
+      expect(response.headers).to include('Content-Security-Policy')
+      expect(response.headers).to include('Content-Security-Policy-Report-Only')
+    end
+
+    it 'can be customized with SiteSetting' do
+      SiteSetting.content_security_policy = true
+
+      get '/'
+      script_src = parse(response.headers['Content-Security-Policy'])['script-src']
+
+      expect(script_src).to_not include('example.com')
+
+      SiteSetting.content_security_policy_script_src = 'example.com'
+
+      get '/'
+      script_src = parse(response.headers['Content-Security-Policy'])['script-src']
+
+      expect(script_src).to include('example.com')
+      expect(script_src).to include("'self'")
+      expect(script_src).to include("'unsafe-eval'")
+    end
+
+    it 'does not set CSP when responding to non-HTML' do
+      SiteSetting.content_security_policy = true
+      SiteSetting.content_security_policy_report_only = true
+
+      get '/latest.json'
+
+      expect(response.headers).to_not include('Content-Security-Policy')
+      expect(response.headers).to_not include('Content-Security-Policy-Report-Only')
+    end
+
+    it 'does not set CSP for /logs' do
+      sign_in(Fabricate(:admin))
+      SiteSetting.content_security_policy = true
+
+      get '/logs'
+
+      expect(response.status).to eq(200)
+      expect(response.headers).to_not include('Content-Security-Policy')
+    end
+
+    def parse(csp_string)
+      csp_string.split(';').map do |policy|
+        directive, *sources = policy.split
+        [directive, sources]
+      end.to_h
     end
   end
 end

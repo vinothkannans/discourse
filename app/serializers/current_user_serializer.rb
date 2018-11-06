@@ -42,7 +42,8 @@ class CurrentUserSerializer < BasicUserSerializer
              :can_create_topic,
              :link_posting_access,
              :external_id,
-             :top_category_ids
+             :top_category_ids,
+             :hide_profile_and_presence
 
   def link_posting_access
     scope.link_posting_access
@@ -66,6 +67,10 @@ class CurrentUserSerializer < BasicUserSerializer
 
   def reply_count
     object.user_stat.topic_reply_count
+  end
+
+  def hide_profile_and_presence
+    object.user_option.hide_profile_and_presence
   end
 
   def enable_quoting
@@ -101,7 +106,7 @@ class CurrentUserSerializer < BasicUserSerializer
   end
 
   def can_send_private_email_messages
-    scope.cand_send_private_messages_to_email?
+    scope.can_send_private_messages_to_email?
   end
 
   def can_edit

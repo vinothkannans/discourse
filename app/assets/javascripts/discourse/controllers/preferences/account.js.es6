@@ -6,6 +6,11 @@ import { setting } from "discourse/lib/computed";
 import { popupAjaxError } from "discourse/lib/ajax-error";
 import showModal from "discourse/lib/show-modal";
 import { findAll } from "discourse/models/login-method";
+import { ajax } from "discourse/lib/ajax";
+import { userPath } from "discourse/lib/url";
+
+// Number of tokens shown by default.
+const DEFAULT_AUTH_TOKENS_COUNT = 2;
 
 export default Ember.Controller.extend(
   CanCheckEmails,
@@ -20,6 +25,8 @@ export default Ember.Controller.extend(
     newTitleInput: null,
 
     passwordProgress: null,
+
+    showAllAuthTokens: false,
 
     cannotDeleteAccount: Em.computed.not("currentUser.can_delete_account"),
     deleteDisabled: Em.computed.or(
@@ -85,12 +92,37 @@ export default Ember.Controller.extend(
       return userId !== this.get("currentUser.id");
     },
 
-    @computed()
-    canUpdateAssociatedAccounts() {
+    @computed("model.second_factor_enabled")
+    canUpdateAssociatedAccounts(secondFactorEnabled) {
+      if (secondFactorEnabled) {
+        return false;
+      }
+
       return (
         findAll(this.siteSettings, this.capabilities, this.site.isMobileDevice)
           .length > 0
       );
+    },
+
+    @computed("showAllAuthTokens", "model.user_auth_tokens")
+    authTokens(showAllAuthTokens, tokens) {
+      tokens.sort(
+        (a, b) =>
+          a.is_active
+            ? -1
+            : b.is_active
+              ? 1
+              : b.seen_at.localeCompare(a.seen_at)
+      );
+
+      return showAllAuthTokens
+        ? tokens
+        : tokens.slice(0, DEFAULT_AUTH_TOKENS_COUNT);
+    },
+
+    @computed("model.user_auth_tokens")
+    canShowAllAuthTokens(tokens) {
+      return tokens.length > DEFAULT_AUTH_TOKENS_COUNT;
     },
 
     actions: {
@@ -172,10 +204,6 @@ export default Ember.Controller.extend(
         bootbox.dialog(message, buttons, { classes: "delete-account" });
       },
 
-      showTwoFactorModal() {
-        showModal("second-factor-intro");
-      },
-
       revokeAccount(account) {
         const model = this.get("model");
         this.set("revoking", true);
@@ -192,6 +220,26 @@ export default Ember.Controller.extend(
           .finally(() => {
             this.set("revoking", false);
           });
+      },
+
+      toggleShowAllAuthTokens() {
+        this.set("showAllAuthTokens", !this.get("showAllAuthTokens"));
+      },
+
+      revokeAuthToken(token) {
+        ajax(
+          userPath(
+            `${this.get("model.username_lower")}/preferences/revoke-auth-token`
+          ),
+          {
+            type: "POST",
+            data: token ? { token_id: token.id } : {}
+          }
+        );
+      },
+
+      showToken(token) {
+        showModal("auth-token", { model: token });
       },
 
       connectAccount(method) {

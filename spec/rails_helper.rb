@@ -133,6 +133,7 @@ RSpec.configure do |config|
     end
 
     unfreeze_time
+    ActionMailer::Base.deliveries.clear
 
     raise if ActiveRecord::Base.connection_pool.stat[:busy] > 1
   end
@@ -172,6 +173,17 @@ RSpec.configure do |config|
       $test_cleanup_callbacks.reverse_each(&:call)
       $test_cleanup_callbacks = nil
     end
+  end
+
+  config.before(:each, type: :multisite) do
+    RailsMultisite::ConnectionManagement.config_filename =
+      "spec/fixtures/multisite/two_dbs.yml"
+  end
+
+  config.after(:each, type: :multisite) do
+    RailsMultisite::ConnectionManagement.clear_settings!
+    ActiveRecord::Base.clear_active_connections!
+    ActiveRecord::Base.establish_connection
   end
 
   class TestCurrentUserProvider < Auth::DefaultCurrentUserProvider
@@ -266,4 +278,12 @@ def file_from_fixtures(filename, directory = "images")
   FileUtils.mkdir_p("#{Rails.root}/tmp/spec") unless Dir.exists?("#{Rails.root}/tmp/spec")
   FileUtils.cp("#{Rails.root}/spec/fixtures/#{directory}/#{filename}", "#{Rails.root}/tmp/spec/#{filename}")
   File.new("#{Rails.root}/tmp/spec/#{filename}")
+end
+
+def has_trigger?(trigger_name)
+  DB.exec(<<~SQL) != 0
+    SELECT 1
+    FROM INFORMATION_SCHEMA.TRIGGERS
+    WHERE trigger_name = '#{trigger_name}'
+  SQL
 end

@@ -12,7 +12,6 @@ module I18n
       end
 
       def reload!
-        @overrides = {}
         @pluralizers = {}
         super
       end
@@ -44,7 +43,7 @@ module I18n
         results = {}
 
         fallbacks(locale).each do |fallback|
-          find_results(/#{query}/i, results, translations[fallback])
+          find_results(/#{Regexp.escape(query)}/i, results, translations[fallback])
         end
 
         results

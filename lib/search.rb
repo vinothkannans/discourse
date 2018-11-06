@@ -2,9 +2,17 @@ require_dependency 'search/grouped_search_results'
 
 class Search
   INDEX_VERSION = 2.freeze
+  DIACRITICS ||= /([\u0300-\u036f]|[\u1AB0-\u1AFF]|[\u1DC0-\u1DFF]|[\u20D0-\u20FF])/
 
   def self.per_facet
     5
+  end
+
+  def self.strip_diacritics(str)
+    s = str.unicode_normalize(:nfkd)
+    s.gsub!(DIACRITICS, "")
+    s.strip!
+    s
   end
 
   def self.per_filter
@@ -59,6 +67,9 @@ class Search
     end
 
     data.force_encoding("UTF-8")
+    if SiteSetting.search_ignore_accents
+      data = strip_diacritics(data)
+    end
     data
   end
 
@@ -132,11 +143,14 @@ class Search
     @valid = true
     @page = @opts[:page]
 
+    term = term.to_s.dup
+
     # Removes any zero-width characters from search terms
-    term.to_s.gsub!(/[\u200B-\u200D\uFEFF]/, '')
+    term.gsub!(/[\u200B-\u200D\uFEFF]/, '')
     # Replace curly quotes to regular quotes
-    term.to_s.gsub!(/[\u201c\u201d]/, '"')
-    @clean_term = term.to_s.dup
+    term.gsub!(/[\u201c\u201d]/, '"')
+
+    @clean_term = term
 
     term = process_advanced_search!(term)
 
@@ -369,7 +383,7 @@ class Search
     end
   end
 
-  advanced_filter(/^\#([a-zA-Z0-9\-:=]+)/) do |posts, match|
+  advanced_filter(/^\#([\p{L}0-9\-:=]+)/) do |posts, match|
 
     exact = true
 
@@ -404,7 +418,7 @@ class Search
       posts.where("topics.category_id IN (?)", category_ids)
     else
       # try a possible tag match
-      tag_id = Tag.where(name: slug[0]).pluck(:id).first
+      tag_id = Tag.where_name(slug[0]).pluck(:id).first
       if (tag_id)
         posts.where("topics.id IN (
           SELECT DISTINCT(tt.topic_id)
@@ -465,11 +479,11 @@ class Search
     end
   end
 
-  advanced_filter(/^tags?:([a-zA-Z0-9,\-_+]+)/) do |posts, match|
+  advanced_filter(/^tags?:([\p{L}0-9,\-_+]+)/) do |posts, match|
     search_tags(posts, match, positive: true)
   end
 
-  advanced_filter(/\-tags?:([a-zA-Z0-9,\-_+]+)/) do |posts, match|
+  advanced_filter(/\-tags?:([\p{L}0-9,\-_+]+)/) do |posts, match|
     search_tags(posts, match, positive: false)
   end
 
@@ -493,7 +507,7 @@ class Search
 
   def search_tags(posts, match, positive:)
     return if match.nil?
-
+    match.downcase!
     modifier = positive ? "" : "NOT"
 
     if match.include?('+')
@@ -504,16 +518,16 @@ class Search
         FROM topic_tags tt, tags
         WHERE tt.tag_id = tags.id
         GROUP BY tt.topic_id
-        HAVING to_tsvector(#{default_ts_config}, array_to_string(array_agg(tags.name), ' ')) @@ to_tsquery(#{default_ts_config}, ?)
-      )", tags.join('&')).order("id")
+        HAVING to_tsvector(#{default_ts_config}, array_to_string(array_agg(lower(tags.name)), ' ')) @@ to_tsquery(#{default_ts_config}, ?)
+      )", tags.join('&'))
     else
       tags = match.split(",")
 
       posts.where("topics.id #{modifier} IN (
         SELECT DISTINCT(tt.topic_id)
         FROM topic_tags tt, tags
-        WHERE tt.tag_id = tags.id AND tags.name IN (?)
-      )", tags).order("id")
+        WHERE tt.tag_id = tags.id AND lower(tags.name) IN (?)
+      )", tags)
     end
   end
 

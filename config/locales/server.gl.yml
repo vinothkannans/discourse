@@ -62,8 +62,6 @@ gl:
       body: 'Producíronse problemas cos seguintes campos:'
     embed:
       load_from_remote: "Produciuse un erro cargando esta publicación."
-    site_settings:
-      min_username_length_range: "O mínimo non pode ser maior que o máximo."
   activemodel:
     errors:
       <<: *errors
@@ -421,7 +419,6 @@ gl:
       subject_template: "O convite en bloque procesouse correctamente"
   page_not_found:
     see_more: "Máis"
-    search_google: "Google"
   terms_of_service:
     title: "Termos do servizo"
   about: "Sobre"
