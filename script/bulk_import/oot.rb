@@ -69,7 +69,7 @@ class BulkImport::Oot < BulkImport::Base
       break if posts.empty?
 
       posts.each do |p|
-        next unless post_id = post_id_from_imported_id(t["PostID"])
+        next unless post_id = post_id_from_imported_id(p["PostID"])
 
         post = Post.find(post_id)
         timestamp = p["PostDate"]
