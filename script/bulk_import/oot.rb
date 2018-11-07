@@ -75,7 +75,7 @@ class BulkImport::Oot < BulkImport::Base
         timestamp = p["PostDate"]
         post.created_at = timestamp
         post.updated_at = timestamp
-        post.save!
+        post.save!(validate: false)
 
         topic = post.topic
         topic.created_at = timestamp
@@ -86,7 +86,7 @@ class BulkImport::Oot < BulkImport::Base
           topic.bumped_at = timestamp
         end
 
-        topic.save!
+        topic.save!(validate: false)
       end
 
       puts "", offset
