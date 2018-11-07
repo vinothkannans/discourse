@@ -59,6 +59,7 @@ class BulkImport::Oot < BulkImport::Base
         SELECT PostID, PostDate
           FROM forums_Posts
         WHERE PostLevel = 1
+      ORDER BY PostID
         OFFSET #{offset} ROWS
         FETCH NEXT #{BATCH_SIZE} ROWS ONLY
       SQL
