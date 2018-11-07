@@ -72,12 +72,15 @@ class BulkImport::Oot < BulkImport::Base
         next unless post_id = post_id_from_imported_id(p["PostID"])
 
         post = Post.find(post_id)
+        topic = post.topic
+
+        next if post.blank? || topic.blank?
+
         timestamp = p["PostDate"]
         post.created_at = timestamp
         post.updated_at = timestamp
         post.save!(validate: false)
 
-        topic = post.topic
         topic.created_at = timestamp
 
         if topic.posts_count <= 1
