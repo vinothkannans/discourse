@@ -72,7 +72,7 @@ class BulkImport::Oot < BulkImport::Base
         next unless post_id = post_id_from_imported_id(p["PostID"])
 
         post = Post.find_by_id(post_id)
-        topic = post.topic
+        topic = post&.topic
 
         next if post.blank? || topic.blank?
 
