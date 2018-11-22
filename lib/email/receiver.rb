@@ -160,18 +160,14 @@ module Email
                      topic: post.topic,
                      skip_validations: user.staged?,
                      bounce: is_bounce?)
-      elsif is_bounce?
-        raise BouncedEmailError
       else
         first_exception = nil
 
         destinations.each do |destination|
           begin
-            process_destination(destination, user, body, elided, hidden_reason_id)
+            return process_destination(destination, user, body, elided, hidden_reason_id)
           rescue => e
             first_exception ||= e
-          else
-            return
           end
         end
 
@@ -450,6 +446,17 @@ module Email
     end
 
     def parse_from_field(mail)
+      if mail.bounced? || verp
+        final_recipient = mail.final_recipient
+        return extract_from_address_and_name(final_recipient) if final_recipient.is_a? String
+
+        if final_recipient.is_a? Array
+          final_recipient.each do |from|
+            return extract_from_address_and_name(from)
+          end
+        end
+      end
+
       return unless mail[:from]
 
       if mail[:from].errors.blank?
@@ -476,6 +483,11 @@ module Email
     end
 
     def extract_from_address_and_name(value)
+      if value[";"]
+        from_display_name, from_address = value.split(";")
+        return [from_address&.strip&.downcase, from_display_name&.strip]
+      end
+
       if value[/<[^>]+>/]
         from_address = value[/<([^>]+)>/, 1]
         from_display_name = value[/^([^<]+)/, 1]
@@ -588,6 +600,8 @@ module Email
                 has_been_forwarded? &&
                 process_forwarded_email(destination, user)
 
+      return if is_bounce? && destination[:type] != :reply
+
       case destination[:type]
       when :group
         group = destination[:obj]
@@ -622,7 +636,8 @@ module Email
                      hidden_reason_id: hidden_reason_id,
                      post: post,
                      topic: post&.topic,
-                     skip_validations: user.staged?)
+                     skip_validations: user.staged?,
+                     bounce: is_bounce?)
       end
     end
 
@@ -996,12 +1011,12 @@ module Email
         options[:raw] = "The message to #{user.email} bounced. 
 
 ### Details
-        
+
 ```text
 #{options[:raw]}
-```
-        "
+```"
         user = Discourse.system_user
+        options[:post_type] = Post.types[:whisper]
       end
 
       result = NewPostManager.new(user, options).perform
