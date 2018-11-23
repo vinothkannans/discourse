@@ -1,7 +1,7 @@
 {{#each categories as |c|}}
   <div class='category-box category-box-{{unbound c.slug}}' style={{border-color c.color}} data-url={{c.url}}>
     <div class='category-box-inner'>
-      <div class="category-logo">
+      <div class="category-logo aspect-image" style={{c.uploaded_logo.aspect_ratio}}>
         {{#if c.uploaded_logo.url}}
           {{cdn-img src=c.uploaded_logo.url class="logo"}}
         {{/if}}
@@ -24,7 +24,7 @@
           <div class='subcategories'>
             {{#each c.subcategories as |sc|}}
               <a class="subcategory" href={{sc.url}}>
-                <span class="subcategory-image-placeholder">
+                <span class="subcategory-image-placeholder aspect-image" style={{c.uploaded_logo.aspect_ratio}}>
                   {{cdn-img src=sc.uploaded_logo.url class="logo"}}
                 </span>
                 <span class="subcategory-link">{{sc.name}}</span>

@@ -226,6 +226,24 @@ button.dismiss-read {
   margin: 0.25em 1em 0.5em 0;
 }
 
+@supports (--custom: property) {
+  .aspect-image {
+    max-width: calc(150px * var(--aspect-ratio));
+    max-height: 150px;
+    float: left;
+    margin: 0.25em 1em 0.5em 0;
+  }
+
+  img {
+    width: 100%;
+    height: inherit;
+    max-width: initial;
+    max-height: initial;
+    float: none;
+    margin: 0;
+  }
+}
+
 /* Tablet (portrait) ----------- */
 
 @include breakpoint(medium) {

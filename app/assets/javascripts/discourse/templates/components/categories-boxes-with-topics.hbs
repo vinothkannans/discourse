@@ -4,7 +4,9 @@
       <div class='category-box-heading'>
         <a href={{c.url}}>
           {{#if c.uploaded_logo.url}}
-            {{cdn-img src=c.uploaded_logo.url class="logo"}}
+            <div class="aspect-image" style={{c.uploaded_logo.aspect_ratio}}>
+              {{cdn-img src=c.uploaded_logo.url class="logo"}}
+            </div>
           {{/if}}
 
           <h3>

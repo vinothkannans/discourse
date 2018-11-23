@@ -485,6 +485,24 @@ ol.category-breadcrumb {
   padding: 8px 0;
 }
 
+@supports (--custom: property) {
+  .aspect-image {
+    max-width: calc(150px * var(--aspect-ratio));
+    max-height: 150px;
+    float: left;
+    padding: 8px 0;
+
+    img {
+      width: inherit;
+      height: inherit;
+      max-width: initial;
+      max-height: initial;
+      float: none;
+      padding: 0;
+    }
+  }
+}
+
 button.dismiss-read {
   margin-right: 10px;
 }

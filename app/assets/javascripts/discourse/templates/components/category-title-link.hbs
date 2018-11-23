@@ -8,6 +8,8 @@
     <span class="category-name">{{dir-span category.name}}</span>
   </div>
   {{#if category.uploaded_logo.url}}
-    <div>{{cdn-img src=category.uploaded_logo.url class="category-logo"}}</div>
+    <div class="aspect-image" style={{category.uploaded_logo.aspect_ratio}}>
+      {{cdn-img src=category.uploaded_logo.url class="category-logo"}}
+    </div>
   {{/if}}
 </a>
