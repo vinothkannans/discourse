@@ -221,26 +221,17 @@ button.dismiss-read {
 }
 
 .category-logo {
+  width: auto;
   max-height: 150px;
   float: left;
   margin: 0.25em 1em 0.5em 0;
 }
 
 @supports (--custom: property) {
-  .aspect-image {
-    max-width: calc(150px * var(--aspect-ratio));
-    max-height: 150px;
-    float: left;
-    margin: 0.25em 1em 0.5em 0;
-  }
-
-  img {
-    width: 100%;
-    height: inherit;
-    max-width: initial;
-    max-height: initial;
-    float: none;
-    margin: 0;
+  .category-logo {
+    --max-height: 150px;
+    max-width: calc(var(--max-height) * var(--width-ratio));
+    max-height: var(--max-height);
   }
 }
 

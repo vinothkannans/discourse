@@ -3,9 +3,11 @@
 
   <section class='category-heading'>
     {{#if category.uploaded_logo.url}}
-      <div class="aspect-image" style={{category.uploaded_logo.aspect_ratio}}>
-        {{cdn-img src=category.uploaded_logo.url class="category-logo"}}
-      </div>
+      {{cdn-img
+        src=category.uploaded_logo.url
+        class="category-logo"
+        width=category.uploaded_logo.width
+        height=category.uploaded_logo.height}}
       {{#if category.description}}
         <p>{{{dir-span category.description}}}</p>
       {{/if}}

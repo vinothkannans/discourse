@@ -43,6 +43,7 @@
 
     .logo {
       display: block;
+      width: auto;
       height: 40px;
       margin: 0 auto 1em auto;
     }
@@ -86,22 +87,6 @@
       .category-logo {
         float: none;
         margin: 0;
-      }
-
-      @supports (--custom: property) {
-        .aspect-image {
-          width: calc(40px * var(--aspect-ratio));
-          margin: 0 auto 1em auto;
-
-          img {
-            width: 100%;
-            height: inherit;
-            max-width: initial;
-            max-height: initial;
-            float: none;
-            margin-bottom: 0;
-          }
-        }
       }
     }
   }
