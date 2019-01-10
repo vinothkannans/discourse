@@ -2,11 +2,11 @@
 
 Some notes about testing Discourse:
 
-test again 2
+test again 2a
 
-new edit for testing
+new edit for testinga
 
-## MailCatcher
+## MailCatchera
 
 Discourse depends heavily on (sending) email for notifications. We use [MailCatcher](http://mailcatcher.me/) 
 to test emails. It's super convenient!
