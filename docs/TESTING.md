@@ -4,6 +4,8 @@ Some notes about testing Discourse:
 
 test again 2
 
+new edit for testing
+
 ## MailCatcher
 
 Discourse depends heavily on (sending) email for notifications. We use [MailCatcher](http://mailcatcher.me/) 
