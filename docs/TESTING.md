@@ -2,7 +2,7 @@
 
 Some notes about testing Discourse:
 
-test again
+test again 2
 
 ## MailCatcher
 
